@@ -2,8 +2,7 @@ unit uDmImages;
 
 interface
 
-uses
-  System.SysUtils, System.Classes, System.ImageList, Vcl.ImgList, Vcl.Controls, cxGraphics;
+uses Vcl.Controls, System.Classes, System.ImageList, Vcl.ImgList, cxGraphics;
 
 type
   TDmImages = class(TDataModule)

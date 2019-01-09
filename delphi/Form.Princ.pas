@@ -4,11 +4,11 @@ interface
 
 uses dxRibbonSkins, dxRibbonCustomizationForm, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, FireDAC.UI.Intf, FireDAC.Stan.Async, FireDAC.Comp.ScriptCommands,
-  FireDAC.Stan.Util, FireDAC.VCLUI.Script, Vcl.StdActns, Vcl.ActnList, System.Classes,
-  System.Actions, dxBar, dxBarApplicationMenu, dxRibbon, cxClasses, Vcl.Menus, FireDAC.Comp.UI,
-  FireDAC.Stan.Intf, FireDAC.Comp.Script, dxStatusBar, dxRibbonStatusBar, Vcl.ExtCtrls,
-  dxGDIPlusClasses, Vcl.Controls, Vcl.Forms, Form.Edit.Query, Form.Edit.Transform, Form.Edit.Load,
-  Form.Grid;
+  FireDAC.Stan.Util, FireDAC.VCLUI.Script, Vcl.Menus, Vcl.StdActns, Vcl.ActnList, System.Classes,
+  System.Actions, dxBar, dxBarApplicationMenu, dxRibbon, cxClasses, FireDAC.Comp.UI,
+  FireDAC.Stan.Intf, FireDAC.Comp.Script, dxStatusBar, dxRibbonStatusBar, dxGDIPlusClasses,
+  Vcl.Controls, Vcl.ExtCtrls, Vcl.Forms, Form.Grid, Form.Edit.Query, Form.Edit.Transform,
+  Form.Edit.Load;
 
 type
   TComponentETL = class(TPaintBox)
@@ -232,14 +232,14 @@ end;
 procedure TFoPrinc.AcOpenBeforeExecute(Sender: TObject);
 begin
   if Assigned(ActiveMDIChild) then // abre dialog no mesmo diretorio do arquivo ja aberto
-    AcAbrir.Dialog.InitialDir := ExtractFileDir(ActiveMDIChild.Caption);
+    AcOpen.Dialog.InitialDir := ExtractFileDir(ActiveMDIChild.Caption);
 end;
 
 function TFoPrinc.AddComponent(const ATipo: Byte): TComponentETL;
 var
   LPrefix: string;
 
-  function GeraTitle: string;
+  function GenerateTitle: string;
 
     function NovoTitle(const ATitle: string): Boolean;
     var
@@ -311,7 +311,7 @@ begin
       end;
   end;
 
-  Result.Title := GeraTitle;
+  Result.Title := GenerateTitle;
   Result.Parent := Self;
   Result.OnPaint := ComponentPaint;
   Result.OnMouseMove := ComponentMouseMove;
@@ -357,7 +357,7 @@ end;
 
 procedure TFoPrinc.AcOpenAccept(Sender: TObject);
 begin
-  Open(AcAbrir.Dialog.FileName);
+  Open(AcOpen.Dialog.FileName);
 
   // if EhArquivo then
   // if UpperCase(ExtractFileExt(AcAbrir.Dialog.FileName))='.CSV' then
@@ -369,7 +369,7 @@ end;
 procedure TFoPrinc.AcSaveBeforeExecute(Sender: TObject);
 begin
   if Assigned(ActiveMDIChild) then
-    AcSalvar.Dialog.InitialDir := ExtractFileDir(ActiveMDIChild.Caption);
+    AcSave.Dialog.InitialDir := ExtractFileDir(ActiveMDIChild.Caption);
 end;
 
 procedure TFoPrinc.AcSaveAccept(Sender: TObject);
@@ -622,12 +622,12 @@ end;
 
 procedure TFoPrinc.AcExecuteExecute(Sender: TObject);
 begin
-  AcAplicar.Enabled := false;
+  AcExecute.Enabled := false;
   try
     // SB.Panels[3].Text := '';
     Execute;
   finally
-    AcAplicar.Enabled := True;
+    AcExecute.Enabled := True;
   end;
 end;
 
