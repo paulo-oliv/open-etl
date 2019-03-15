@@ -14,17 +14,16 @@ type
     MM: TMemo;
     PnEsquerda: TPanel;
     ClConexoes: TCheckListBox;
-    ActionList1: TActionList;
-    AcInvert: TAction;
     Button1: TButton;
     PopupMenu1: TPopupMenu;
-    AcEdit: TAction;
-    AcDelete: TAction;
-    AcNew: TAction;
     New1: TMenuItem;
     Edit1: TMenuItem;
     N1: TMenuItem;
     Delete1: TMenuItem;
+    AcInvert: TAction;
+    AcEdit: TAction;
+    AcDelete: TAction;
+    AcNew: TAction;
     procedure AcInvertExecute(Sender: TObject);
     procedure AcNewExecute(Sender: TObject);
   private

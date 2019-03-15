@@ -1,16 +1,14 @@
 inherited FoEditQuery: TFoEditQuery
   Caption = 'Edit Query'
-  ExplicitWidth = 651
-  ExplicitHeight = 338
   PixelsPerInch = 96
   TextHeight = 20
-  object pSplitter1: TpSplitter
+  object pSplitter1: TpSplitter [0]
     Left = 191
     Top = 0
     Width = 8
     Height = 304
   end
-  object MM: TMemo
+  object MM: TMemo [1]
     AlignWithMargins = True
     Left = 202
     Top = 3
@@ -21,7 +19,7 @@ inherited FoEditQuery: TFoEditQuery
     ScrollBars = ssBoth
     TabOrder = 1
   end
-  object PnEsquerda: TPanel
+  object PnEsquerda: TPanel [2]
     AlignWithMargins = True
     Left = 3
     Top = 3
@@ -53,10 +51,7 @@ inherited FoEditQuery: TFoEditQuery
       TabOrder = 1
     end
   end
-  object ActionList1: TActionList
-    Images = DmImages.ILDev32
-    Left = 280
-    Top = 88
+  inherited ActionList: TActionList
     object AcInvert: TAction
       Caption = 'Reverse Checks'
       ImageIndex = 13
@@ -81,16 +76,20 @@ inherited FoEditQuery: TFoEditQuery
     Left = 80
     Top = 144
     object New1: TMenuItem
-      Action = AcNew
+      Caption = 'New...'
+      ImageIndex = 11
+      OnClick = AcNewExecute
     end
     object Edit1: TMenuItem
-      Action = AcEdit
+      Caption = 'Edit...'
+      ImageIndex = 14
     end
     object N1: TMenuItem
       Caption = '-'
     end
     object Delete1: TMenuItem
-      Action = AcDelete
+      Caption = 'Delete'
+      ImageIndex = 15
     end
   end
 end

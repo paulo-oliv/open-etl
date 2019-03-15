@@ -8,7 +8,9 @@ uses
   Form.Edit.Transform in 'Form.Edit.Transform.pas' {FoEditTransform},
   Form.Grid in 'Form.Grid.pas' {FoGrid},
   uDmImages in 'uDmImages.pas' {DmImages: TDataModule},
-  Form.Edit.Load in 'Form.Edit.Load.pas' {FoEditLoad};
+  Form.Edit.Load in 'Form.Edit.Load.pas' {FoEditLoad},
+  ComponentETL in 'ComponentETL.pas',
+  FileProjectETL in 'FileProjectETL.pas';
 
 {$R *.res}
 

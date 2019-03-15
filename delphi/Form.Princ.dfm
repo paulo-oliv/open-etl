@@ -10,8 +10,7 @@ object FoPrinc: TFoPrinc
   Font.Height = -15
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = True
-  WindowState = wsMaximized
+  OldCreateOrder = False
   OnCreate = FormCreate
   OnDragDrop = FormDragDrop
   OnDragOver = FormDragOver
@@ -20,9 +19,9 @@ object FoPrinc: TFoPrinc
   object CategoryPanelGroup1: TCategoryPanelGroup
     AlignWithMargins = True
     Left = 3
-    Top = 63
+    Top = 56
     Width = 112
-    Height = 537
+    Height = 544
     HorzScrollBar.Style = ssFlat
     VertScrollBar.Tracking = True
     BevelEdges = []
@@ -480,35 +479,34 @@ object FoPrinc: TFoPrinc
       end
     end
   end
-  object dxRibbon1: TdxRibbon
-    Left = 0
-    Top = 0
-    Width = 984
-    Height = 60
-    ApplicationButton.Menu = dxBarApplicationMenu1
-    BarManager = dxBarManager1
-    ColorSchemeName = 'Blue'
-    EnableTabAero = False
-    PopupMenuItems = []
-    QuickAccessToolbar.Toolbar = dxBarManager1Bar1
-    ShowMinimizeButton = False
-    ShowTabGroups = False
-    Contexts = <>
-    TabOrder = 5
-    TabStop = False
-  end
   object dxRibbonStatusBar1: TdxRibbonStatusBar
     Left = 0
     Top = 603
     Width = 984
     Height = 23
     Panels = <>
-    Ribbon = dxRibbon1
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clDefault
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = []
+  end
+  object Ribbon1: TRibbon
+    Left = 0
+    Top = 0
+    Width = 984
+    Height = 53
+    ActionManager = ActionManager1
+    ApplicationMenu.Menu = RibbonApplicationMenuBar1
+    Caption = 'Ribbon1'
+    HideTabs = True
+    ShowHelpButton = False
+    StyleName = 'Ribbon - Luna'
+    object RibbonApplicationMenuBar1: TRibbonApplicationMenuBar
+      ActionManager = ActionManager1
+      OptionItems = <>
+      RecentItems = <>
+    end
   end
   object SQL: TFDScript
     SQLScripts = <>
@@ -525,112 +523,6 @@ object FoPrinc: TFoPrinc
     Options = [ssCallstack, ssConsole]
     Left = 664
     Top = 296
-  end
-  object dxBarManager1: TdxBarManager
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -12
-    Font.Name = 'Segoe UI'
-    Font.Style = []
-    Categories.Strings = (
-      'Default'
-      'File')
-    Categories.ItemsVisibles = (
-      2
-      2)
-    Categories.Visibles = (
-      True
-      True)
-    ImageOptions.Images = DmImages.ILDev32
-    ImageOptions.LargeIcons = True
-    MenuAnimations = maSlide
-    PopupMenuLinks = <>
-    ShowShortCutInHint = True
-    UseSystemFont = True
-    Left = 568
-    Top = 8
-    DockControlHeights = (
-      0
-      0
-      0
-      0)
-    object dxBarManager1Bar1: TdxBar
-      AllowCustomizing = False
-      AllowQuickCustomizing = False
-      Caption = 'Quick Access Toolbar'
-      CaptionButtons = <>
-      DockedLeft = 0
-      DockedTop = 0
-      FloatLeft = 606
-      FloatTop = 323
-      FloatClientWidth = 51
-      FloatClientHeight = 40
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -12
-      Font.Name = 'Segoe UI'
-      Font.Style = []
-      Hidden = True
-      Images = DmImages.ILDev32
-      ItemLinks = <>
-      OneOnRow = True
-      RotateWhenVertical = False
-      Row = 0
-      ShowMark = False
-      SizeGrip = False
-      UseOwnFont = True
-      UseRecentItems = False
-      Visible = True
-      WholeRow = False
-    end
-    object dxBarButton1: TdxBarButton
-      Action = AcNew
-      Category = 0
-    end
-    object dxBarButton2: TdxBarButton
-      Action = AcClose
-      Category = 0
-    end
-    object dxBarButton3: TdxBarButton
-      Action = AcSave
-      Category = 0
-    end
-    object dxBarButton4: TdxBarButton
-      Action = AcOpen
-      Category = 0
-    end
-  end
-  object dxBarApplicationMenu1: TdxBarApplicationMenu
-    BarManager = dxBarManager1
-    Buttons = <>
-    ExtraPane.Items = <>
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -12
-    Font.Name = 'Segoe UI'
-    Font.Style = []
-    ItemLinks = <
-      item
-        Visible = True
-        ItemName = 'dxBarButton1'
-      end
-      item
-        Visible = True
-        ItemName = 'dxBarButton4'
-      end
-      item
-        BeginGroup = True
-        Visible = True
-        ItemName = 'dxBarButton3'
-      end
-      item
-        BeginGroup = True
-        Visible = True
-        ItemName = 'dxBarButton2'
-      end>
-    UseOwnFont = True
-    Left = 536
-    Top = 8
   end
   object AlPrinc: TActionList
     Images = DmImages.ILDev32
@@ -784,5 +676,49 @@ object FoPrinc: TFoPrinc
       ImageIndex = 15
       OnClick = MnDelLinkClick
     end
+  end
+  object FileMain: TFDMemTable
+    FetchOptions.AssignedValues = [evMode]
+    FetchOptions.Mode = fmAll
+    ResourceOptions.AssignedValues = [rvSilentMode]
+    ResourceOptions.SilentMode = True
+    UpdateOptions.AssignedValues = [uvCheckRequired, uvAutoCommitUpdates]
+    UpdateOptions.CheckRequired = False
+    UpdateOptions.AutoCommitUpdates = True
+    Left = 312
+    Top = 336
+    object FileMainx: TIntegerField
+      FieldName = 'x'
+    end
+    object FileMainy: TIntegerField
+      FieldName = 'y'
+    end
+    object FileMaintype: TShortintField
+      FieldName = 'type'
+    end
+    object FileMainscript: TMemoField
+      FieldName = 'script'
+      BlobType = ftMemo
+    end
+  end
+  object ActionManager1: TActionManager
+    ActionBars = <
+      item
+        Items = <
+          item
+            ChangesAllowed = [caModify]
+            Items = <
+              item
+                Caption = 'ActionClientItem0'
+              end>
+            Caption = 'ActionClientItem0'
+            KeyTip = 'F'
+          end>
+        ActionBar = RibbonApplicationMenuBar1
+        AutoSize = False
+      end>
+    Left = 368
+    Top = 160
+    StyleName = 'Ribbon - Luna'
   end
 end

@@ -7,90 +7,12 @@ uses dxRibbonSkins, dxRibbonCustomizationForm, cxGraphics, cxControls, cxLookAnd
   FireDAC.Stan.Util, FireDAC.VCLUI.Script, Vcl.Menus, Vcl.StdActns, Vcl.ActnList, System.Classes,
   System.Actions, dxBar, dxBarApplicationMenu, dxRibbon, cxClasses, FireDAC.Comp.UI,
   FireDAC.Stan.Intf, FireDAC.Comp.Script, dxStatusBar, dxRibbonStatusBar, dxGDIPlusClasses,
-  Vcl.Controls, Vcl.ExtCtrls, Vcl.Forms, Form.Grid, Form.Edit.Query, Form.Edit.Transform,
-  Form.Edit.Load;
+  Vcl.Controls, Vcl.ExtCtrls, Vcl.Forms, ComponentETL, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf, Data.DB,
+  FireDAC.Comp.DataSet, FireDAC.Comp.Client, Vcl.ToolWin, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus,
+  Vcl.RibbonActnMenus, Vcl.RibbonLunaStyleActnCtrls, Vcl.Ribbon;
 
 type
-  TComponentETL = class(TPaintBox)
-  strict private
-    FFormGrid: TFoGrid;
-    FTitle: string;
-  strict protected
-    procedure configQuery; virtual;
-    function getTitle: string;
-    procedure setTitle(const ATitle: string);
-  public
-    procedure Edit; virtual; abstract;
-    procedure Preview;
-    procedure Delete;
-  published
-    property Title: string read getTitle write setTitle;
-    // constructor Create(AOwner: TComponent); override;
-  end;
-
-  TLinkComponents = class(TPaintBox)
-  strict private
-    FText: string;
-    FSource, FTarget: TComponentETL;
-  strict protected
-    procedure Paint; override;
-  public
-    property Text: string read FText write FText;
-    property Source: TComponentETL read FSource write FSource;
-    property Target: TComponentETL read FTarget write FTarget;
-    procedure RefreshSize;
-  end;
-
-  TCompExtract = class(TComponentETL)
-  end;
-
-  TCompTransform = class(TComponentETL)
-  strict protected
-    FFormEdit: TFoEditTransform;
-  public
-    procedure Edit; override;
-  end;
-
-  TCompLoad = class(TComponentETL)
-  strict protected
-    FFormEdit: TFoEditLoad;
-  public
-    procedure Edit; override;
-  end;
-
-  TCompQuery = class(TCompExtract)
-  strict private
-    FFormEdit: TFoEditQuery;
-  strict protected
-    procedure configQuery; override;
-  public
-    procedure Edit; override;
-  end;
-
-  TCompFile = class(TCompExtract)
-  end;
-
-  TCompFilter = class(TCompTransform)
-  end;
-
-  TCompConversion = class(TCompTransform)
-  end;
-
-  TCompDerivation = class(TCompTransform)
-  end;
-
-  TCompJoin = class(TCompTransform)
-  end;
-
-  TComCondensation = class(TCompTransform)
-  end;
-
-  TCompExecute = class(TCompLoad)
-  end;
-
-  TCompScript = class(TCompLoad)
-  end;
-
   TFoPrinc = class(TForm)
     SQL: TFDScript;
     FDScriptDialog: TFDGUIxScriptDialog;
@@ -102,10 +24,6 @@ type
     ImConversion: TImage;
     ImQuery: TImage;
     ImFile: TImage;
-    dxBarManager1: TdxBarManager;
-    dxBarManager1Bar1: TdxBar;
-    dxBarApplicationMenu1: TdxBarApplicationMenu;
-    dxRibbon1: TdxRibbon;
     dxRibbonStatusBar1: TdxRibbonStatusBar;
     AlPrinc: TActionList;
     AcOpen: TFileOpen;
@@ -124,10 +42,6 @@ type
     AcEditScript: TAction;
     ImExecute: TImage;
     ImScript: TImage;
-    dxBarButton1: TdxBarButton;
-    dxBarButton2: TdxBarButton;
-    dxBarButton3: TdxBarButton;
-    dxBarButton4: TdxBarButton;
     ImDerivation: TImage;
     ImFilter: TImage;
     ImJoin: TImage;
@@ -144,6 +58,14 @@ type
     MenuItem4: TMenuItem;
     MenuItem5: TMenuItem;
     MnDelLink: TMenuItem;
+    FileMain: TFDMemTable;
+    FileMainx: TIntegerField;
+    FileMainy: TIntegerField;
+    FileMaintype: TShortintField;
+    FileMainscript: TMemoField;
+    Ribbon1: TRibbon;
+    ActionManager1: TActionManager;
+    RibbonApplicationMenuBar1: TRibbonApplicationMenuBar;
     procedure FormCreate(Sender: TObject);
     procedure AcExecuteExecute(Sender: TObject);
     procedure AcOpenAccept(Sender: TObject);
@@ -186,7 +108,7 @@ type
       var Accept: Boolean);
     procedure ComponentDblClick(Sender: TObject);
   public
-    function AddComponent(const ATipo: Byte): TComponentETL;
+    function AddComponent(const AType: Byte): TComponentETL;
   end;
 
 var
@@ -198,18 +120,7 @@ implementation
 
 {$R *.dfm}
 
-uses uMsg, Windows, SysUtils, uDmImages, Vcl.Graphics;
-
-const
-  TIPO_COMPONENT_QUERY = 0;
-  TIPO_COMPONENT_FILE = 1;
-  TIPO_COMPONENT_FILTER = 2;
-  TIPO_COMPONENT_CONVERSION = 3;
-  TIPO_COMPONENT_DERIVATION = 4;
-  TIPO_COMPONENT_JOIN = 5;
-  TIPO_COMPONENT_CONDENSATION = 6;
-  TIPO_COMPONENT_EXECUTE = 7;
-  TIPO_COMPONENT_SCRIPT = 8;
+uses uMsg, SysUtils, uDmImages;
 
 procedure TFoPrinc.AcNewExecute(Sender: TObject);
 begin
@@ -220,6 +131,7 @@ procedure TFoPrinc.Open(const AFile: string);
 begin
   if FileExists(AFile) then
   begin
+    FileMain.LoadFromFile(AFile);
     // if TFoSqlProdutos.EhSped(AFile) then
     // TFoSqlProdutos.Create(Self).Open(AFile)
     // else
@@ -235,11 +147,9 @@ begin
     AcOpen.Dialog.InitialDir := ExtractFileDir(ActiveMDIChild.Caption);
 end;
 
-function TFoPrinc.AddComponent(const ATipo: Byte): TComponentETL;
-var
-  LPrefix: string;
+function TFoPrinc.AddComponent(const AType: Byte): TComponentETL;
 
-  function GenerateTitle: string;
+  function GenerateTitle(APrefix: string): string;
 
     function NovoTitle(const ATitle: string): Boolean;
     var
@@ -258,61 +168,13 @@ var
     LNum := 0;
     repeat
       LNum := LNum + 1;
-      Result := LPrefix + IntToStr(LNum);
+      Result := APrefix + IntToStr(LNum);
     until NovoTitle(Result);
   end;
 
 begin
-  case ATipo of
-    TIPO_COMPONENT_QUERY:
-      begin
-        Result := TCompQuery.Create(Self);
-        LPrefix := 'Query';
-      end;
-    TIPO_COMPONENT_FILE:
-      begin
-        Result := TCompFile.Create(Self);
-        LPrefix := 'File';
-      end;
-    TIPO_COMPONENT_FILTER:
-      begin
-        Result := TCompFilter.Create(Self);
-        LPrefix := 'Filter';
-      end;
-    TIPO_COMPONENT_CONVERSION:
-      begin
-        Result := TCompConversion.Create(Self);
-        LPrefix := 'Conversion';
-      end;
-    TIPO_COMPONENT_DERIVATION:
-      begin
-        Result := TCompDerivation.Create(Self);
-        LPrefix := 'Derivation';
-      end;
-    TIPO_COMPONENT_JOIN:
-      begin
-        Result := TCompJoin.Create(Self);
-        LPrefix := 'Join';
-      end;
-    TIPO_COMPONENT_CONDENSATION:
-      begin
-        Result := TCompConversion.Create(Self);
-        LPrefix := 'Condensation';
-      end;
-    TIPO_COMPONENT_EXECUTE:
-      begin
-        Result := TCompExecute.Create(Self);
-        LPrefix := 'Execute';
-      end;
-    TIPO_COMPONENT_SCRIPT:
-      begin
-        Result := TCompScript.Create(Self);
-        LPrefix := 'Script';
-      end;
-  end;
-
-  Result.Title := GenerateTitle;
-  Result.Parent := Self;
+  Result := TComponentETL.Factory(Self, AType);
+  Result.Title := GenerateTitle(Result.Title);
   Result.OnPaint := ComponentPaint;
   Result.OnMouseMove := ComponentMouseMove;
   Result.OnMouseUp := ComponentMouseUp;
@@ -321,7 +183,6 @@ begin
   Result.OnDragDrop := ComponentDragDrop;
   Result.OnDragOver := ComponentDragOver;
   Result.OnDblClick := ComponentDblClick;
-  Result.Tag := ATipo;
   Result.PopupMenu := PopupComp;
 end;
 
@@ -380,6 +241,7 @@ begin
     Caption := AcSalvar.Dialog.FileName;
     Salvar;
     end; }
+  FileMain.SaveToFile(AcSave.Dialog.FileName);
 end;
 
 procedure TFoPrinc.AcCloseExecute(Sender: TObject);
@@ -705,215 +567,6 @@ end;
 procedure TFoPrinc.AcForeignKeyExecute(Sender: TObject);
 begin
   //
-end;
-
-{ TComponenteETL }
-
-procedure TComponentETL.configQuery;
-begin
-  //
-end;
-
-procedure TComponentETL.Delete;
-begin
-  DisposeOf;
-end;
-
-function TComponentETL.getTitle: string;
-begin
-  Result := FTitle;
-end;
-
-procedure TComponentETL.setTitle(const ATitle: string);
-begin
-  FTitle := ATitle;
-  Repaint;
-end;
-
-procedure TComponentETL.Preview;
-begin
-  if not Assigned(FFormGrid) then
-    FFormGrid := TFoGrid.New(Self);
-
-  configQuery;
-
-  FFormGrid.ShowModal;
-end;
-
-{ TCompQuery }
-
-procedure TCompQuery.configQuery;
-begin
-  if Assigned(FFormEdit) then
-  begin
-
-  end;
-end;
-
-procedure TCompQuery.Edit;
-begin
-  if not Assigned(FFormEdit) then
-    FFormEdit := TFoEditQuery.New(Self);
-  FFormEdit.ShowModal;
-end;
-
-{ TCompTransform }
-
-procedure TCompTransform.Edit;
-begin
-  if not Assigned(FFormEdit) then
-    FFormEdit := TFoEditTransform.New(Self);
-  FFormEdit.ShowModal;
-end;
-
-{ TCompLoad }
-
-procedure TCompLoad.Edit;
-begin
-  if not Assigned(FFormEdit) then
-    FFormEdit := TFoEditLoad.New(Self);
-  FFormEdit.ShowModal;
-end;
-
-{ TLinkComponents }
-
-procedure TLinkComponents.Paint;
-
-  procedure DesenharSeta(Origem, Destino: TPoint);
-  const
-    ANGULO = 30;
-    PONTA = 25;
-  var
-    AlphaRota, Alpha, Beta: Extended;
-    vertice1, vertice2, vertice3: TPoint;
-  begin
-    Canvas.MoveTo(Origem.X, Origem.Y);
-    Canvas.LineTo(Destino.X, Destino.Y);
-
-    if (Destino.X >= Origem.X) then
-    begin
-      if (Destino.Y >= Origem.Y) then
-      begin
-        AlphaRota := Destino.X - Origem.X;
-        if (AlphaRota <> 0) then
-          Alpha := ArcTan((Destino.Y - Origem.Y) / AlphaRota)
-        else
-          Alpha := ArcTan(Destino.Y - Origem.Y);
-        Beta := (ANGULO * (PI / 180)) / 2;
-        vertice1.X := Destino.X - Round(Cos(Alpha + Beta));
-        vertice1.Y := Destino.Y - Round(Sin(Alpha - Beta));
-        vertice2.X := Round(vertice1.X - PONTA * Cos(Alpha + Beta));
-        vertice2.Y := Round(vertice1.Y - PONTA * Sin(Alpha + Beta));
-        vertice3.X := Round(vertice1.X - PONTA * Cos(Alpha - Beta));
-        vertice3.Y := Round(vertice1.Y - PONTA * Sin(Alpha - Beta));
-        Self.Canvas.Polygon([vertice1, vertice2, vertice3]);
-      end
-      else
-      begin
-        AlphaRota := Destino.Y - Origem.Y;
-        if (AlphaRota <> 0) then
-          Alpha := ArcTan((Destino.X - Origem.X) / AlphaRota)
-        else
-          Alpha := ArcTan(Destino.X - Origem.X);
-        Beta := (ANGULO * (PI / 180)) / 2;
-        vertice1.X := Destino.X - Round(Cos(Alpha + Beta));
-        vertice1.Y := Destino.Y - Round(Sin(Alpha - Beta));
-        vertice2.X := Round(vertice1.X + PONTA * Sin(Alpha + Beta));
-        vertice2.Y := Round(vertice1.Y + PONTA * Cos(Alpha + Beta));
-        vertice3.X := Round(vertice1.X + PONTA * Sin(Alpha - Beta));
-        vertice3.Y := Round(vertice1.Y + PONTA * Cos(Alpha - Beta));
-        Self.Canvas.Polygon([vertice1, vertice2, vertice3]);
-      end;
-    end
-    else
-    begin
-      Alpha := ArcTan((Destino.Y - Origem.Y) / (Destino.X - Origem.X));
-      Beta := (ANGULO * (PI / 180)) / 2;
-      vertice1.X := Destino.X - Round(Cos(Alpha + Beta));
-      vertice1.Y := Destino.Y - Round(Sin(Alpha - Beta));
-      vertice2.X := Round(vertice1.X + PONTA * Cos(Alpha + Beta));
-      vertice2.Y := Round(vertice1.Y + PONTA * Sin(Alpha + Beta));
-      vertice3.X := Round(vertice1.X + PONTA * Cos(Alpha - Beta));
-      vertice3.Y := Round(vertice1.Y + PONTA * Sin(Alpha - Beta));
-      Self.Canvas.Polygon([vertice1, vertice2, vertice3]);
-    end;
-  end;
-
-const
-  POSICAO_MIN = 8;
-begin
-  Canvas.Pen.Width := 2;
-  Canvas.Pen.Color := clGray;
-  if Tag = 0 then
-    DesenharSeta(Point(0, Height), Point(Width - POSICAO_MIN, POSICAO_MIN))
-  else if Tag = 1 then
-    DesenharSeta(Point(Width, Height - POSICAO_MIN), Point(POSICAO_MIN, POSICAO_MIN))
-  else if Tag = 2 then
-    DesenharSeta(Point(0, 0), Point(Width - POSICAO_MIN, Height - POSICAO_MIN))
-  else
-    DesenharSeta(Point(Width, 0), Point(POSICAO_MIN, Height - POSICAO_MIN));
-  Canvas.Brush.Color := clWhite;
-  Canvas.TextOut(Width div 2 - Canvas.TextWidth(FText) div 2, Height div 2, IntToStr(Tag));
-end;
-
-procedure TLinkComponents.RefreshSize;
-var
-  x1, x2, y1, y2, a: Integer;
-  b: Boolean;
-begin
-  x1 := FSource.Left;
-  x2 := FTarget.Left;
-  if x1 < x2 then
-  begin
-    x2 := x2 - x1;
-    b := false;
-  end
-  else
-  begin
-    a := x1;
-    x1 := x2;
-    x2 := a - x1;
-    b := True;
-  end;
-
-  y1 := FSource.Top;
-  y2 := FTarget.Top;
-  if y1 < y2 then
-  begin
-    y2 := y2 - y1;
-    if b then
-      Tag := 0
-    else
-      Tag := 1
-  end
-  else
-  begin
-    a := y1;
-    y1 := y2;
-    y2 := a - y1;
-    if b then
-      Tag := 2
-    else
-      Tag := 3;
-  end;
-  x1 := x1 + 64;
-  y1 := y1 + 64;
-  x2 := x2 - 64;
-  y2 := y2 - 64;
-  if (x2 < 64) then
-  begin
-    a := (64 - x2) div 2;
-    x1 := x1 - a;
-    x2 := x2 + a;
-  end;
-  if (y2 < 64) then
-  begin
-    a := (64 - y2) div 2;
-    y1 := y1 - a;
-    y2 := y2 + a;
-  end;
-  SetBounds(x1, y1, x2, y2);
-  Repaint;
 end;
 
 end.
