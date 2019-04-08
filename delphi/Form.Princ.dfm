@@ -19,9 +19,9 @@ object FoPrinc: TFoPrinc
   object CategoryPanelGroup1: TCategoryPanelGroup
     AlignWithMargins = True
     Left = 3
-    Top = 56
+    Top = 3
     Width = 112
-    Height = 544
+    Height = 597
     HorzScrollBar.Style = ssFlat
     VertScrollBar.Tracking = True
     BevelEdges = []
@@ -36,8 +36,6 @@ object FoPrinc: TFoPrinc
     HeaderFont.Style = []
     ParentCtl3D = False
     TabOrder = 0
-    ExplicitTop = 39
-    ExplicitHeight = 561
     object CpLoad: TCategoryPanel
       Top = 321
       Height = 104
@@ -484,29 +482,13 @@ object FoPrinc: TFoPrinc
     Top = 603
     Width = 984
     Height = 23
+    Hint = ''
     Panels = <>
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clDefault
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = []
-  end
-  object Ribbon1: TRibbon
-    Left = 0
-    Top = 0
-    Width = 984
-    Height = 53
-    ActionManager = ActionManager1
-    ApplicationMenu.Menu = RibbonApplicationMenuBar1
-    Caption = 'Ribbon1'
-    HideTabs = True
-    ShowHelpButton = False
-    StyleName = 'Ribbon - Luna'
-    object RibbonApplicationMenuBar1: TRibbonApplicationMenuBar
-      ActionManager = ActionManager1
-      OptionItems = <>
-      RecentItems = <>
-    end
   end
   object SQL: TFDScript
     SQLScripts = <>
@@ -700,25 +682,5 @@ object FoPrinc: TFoPrinc
       FieldName = 'script'
       BlobType = ftMemo
     end
-  end
-  object ActionManager1: TActionManager
-    ActionBars = <
-      item
-        Items = <
-          item
-            ChangesAllowed = [caModify]
-            Items = <
-              item
-                Caption = 'ActionClientItem0'
-              end>
-            Caption = 'ActionClientItem0'
-            KeyTip = 'F'
-          end>
-        ActionBar = RibbonApplicationMenuBar1
-        AutoSize = False
-      end>
-    Left = 368
-    Top = 160
-    StyleName = 'Ribbon - Luna'
   end
 end

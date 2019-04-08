@@ -10,7 +10,7 @@ uses dxRibbonSkins, dxRibbonCustomizationForm, cxGraphics, cxControls, cxLookAnd
   Vcl.Controls, Vcl.ExtCtrls, Vcl.Forms, ComponentETL, FireDAC.Stan.Option, FireDAC.Stan.Param,
   FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf, Data.DB,
   FireDAC.Comp.DataSet, FireDAC.Comp.Client, Vcl.ToolWin, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus,
-  Vcl.RibbonActnMenus, Vcl.RibbonLunaStyleActnCtrls, Vcl.Ribbon;
+  Vcl.PlatformDefaultStyleActnCtrls;
 
 type
   TFoPrinc = class(TForm)
@@ -63,9 +63,6 @@ type
     FileMainy: TIntegerField;
     FileMaintype: TShortintField;
     FileMainscript: TMemoField;
-    Ribbon1: TRibbon;
-    ActionManager1: TActionManager;
-    RibbonApplicationMenuBar1: TRibbonApplicationMenuBar;
     procedure FormCreate(Sender: TObject);
     procedure AcExecuteExecute(Sender: TObject);
     procedure AcOpenAccept(Sender: TObject);
@@ -131,11 +128,7 @@ procedure TFoPrinc.Open(const AFile: string);
 begin
   if FileExists(AFile) then
   begin
-    FileMain.LoadFromFile(AFile);
-    // if TFoSqlProdutos.EhSped(AFile) then
-    // TFoSqlProdutos.Create(Self).Open(AFile)
-    // else
-    // TFoEditQuery.Create(Self).Open(AFile)
+    // FileMain.LoadFromFile(AFile);
   end
   // else
   // TFoEditQuery.Create(Self).Novo(AFile)
@@ -350,29 +343,35 @@ begin
 end;
 
 procedure TFoPrinc.FormDragDrop(Sender, Source: TObject; X, Y: Integer);
-const
-  COMP_ETL_WIDTH = 100;
-  COMP_ETL_HEIGHT = 85;
+
+  procedure AddComponentPos(const AType: Byte);
+  const
+    COMP_ETL_WIDTH = 100;
+    COMP_ETL_HEIGHT = 85;
+  begin
+    AddComponent(TIPO_COMPONENT_EXECUTE).SetBounds(X, Y, COMP_ETL_WIDTH, COMP_ETL_HEIGHT)
+  end;
+
 begin
   TImage(Source).EndDrag(True);
   if Source = ImQuery then
-    AddComponent(TIPO_COMPONENT_QUERY).SetBounds(X, Y, COMP_ETL_WIDTH, COMP_ETL_HEIGHT)
+    AddComponentPos(TIPO_COMPONENT_QUERY)
   else if Source = ImFile then
-    AddComponent(TIPO_COMPONENT_FILE).SetBounds(X, Y, COMP_ETL_WIDTH, COMP_ETL_HEIGHT)
+    AddComponentPos(TIPO_COMPONENT_FILE)
   else if Source = ImFilter then
-    AddComponent(TIPO_COMPONENT_FILTER).SetBounds(X, Y, COMP_ETL_WIDTH, COMP_ETL_HEIGHT)
+    AddComponentPos(TIPO_COMPONENT_FILTER)
   else if Source = ImConversion then
-    AddComponent(TIPO_COMPONENT_CONVERSION).SetBounds(X, Y, COMP_ETL_WIDTH, COMP_ETL_HEIGHT)
+    AddComponentPos(TIPO_COMPONENT_CONVERSION)
   else if Source = ImDerivation then
-    AddComponent(TIPO_COMPONENT_DERIVATION).SetBounds(X, Y, COMP_ETL_WIDTH, COMP_ETL_HEIGHT)
+    AddComponentPos(TIPO_COMPONENT_DERIVATION)
   else if Source = ImJoin then
-    AddComponent(TIPO_COMPONENT_JOIN).SetBounds(X, Y, COMP_ETL_WIDTH, COMP_ETL_HEIGHT)
+    AddComponentPos(TIPO_COMPONENT_JOIN)
   else if Source = ImCondensation then
-    AddComponent(TIPO_COMPONENT_CONDENSATION).SetBounds(X, Y, COMP_ETL_WIDTH, COMP_ETL_HEIGHT)
+    AddComponentPos(TIPO_COMPONENT_CONDENSATION)
   else if Source = ImExecute then
-    AddComponent(TIPO_COMPONENT_EXECUTE).SetBounds(X, Y, COMP_ETL_WIDTH, COMP_ETL_HEIGHT)
+    AddComponentPos(TIPO_COMPONENT_EXECUTE)
   else if Source = ImScript then
-    AddComponent(TIPO_COMPONENT_SCRIPT).SetBounds(X, Y, COMP_ETL_WIDTH, COMP_ETL_HEIGHT)
+    AddComponentPos(TIPO_COMPONENT_SCRIPT)
 end;
 
 procedure TFoPrinc.FormDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState;
@@ -426,8 +425,8 @@ end;
 
 procedure TFoPrinc.ComponentMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 const
-  minWidth = 120;
-  minHeight = 60;
+  MIN_LEFT = 120;
+  MIN_TOP = 60;
 begin
   if mover then
     with Sender as TControl do
@@ -435,15 +434,15 @@ begin
       X := X - moveX + Left;
       Y := Y - moveY + Top;
 
-      if X < minWidth then
-        X := minWidth;
-      if Y < minHeight then
-        Y := minHeight;
+      if X < MIN_LEFT then
+        X := MIN_LEFT;
+      if Y < MIN_TOP then
+        Y := MIN_TOP;
 
       if X > Parent.Width - Width then
         X := Parent.Width - Width;
-      if Y > Parent.Height - Height - minHeight then
-        Y := Parent.Height - Height - minHeight;
+      if Y > Parent.Height - Height - MIN_TOP then
+        Y := Parent.Height - Height - MIN_TOP;
 
       Left := X;
       Top := Y;
