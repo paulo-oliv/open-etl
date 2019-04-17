@@ -8,7 +8,8 @@ uses
   System.Classes,
   Form.Edit.Query,
   Form.Edit.Transform,
-  Form.Edit.Load;
+  Form.Edit.Load,
+  Vcl.StdCtrls;
 
 const
   TIPO_COMPONENT_QUERY = 0;
@@ -24,6 +25,7 @@ const
 type
   TComponentETL = class(TPaintBox)
   strict private
+    FLabel: TCustomLabel;
     FFormGrid: TFoGrid;
     FTitle: string;
   strict protected
@@ -38,7 +40,7 @@ type
   published
     property Title: string read getTitle write setTitle;
     property OnResize;
-    // constructor Create(AOwner: TComponent); override;
+    constructor Create(AOwner: TComponent); override;
   end;
 
   TLinkComponents = class(TPaintBox)
@@ -108,7 +110,13 @@ implementation
 
 { TComponentETL }
 
-uses Controls, Vcl.Graphics, Windows, SysUtils;
+uses Controls, Vcl.Graphics, Windows, SysUtils, Math;
+
+constructor TComponentETL.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FLabel := TCustomLabel.Create(AOwner);
+end;
 
 class function TComponentETL.Factory(const AOwner: TComponent; const AType: Byte): TComponentETL;
 begin
@@ -309,27 +317,26 @@ begin
   else
     DesenharSeta(Point(Width, 0), Point(POSICAO_MIN, Height - POSICAO_MIN));
   Canvas.Brush.Color := clWhite;
-  Canvas.TextOut(Width div 2 - Canvas.TextWidth(FText) div 2, Height div 2, IntToStr(Tag));
 end;
 
 procedure TLinkComponents.RefreshSize;
 var
   x1, x2, y1, y2, a: Integer;
-  b: Boolean;
+  LSetaDireita: Boolean;
 begin
   x1 := FSource.Left;
   x2 := FTarget.Left;
   if x1 < x2 then
   begin
     x2 := x2 - x1;
-    b := false;
+    LSetaDireita := True;
   end
   else
   begin
     a := x1;
     x1 := x2;
     x2 := a - x1;
-    b := True;
+    LSetaDireita := False;
   end;
 
   y1 := FSource.Top;
@@ -337,37 +344,53 @@ begin
   if y1 < y2 then
   begin
     y2 := y2 - y1;
-    if b then
-      Tag := 0
-    else
+    if LSetaDireita then
       Tag := 1
+    else
+      Tag := 0;
   end
   else
   begin
     a := y1;
     y1 := y2;
     y2 := a - y1;
-    if b then
-      Tag := 2
+    if LSetaDireita then
+      Tag := 3
     else
-      Tag := 3;
+      Tag := 2
   end;
   x1 := x1 + 64;
   y1 := y1 + 64;
   x2 := x2 - 64;
   y2 := y2 - 64;
+
   if (x2 < 64) then
   begin
-    a := (64 - x2) div 2;
+    a := (101 - x2) div 2;
     x1 := x1 - a;
     x2 := x2 + a;
   end;
   if (y2 < 64) then
   begin
-    a := (64 - y2) div 2;
+    a := (101 - y2) div 2;
     y1 := y1 - a;
     y2 := y2 + a;
   end;
+
+  a := Min(FSource.Top, FTarget.Top);
+  if (y1 < a) then
+  begin
+    y2 := y2 + (a - y1);
+    y1 := a;
+  end;
+
+  a := Min(FSource.Left, FTarget.Left);
+  if (x1 < a) then
+  begin
+    x2 := x2 + (a - x1);
+    x1 := a;
+  end;
+
   SetBounds(x1, y1, x2, y2);
   Repaint;
 end;

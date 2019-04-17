@@ -482,7 +482,6 @@ object FoPrinc: TFoPrinc
     Top = 603
     Width = 984
     Height = 23
-    Hint = ''
     Panels = <>
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clDefault

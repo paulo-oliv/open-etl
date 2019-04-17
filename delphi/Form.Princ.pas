@@ -349,7 +349,7 @@ procedure TFoPrinc.FormDragDrop(Sender, Source: TObject; X, Y: Integer);
     COMP_ETL_WIDTH = 100;
     COMP_ETL_HEIGHT = 85;
   begin
-    AddComponent(TIPO_COMPONENT_EXECUTE).SetBounds(X, Y, COMP_ETL_WIDTH, COMP_ETL_HEIGHT)
+    AddComponent(AType).SetBounds(X, Y, COMP_ETL_WIDTH, COMP_ETL_HEIGHT)
   end;
 
 begin
