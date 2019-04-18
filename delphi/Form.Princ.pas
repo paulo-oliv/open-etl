@@ -94,7 +94,6 @@ type
     procedure Execute;
   strict protected
     procedure ComponentPaint(Sender: TObject);
-    procedure ComponentResize(Sender: TObject);
     procedure ComponentMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
       X, Y: Integer);
     procedure ComponentMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -105,7 +104,7 @@ type
       var Accept: Boolean);
     procedure ComponentDblClick(Sender: TObject);
   public
-    function AddComponent(const AType: Byte): TComponentETL;
+    function AddComponent(const AType: Byte; const X, Y: Integer): TComponentETL;
   end;
 
 var
@@ -117,7 +116,7 @@ implementation
 
 {$R *.dfm}
 
-uses uMsg, SysUtils, uDmImages;
+uses uMsg, SysUtils, uDmImages, FileProjectETL;
 
 procedure TFoPrinc.AcNewExecute(Sender: TObject);
 begin
@@ -138,45 +137,6 @@ procedure TFoPrinc.AcOpenBeforeExecute(Sender: TObject);
 begin
   if Assigned(ActiveMDIChild) then // abre dialog no mesmo diretorio do arquivo ja aberto
     AcOpen.Dialog.InitialDir := ExtractFileDir(ActiveMDIChild.Caption);
-end;
-
-function TFoPrinc.AddComponent(const AType: Byte): TComponentETL;
-
-  function GenerateTitle(APrefix: string): string;
-
-    function NovoTitle(const ATitle: string): Boolean;
-    var
-      i: Integer;
-    begin
-      Result := True;
-      for i := 0 to ControlCount - 1 do
-        if Controls[i] is TComponentETL then
-          if ATitle = TComponentETL(Controls[i]).Title then
-            exit(false)
-    end;
-
-  var
-    LNum: Word;
-  begin
-    LNum := 0;
-    repeat
-      LNum := LNum + 1;
-      Result := APrefix + IntToStr(LNum);
-    until NovoTitle(Result);
-  end;
-
-begin
-  Result := TComponentETL.Factory(Self, AType);
-  Result.Title := GenerateTitle(Result.Title);
-  Result.OnPaint := ComponentPaint;
-  Result.OnMouseMove := ComponentMouseMove;
-  Result.OnMouseUp := ComponentMouseUp;
-  Result.OnMouseDown := ComponentMouseDown;
-  Result.OnResize := ComponentResize;
-  Result.OnDragDrop := ComponentDragDrop;
-  Result.OnDragOver := ComponentDragOver;
-  Result.OnDblClick := ComponentDblClick;
-  Result.PopupMenu := PopupComp;
 end;
 
 procedure TFoPrinc.AcAddQueryExecute(Sender: TObject);
@@ -206,7 +166,7 @@ begin
     geraNome;
     until NomeNaoExiste; }
 
-  AddComponent(0).SetBounds(50, 50, 100, 100);
+  AddComponent(0, 50, 50);
 end;
 
 procedure TFoPrinc.AcOpenAccept(Sender: TObject);
@@ -342,36 +302,41 @@ begin
     end); }
 end;
 
+function TFoPrinc.AddComponent(const AType: Byte; const X, Y: Integer): TComponentETL;
+begin
+  Result := TComponentETL.Factory(Self, Self, AType, X, Y);
+  TProjectETL.AddComponent(Result);
+  Result.OnPaint := ComponentPaint;
+  Result.OnMouseMove := ComponentMouseMove;
+  Result.OnMouseUp := ComponentMouseUp;
+  Result.OnMouseDown := ComponentMouseDown;
+  Result.OnDragDrop := ComponentDragDrop;
+  Result.OnDragOver := ComponentDragOver;
+  Result.OnDblClick := ComponentDblClick;
+  Result.PopupMenu := PopupComp;
+end;
+
 procedure TFoPrinc.FormDragDrop(Sender, Source: TObject; X, Y: Integer);
-
-  procedure AddComponentPos(const AType: Byte);
-  const
-    COMP_ETL_WIDTH = 100;
-    COMP_ETL_HEIGHT = 85;
-  begin
-    AddComponent(AType).SetBounds(X, Y, COMP_ETL_WIDTH, COMP_ETL_HEIGHT)
-  end;
-
 begin
   TImage(Source).EndDrag(True);
   if Source = ImQuery then
-    AddComponentPos(TIPO_COMPONENT_QUERY)
+    AddComponent(TIPO_COMPONENT_QUERY, X, Y)
   else if Source = ImFile then
-    AddComponentPos(TIPO_COMPONENT_FILE)
+    AddComponent(TIPO_COMPONENT_FILE, X, Y)
   else if Source = ImFilter then
-    AddComponentPos(TIPO_COMPONENT_FILTER)
+    AddComponent(TIPO_COMPONENT_FILTER, X, Y)
   else if Source = ImConversion then
-    AddComponentPos(TIPO_COMPONENT_CONVERSION)
+    AddComponent(TIPO_COMPONENT_CONVERSION, X, Y)
   else if Source = ImDerivation then
-    AddComponentPos(TIPO_COMPONENT_DERIVATION)
+    AddComponent(TIPO_COMPONENT_DERIVATION, X, Y)
   else if Source = ImJoin then
-    AddComponentPos(TIPO_COMPONENT_JOIN)
+    AddComponent(TIPO_COMPONENT_JOIN, X, Y)
   else if Source = ImCondensation then
-    AddComponentPos(TIPO_COMPONENT_CONDENSATION)
+    AddComponent(TIPO_COMPONENT_CONDENSATION, X, Y)
   else if Source = ImExecute then
-    AddComponentPos(TIPO_COMPONENT_EXECUTE)
+    AddComponent(TIPO_COMPONENT_EXECUTE, X, Y)
   else if Source = ImScript then
-    AddComponentPos(TIPO_COMPONENT_SCRIPT)
+    AddComponent(TIPO_COMPONENT_SCRIPT, X, Y)
 end;
 
 procedure TFoPrinc.FormDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState;
@@ -459,20 +424,6 @@ end;
 procedure TFoPrinc.ComponentPaint(Sender: TObject);
 begin
   DmImages.ILDev64.Draw(TPaintBox(Sender).Canvas, 0, 0, TComponentETL(Sender).Tag);
-  TComponentETL(Sender).Canvas.TextOut(0, 64, TComponentETL(Sender).Title);
-end;
-
-procedure TFoPrinc.ComponentResize(Sender: TObject);
-var
-  i: Integer;
-begin
-  for i := 0 to ControlCount - 1 do
-    if Controls[i] is TLinkComponents then
-    begin
-      if (Sender = TLinkComponents(Controls[i]).Source) or
-        (Sender = TLinkComponents(Controls[i]).Target) then
-        TLinkComponents(Controls[i]).RefreshSize;
-    end;
 end;
 
 procedure TFoPrinc.SQLSpoolPut(AEngine: TFDScript; const AMessage: string;

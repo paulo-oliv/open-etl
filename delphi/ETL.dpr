@@ -10,7 +10,8 @@ uses
   uDmImages in 'uDmImages.pas' {DmImages: TDataModule},
   Form.Edit.Load in 'Form.Edit.Load.pas' {FoEditLoad},
   ComponentETL in 'ComponentETL.pas',
-  FileProjectETL in 'FileProjectETL.pas';
+  FileProjectETL in 'FileProjectETL.pas',
+  FileProject.Interfaces in 'FileProject.Interfaces.pas';
 
 {$R *.res}
 

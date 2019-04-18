@@ -9,7 +9,9 @@ uses
   Form.Edit.Query,
   Form.Edit.Transform,
   Form.Edit.Load,
-  Vcl.StdCtrls;
+  Vcl.StdCtrls,
+  Vcl.Controls,
+  FileProject.Interfaces;
 
 const
   TIPO_COMPONENT_QUERY = 0;
@@ -23,12 +25,13 @@ const
   TIPO_COMPONENT_SCRIPT = 8;
 
 type
-  TComponentETL = class(TPaintBox)
+  TComponentETL = class(TPaintBox, IComponentETL)
   strict private
     FLabel: TCustomLabel;
     FFormGrid: TFoGrid;
-    FTitle: string;
   strict protected
+    procedure RefreshPositionLabel;
+    procedure Resize; override;
     procedure configQuery; virtual;
     function getTitle: string;
     procedure setTitle(const ATitle: string);
@@ -36,14 +39,14 @@ type
     procedure Edit; virtual; abstract;
     procedure Preview;
     procedure Delete;
-    class function Factory(const AOwner: TComponent; const AType: Byte): TComponentETL;
+    class function Factory(const AOwner: TComponent; const AParent: TWinControl; const AType: Byte;
+      const Ax, Ay: Integer): TComponentETL;
   published
     property Title: string read getTitle write setTitle;
-    property OnResize;
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(const AOwner: TComponent; const AParent: TWinControl);
   end;
 
-  TLinkComponents = class(TPaintBox)
+  TLinkComponents = class(TPaintBox, ILinkComponents)
   strict private
     FText: string;
     FSource, FTarget: TComponentETL;
@@ -110,65 +113,95 @@ implementation
 
 { TComponentETL }
 
-uses Controls, Vcl.Graphics, Windows, SysUtils, Math;
+uses Vcl.Graphics, Windows, SysUtils, Math;
 
-constructor TComponentETL.Create(AOwner: TComponent);
+const
+  COMP_WIDTH = 64;
+  COMP_HEIGHT = 64;
+
+procedure TComponentETL.RefreshPositionLabel;
 begin
-  inherited Create(AOwner);
-  FLabel := TCustomLabel.Create(AOwner);
+  FLabel.Left := Left + ((COMP_WIDTH - FLabel.Width) div 2);
+  FLabel.Top := Top + Height;
 end;
 
-class function TComponentETL.Factory(const AOwner: TComponent; const AType: Byte): TComponentETL;
+procedure TComponentETL.Resize;
+var
+  i: Integer;
+begin
+  inherited;
+  RefreshPositionLabel;
+
+  if Assigned(Parent) then
+    for i := 0 to Parent.ControlCount - 1 do
+      if Parent.Controls[i] is TLinkComponents then
+        if (TLinkComponents(Parent.Controls[i]).Target = Self) or
+          (TLinkComponents(Parent.Controls[i]).Source = Self) then
+          TLinkComponents(Parent.Controls[i]).RefreshSize;
+end;
+
+constructor TComponentETL.Create(const AOwner: TComponent; const AParent: TWinControl);
+begin
+  FLabel := TCustomLabel.Create(AOwner);
+  inherited Create(AOwner);
+  Parent := AParent;
+  FLabel.Parent := AParent;
+  FLabel.Canvas.Font.Name := 'Segoe UI';
+  FLabel.Canvas.Font.Size := 10;
+end;
+
+class function TComponentETL.Factory(const AOwner: TComponent; const AParent: TWinControl;
+  const AType: Byte; const Ax, Ay: Integer): TComponentETL;
 begin
   case AType of
     TIPO_COMPONENT_QUERY:
       begin
-        Result := TCompQuery.Create(AOwner);
+        Result := TCompQuery.Create(AOwner, AParent);
         Result.Title := 'Query';
       end;
     TIPO_COMPONENT_FILE:
       begin
-        Result := TCompFile.Create(AOwner);
+        Result := TCompFile.Create(AOwner, AParent);
         Result.Title := 'File';
       end;
     TIPO_COMPONENT_FILTER:
       begin
-        Result := TCompFilter.Create(AOwner);
+        Result := TCompFilter.Create(AOwner, AParent);
         Result.Title := 'Filter';
       end;
     TIPO_COMPONENT_CONVERSION:
       begin
-        Result := TCompConversion.Create(AOwner);
+        Result := TCompConversion.Create(AOwner, AParent);
         Result.Title := 'Conversion';
       end;
     TIPO_COMPONENT_DERIVATION:
       begin
-        Result := TCompDerivation.Create(AOwner);
+        Result := TCompDerivation.Create(AOwner, AParent);
         Result.Title := 'Derivation';
       end;
     TIPO_COMPONENT_JOIN:
       begin
-        Result := TCompJoin.Create(AOwner);
+        Result := TCompJoin.Create(AOwner, AParent);
         Result.Title := 'Join';
       end;
     TIPO_COMPONENT_CONDENSATION:
       begin
-        Result := TCompConversion.Create(AOwner);
+        Result := TCompConversion.Create(AOwner, AParent);
         Result.Title := 'Condensation';
       end;
     TIPO_COMPONENT_EXECUTE:
       begin
-        Result := TCompExecute.Create(AOwner);
+        Result := TCompExecute.Create(AOwner, AParent);
         Result.Title := 'Execute';
       end;
     TIPO_COMPONENT_SCRIPT:
       begin
-        Result := TCompScript.Create(AOwner);
+        Result := TCompScript.Create(AOwner, AParent);
         Result.Title := 'Script';
       end;
   end;
-  Result.Parent := TWinControl(AOwner);
   Result.Tag := AType;
+  Result.SetBounds(Ax, Ay, COMP_WIDTH, COMP_HEIGHT);
 end;
 
 { TComponenteETL }
@@ -185,13 +218,13 @@ end;
 
 function TComponentETL.getTitle: string;
 begin
-  Result := FTitle;
+  Result := FLabel.Caption;
 end;
 
 procedure TComponentETL.setTitle(const ATitle: string);
 begin
-  FTitle := ATitle;
-  Repaint;
+  FLabel.Caption := ATitle;
+  RefreshPositionLabel;
 end;
 
 procedure TComponentETL.Preview;
