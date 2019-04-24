@@ -10,7 +10,7 @@ uses dxRibbonSkins, dxRibbonCustomizationForm, cxGraphics, cxControls, cxLookAnd
   Vcl.Controls, Vcl.ExtCtrls, Vcl.Forms, ComponentETL, FireDAC.Stan.Option, FireDAC.Stan.Param,
   FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf, Data.DB,
   FireDAC.Comp.DataSet, FireDAC.Comp.Client, Vcl.ToolWin, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus,
-  Vcl.PlatformDefaultStyleActnCtrls;
+  Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls;
 
 type
   TFoPrinc = class(TForm)
@@ -63,6 +63,8 @@ type
     FileMainy: TIntegerField;
     FileMaintype: TShortintField;
     FileMainscript: TMemoField;
+    Button1: TButton;
+    Button2: TButton;
     procedure FormCreate(Sender: TObject);
     procedure AcExecuteExecute(Sender: TObject);
     procedure AcOpenAccept(Sender: TObject);
@@ -90,27 +92,16 @@ type
     procedure MenuItem4Click(Sender: TObject);
   strict private
     procedure updateEnableButtons;
-    procedure Open(const AFile: string);
     procedure Execute;
   strict protected
     procedure ComponentPaint(Sender: TObject);
-    procedure ComponentMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
-      X, Y: Integer);
-    procedure ComponentMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-    procedure ComponentMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
-      X, Y: Integer);
     procedure ComponentDragDrop(Sender, Source: TObject; X, Y: Integer);
-    procedure ComponentDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState;
-      var Accept: Boolean);
-    procedure ComponentDblClick(Sender: TObject);
   public
     function AddComponent(const AType: Byte; const X, Y: Integer): TComponentETL;
   end;
 
 var
   FoPrinc: TFoPrinc;
-  moveX, moveY: Integer;
-  mover: Boolean;
 
 implementation
 
@@ -123,20 +114,10 @@ begin
   //
 end;
 
-procedure TFoPrinc.Open(const AFile: string);
-begin
-  if FileExists(AFile) then
-  begin
-    // FileMain.LoadFromFile(AFile);
-  end
-  // else
-  // TFoEditQuery.Create(Self).Novo(AFile)
-end;
-
 procedure TFoPrinc.AcOpenBeforeExecute(Sender: TObject);
 begin
-  if Assigned(ActiveMDIChild) then // abre dialog no mesmo diretorio do arquivo ja aberto
-    AcOpen.Dialog.InitialDir := ExtractFileDir(ActiveMDIChild.Caption);
+  // if Assigned(ActiveMDIChild) then // abre dialog no mesmo diretorio do arquivo ja aberto
+  // AcOpen.Dialog.InitialDir := ExtractFileDir(ActiveMDIChild.Caption);
 end;
 
 procedure TFoPrinc.AcAddQueryExecute(Sender: TObject);
@@ -171,7 +152,12 @@ end;
 
 procedure TFoPrinc.AcOpenAccept(Sender: TObject);
 begin
-  Open(AcOpen.Dialog.FileName);
+  if FileExists(AcOpen.Dialog.FileName) then
+  begin
+    TProjectETL.Load(AcOpen.Dialog.FileName)
+  end
+  // else
+  // TFoEditQuery.Create(Self).Novo(AFile)
 
   // if EhArquivo then
   // if UpperCase(ExtractFileExt(AcAbrir.Dialog.FileName))='.CSV' then
@@ -182,19 +168,19 @@ end;
 
 procedure TFoPrinc.AcSaveBeforeExecute(Sender: TObject);
 begin
-  if Assigned(ActiveMDIChild) then
-    AcSave.Dialog.InitialDir := ExtractFileDir(ActiveMDIChild.Caption);
+  // if Assigned(ActiveMDIChild) then
+  // AcSave.Dialog.InitialDir := ExtractFileDir(ActiveMDIChild.Caption);
 end;
 
 procedure TFoPrinc.AcSaveAccept(Sender: TObject);
 begin
+    TProjectETL.Save(AcSave.Dialog.FileName)
   { if Assigned(ActiveMDIChild) then
     with ActiveMDIChild as TFoMdiChild do
     begin
     Caption := AcSalvar.Dialog.FileName;
     Salvar;
     end; }
-  FileMain.SaveToFile(AcSave.Dialog.FileName);
 end;
 
 procedure TFoPrinc.AcCloseExecute(Sender: TObject);
@@ -307,12 +293,7 @@ begin
   Result := TComponentETL.Factory(Self, Self, AType, X, Y);
   TProjectETL.AddComponent(Result);
   Result.OnPaint := ComponentPaint;
-  Result.OnMouseMove := ComponentMouseMove;
-  Result.OnMouseUp := ComponentMouseUp;
-  Result.OnMouseDown := ComponentMouseDown;
   Result.OnDragDrop := ComponentDragDrop;
-  Result.OnDragOver := ComponentDragOver;
-  Result.OnDblClick := ComponentDblClick;
   Result.PopupMenu := PopupComp;
 end;
 
@@ -345,27 +326,6 @@ begin
   Accept := Source is TImage;
 end;
 
-procedure TFoPrinc.ComponentMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
-  X, Y: Integer);
-begin
-  if (Button = mbLeft) then
-    if ssShift in Shift then
-    begin
-      TComponentETL(Sender).BeginDrag(false);
-    end
-    else
-    begin
-      moveX := X;
-      moveY := Y;
-      mover := True;
-    end;
-end;
-
-procedure TFoPrinc.ComponentDblClick(Sender: TObject);
-begin
-  TComponentETL(Sender).Edit;
-end;
-
 procedure TFoPrinc.ComponentDragDrop(Sender, Source: TObject; X, Y: Integer);
 var
   temp: TLinkComponents;
@@ -380,45 +340,6 @@ begin
   temp.PopupMenu := PopupLink;
   temp.Text := 'teste';
   temp.RefreshSize;
-end;
-
-procedure TFoPrinc.ComponentDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState;
-  var Accept: Boolean);
-begin
-  Accept := (Source is TComponentETL) and (Sender <> Source);
-end;
-
-procedure TFoPrinc.ComponentMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-const
-  MIN_LEFT = 120;
-  MIN_TOP = 60;
-begin
-  if mover then
-    with Sender as TControl do
-    begin
-      X := X - moveX + Left;
-      Y := Y - moveY + Top;
-
-      if X < MIN_LEFT then
-        X := MIN_LEFT;
-      if Y < MIN_TOP then
-        Y := MIN_TOP;
-
-      if X > Parent.Width - Width then
-        X := Parent.Width - Width;
-      if Y > Parent.Height - Height - MIN_TOP then
-        Y := Parent.Height - Height - MIN_TOP;
-
-      Left := X;
-      Top := Y;
-    end;
-end;
-
-procedure TFoPrinc.ComponentMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
-  X, Y: Integer);
-begin
-  if mover then
-    mover := false;
 end;
 
 procedure TFoPrinc.ComponentPaint(Sender: TObject);

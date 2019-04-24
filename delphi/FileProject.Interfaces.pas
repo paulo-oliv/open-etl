@@ -7,6 +7,9 @@ type
     ['{EF7C533C-DE01-4BD9-87E3-4A4E31A7ABB5}']
     function getTitle: string;
     procedure setTitle(const ATitle: string);
+    function GetType: Integer;
+    function GetLeft: Integer;
+    function GetTop: Integer;
     property Title: string read getTitle write setTitle;
   end;
 
@@ -16,10 +19,12 @@ type
 
   IList = interface
     ['{43DB5D2D-7418-41AB-94E7-FD036C99DD4B}']
+    function Count: Integer;
   end;
 
   IListComponentsETL = interface(IList)
     ['{829D88B9-7255-40AB-8486-2BCE1A6112AC}']
+    function GetItem(const AIndex: Integer): IComponentETL;
     function Add(const AComponent: IComponentETL): IListComponentsETL;
   end;
 
@@ -30,6 +35,9 @@ type
   IProjectETL = interface
     ['{14B85495-D30F-45B6-BBE9-36438F0E0094}']
     function getListComponents: IListComponentsETL;
+    function getFileName: string;
+    procedure setFileName(const AFileName: string);
+    property FileName: string read getFilename write setFilename;
   end;
 
 implementation

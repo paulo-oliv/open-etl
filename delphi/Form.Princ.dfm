@@ -489,6 +489,22 @@ object FoPrinc: TFoPrinc
     Font.Name = 'Tahoma'
     Font.Style = []
   end
+  object Button1: TButton
+    Left = 368
+    Top = 48
+    Width = 75
+    Height = 25
+    Action = AcSave
+    TabOrder = 2
+  end
+  object Button2: TButton
+    Left = 376
+    Top = 79
+    Width = 75
+    Height = 25
+    Action = AcOpen
+    TabOrder = 3
+  end
   object SQL: TFDScript
     SQLScripts = <>
     ScriptDialog = FDScriptDialog

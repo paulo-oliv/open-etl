@@ -28,6 +28,10 @@ type
   TComponentETL = class(TPaintBox, IComponentETL)
   strict private
     FLabel: TCustomLabel;
+    class var FMoveX, FMoveY: Integer;
+
+  class var
+    FMover: Boolean;
     FFormGrid: TFoGrid;
   strict protected
     procedure RefreshPositionLabel;
@@ -35,12 +39,22 @@ type
     procedure configQuery; virtual;
     function getTitle: string;
     procedure setTitle(const ATitle: string);
+    procedure SetParent(AParent: TWinControl); override;
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+    procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
+    procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+    procedure DblClick; override;
+        procedure DragOver(Source: TObject; X, Y: Integer; State: TDragState;
+      var Accept: Boolean); override;
   public
+    function GetType: Integer;
     procedure Edit; virtual; abstract;
     procedure Preview;
     procedure Delete;
     class function Factory(const AOwner: TComponent; const AParent: TWinControl; const AType: Byte;
       const Ax, Ay: Integer): TComponentETL;
+    function GetLeft: Integer;
+    function GetTop: Integer;
   published
     property Title: string read getTitle write setTitle;
     constructor Create(const AOwner: TComponent; const AParent: TWinControl);
@@ -113,7 +127,7 @@ implementation
 
 { TComponentETL }
 
-uses Vcl.Graphics, Windows, SysUtils, Math;
+uses Vcl.Graphics, Windows, SysUtils, Math, Types;
 
 const
   COMP_WIDTH = 64;
@@ -140,12 +154,17 @@ begin
           TLinkComponents(Parent.Controls[i]).RefreshSize;
 end;
 
+procedure TComponentETL.SetParent(AParent: TWinControl);
+begin
+  inherited SetParent(AParent);
+  FLabel.Parent := AParent;
+end;
+
 constructor TComponentETL.Create(const AOwner: TComponent; const AParent: TWinControl);
 begin
   FLabel := TCustomLabel.Create(AOwner);
   inherited Create(AOwner);
   Parent := AParent;
-  FLabel.Parent := AParent;
   FLabel.Canvas.Font.Name := 'Segoe UI';
   FLabel.Canvas.Font.Size := 10;
 end;
@@ -194,11 +213,12 @@ begin
         Result := TCompExecute.Create(AOwner, AParent);
         Result.Title := 'Execute';
       end;
-    TIPO_COMPONENT_SCRIPT:
-      begin
-        Result := TCompScript.Create(AOwner, AParent);
-        Result.Title := 'Script';
-      end;
+  else
+    // TIPO_COMPONENT_SCRIPT:
+    begin
+      Result := TCompScript.Create(AOwner, AParent);
+      Result.Title := 'Script';
+    end;
   end;
   Result.Tag := AType;
   Result.SetBounds(Ax, Ay, COMP_WIDTH, COMP_HEIGHT);
@@ -206,9 +226,25 @@ end;
 
 { TComponenteETL }
 
+function TComponentETL.GetLeft: Integer;
+begin
+  Result := Left;
+end;
+
+function TComponentETL.GetTop: Integer;
+begin
+  Result := Top;
+end;
+
 procedure TComponentETL.configQuery;
 begin
   //
+end;
+
+procedure TComponentETL.DblClick;
+begin
+  inherited DblClick;
+  Edit;
 end;
 
 procedure TComponentETL.Delete;
@@ -216,9 +252,70 @@ begin
   DisposeOf;
 end;
 
+procedure TComponentETL.DragOver(Source: TObject; X, Y: Integer; State: TDragState;
+  var Accept: Boolean);
+begin
+  inherited DragOver(Source, X, Y, State, Accept);
+  Accept := (Source is TComponentETL) and (Self <> Source);
+end;
+
 function TComponentETL.getTitle: string;
 begin
   Result := FLabel.Caption;
+end;
+
+function TComponentETL.GetType: Integer;
+begin
+  Result := Tag;
+end;
+
+procedure TComponentETL.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  inherited MouseDown(Button, Shift, X, Y);
+  if (Button = mbLeft) then
+    if ssShift in Shift then
+    begin
+      BeginDrag(false);
+    end
+    else
+    begin
+      FMoveX := X;
+      FMoveY := Y;
+      FMover := True;
+    end;
+end;
+
+procedure TComponentETL.MouseMove(Shift: TShiftState; X, Y: Integer);
+const
+  MIN_LEFT = 120;
+  MIN_TOP = 60;
+begin
+  inherited MouseMove(Shift, X, Y);
+  if FMover then
+  begin
+    X := X - FMoveX + Left;
+    Y := Y - FMoveY + Top;
+
+    if X < MIN_LEFT then
+      X := MIN_LEFT;
+    if Y < MIN_TOP then
+      Y := MIN_TOP;
+
+    if X > Parent.Width - Width then
+      X := Parent.Width - Width;
+    if Y > Parent.Height - Height - MIN_TOP then
+      Y := Parent.Height - Height - MIN_TOP;
+
+    Left := X;
+    Top := Y;
+  end;
+end;
+
+procedure TComponentETL.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  inherited MouseUp(Button, Shift, X, Y);
+  if FMover then
+    FMover := false;
 end;
 
 procedure TComponentETL.setTitle(const ATitle: string);
@@ -369,7 +466,7 @@ begin
     a := x1;
     x1 := x2;
     x2 := a - x1;
-    LSetaDireita := False;
+    LSetaDireita := false;
   end;
 
   y1 := FSource.Top;
