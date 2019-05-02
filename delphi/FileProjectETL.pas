@@ -35,8 +35,9 @@ type
   public
     function getListComponents: IListComponentsETL;
     class function GetInstance: IProjectETL;
-    class function AddComponent(const AComponent: IComponentETL): IProjectETL;
-    class function Load(const AFileName: string): IProjectETL;
+    class function AddComponent(const AParent: TWinControl; const AType: Byte;
+      const Ax, Ay: Integer): IProjectETL;
+    class function Load(const AFileName: string; const AParent: TWinControl): IProjectETL;
     class function Save(const AFileName: string): IProjectETL; overload;
     class function Save: IProjectETL; overload;
     constructor Create;
@@ -49,9 +50,16 @@ type
 
 implementation
 
-uses Classes, SysUtils, System.JSON; // ,  REST.Json; // XMLDoc, xmldom, XMLIntf, msxmldom, ,
+uses Classes, SysUtils, System.JSON, ComponentETL.Factory;
+// ,  REST.Json; // XMLDoc, xmldom, XMLIntf, msxmldom, ,
 
-{ TInterfacedList }
+const
+  VAR_TYPE = 'Type';
+  VAR_TITLE = 'Title';
+  VAR_X = 'X';
+  VAR_Y = 'Y';
+
+  { TInterfacedList }
 function TInterfacedList<T>.Count: Integer;
 begin
   Result := FList.Count;
@@ -88,10 +96,15 @@ begin
   Result := FInstance;
 end;
 
-class function TProjectETL.AddComponent(const AComponent: IComponentETL): IProjectETL;
+class function TProjectETL.AddComponent(const AParent: TWinControl; const AType: Byte;
+  const Ax, Ay: Integer): IProjectETL;
+var
+  LCompETL: IComponentETL;
 begin
   Result := GetInstance;
-  Result.getListComponents.Add(AComponent);
+  LCompETL := TComponentETLFactory.New(AParent, AType);
+  LCompETL.setPosition(Ax, Ay);
+  Result.getListComponents.Add(LCompETL);
 end;
 
 constructor TProjectETL.Create;
@@ -127,10 +140,10 @@ begin
       for i := 0 to GetInstance.getListComponents.Count - 1 do
       begin
         LJSONObject := TJSONObject.Create;
-        LJSONObject.AddPair('Type', IntToStr(GetInstance.getListComponents.GetItem(i).GetType));
-        LJSONObject.AddPair('Title', GetInstance.getListComponents.GetItem(i).Title);
-        LJSONObject.AddPair('X', IntToStr(GetInstance.getListComponents.GetItem(i).GetLeft));
-        LJSONObject.AddPair('Y', IntToStr(GetInstance.getListComponents.GetItem(i).GetTop));
+        LJSONObject.AddPair(VAR_TYPE, IntToStr(GetInstance.getListComponents.GetItem(i).GetType));
+        LJSONObject.AddPair(VAR_TITLE, GetInstance.getListComponents.GetItem(i).Title);
+        LJSONObject.AddPair(VAR_X, IntToStr(GetInstance.getListComponents.GetItem(i).GetLeft));
+        LJSONObject.AddPair(VAR_Y, IntToStr(GetInstance.getListComponents.GetItem(i).GetTop));
         LJSONArray.AddElement(LJSONObject);
       end;
       Writeln(f, LJSONArray.ToJSON);
@@ -194,12 +207,12 @@ end;
   end;
 *)
 
-class function TProjectETL.Load(const AFileName: string): IProjectETL;
+class function TProjectETL.Load(const AFileName: string; const AParent: TWinControl): IProjectETL;
 var
   LJSONArray: TJSONArray;
-  // LJSONObject: TJSONObject;
+  LJSONObject: TJSONObject;
   s: string;
-  // i: Integer;
+  i: Integer;
   f: TextFile;
 begin
   Result := GetInstance;
@@ -213,8 +226,16 @@ begin
   end;
   // try
   LJSONArray := TJSONObject.ParseJSONValue(s) as TJSONArray;
-  // for i := 0 to LJSONArray.Count - 1 do
-  // AddComponent()
+  try
+    for i := 0 to LJSONArray.Count - 1 do
+    begin
+      LJSONObject := TJSONObject(LJSONArray.Items[i]);
+      AddComponent(AParent, LJSONObject.GetValue<Byte>(VAR_TYPE),
+        LJSONObject.GetValue<Integer>(VAR_X), LJSONObject.GetValue<Integer>(VAR_Y))
+    end;
+  finally
+    LJSONArray.DisposeOf
+  end;
 
   // except
   // raise Exception.Create('Error Message');

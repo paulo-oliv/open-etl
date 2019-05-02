@@ -1,7 +1,7 @@
-object DmImages: TDmImages
+object DmMain: TDmMain
   OldCreateOrder = False
-  Height = 201
-  Width = 298
+  Height = 269
+  Width = 291
   object ILDev32: TcxImageList
     Height = 32
     Width = 32
@@ -9002,7 +9002,7 @@ object DmImages: TDmImages
     Left = 144
     Top = 24
     Bitmap = {
-      494C01010F006800DC0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C01010F006800E40010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000004000000001002000000000000040
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000080000000800000008000000080000000800000008000
@@ -9536,5 +9536,72 @@ object DmImages: TDmImages
       001FF01FE007FEBF8FF1F03FFFFFFC9FFFF9F07FF81FFDDFFF75F0FFF81FFDDF
       FF8FF1FFF81FFDDFFFFFFBFFFFFFFFFF00000000000000000000000000000000
       000000000000}
+  end
+  object PopupLink: TPopupMenu
+    Images = ILDev32
+    Left = 138
+    Top = 97
+    object MnEditLabel: TMenuItem
+      Caption = 'Edit Label...'
+      Default = True
+      OnClick = MnEditLabelClick
+    end
+    object MenuItem5: TMenuItem
+      Caption = '-'
+    end
+    object MnDelLink: TMenuItem
+      Caption = 'Delete'
+      ImageIndex = 15
+      OnClick = MnDelLinkClick
+    end
+  end
+  object AlComp: TActionList
+    Images = ILDev32
+    Left = 52
+    Top = 183
+    object AcEditScript: TAction
+      Caption = 'Edit...'
+      ImageIndex = 14
+      OnExecute = AcEditScriptExecute
+    end
+    object AcPreview: TAction
+      Caption = 'Preview...'
+      ImageIndex = 16
+      OnExecute = AcPreviewExecute
+    end
+    object AcEditTitle: TAction
+      Caption = 'Edit Label...'
+      OnExecute = AcEditTitleExecute
+    end
+    object AcDelete: TAction
+      Caption = 'Delete'
+      ImageIndex = 15
+      OnExecute = AcDeleteExecute
+    end
+  end
+  object PopupComp: TPopupMenu
+    Images = ILDev32
+    Left = 123
+    Top = 186
+    object MnEdit: TMenuItem
+      Caption = 'Edit...'
+      Default = True
+      ImageIndex = 14
+    end
+    object MnPreview: TMenuItem
+      Action = AcPreview
+    end
+    object N2: TMenuItem
+      Caption = '-'
+    end
+    object MenuItem1: TMenuItem
+      Action = AcEditTitle
+    end
+    object N1: TMenuItem
+      Caption = '-'
+    end
+    object MnDeleteComponent: TMenuItem
+      Action = AcDelete
+    end
   end
 end

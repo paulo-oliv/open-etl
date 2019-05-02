@@ -1,4 +1,4 @@
-object FoPrinc: TFoPrinc
+object FoMain: TFoMain
   Left = 246
   Top = 188
   ClientHeight = 626
@@ -522,7 +522,7 @@ object FoPrinc: TFoPrinc
     Top = 296
   end
   object AlPrinc: TActionList
-    Images = DmImages.ILDev32
+    Images = DmMain.ILDev32
     Left = 516
     Top = 175
     object AcOpen: TFileOpen
@@ -612,66 +612,6 @@ object FoPrinc: TFoPrinc
       Hint = 'Fechar'
       ImageIndex = 2
       OnExecute = AcCloseExecute
-    end
-    object AcEditScript: TAction
-      Caption = 'Edit...'
-      ImageIndex = 14
-      OnExecute = AcEditScriptExecute
-    end
-    object AcPreview: TAction
-      Caption = 'Preview...'
-      ImageIndex = 16
-      OnExecute = AcPreviewExecute
-    end
-    object AcEditTitle: TAction
-      Caption = 'Edit Label...'
-      OnExecute = AcEditTitleExecute
-    end
-  end
-  object PopupComp: TPopupMenu
-    Images = DmImages.ILDev32
-    Left = 219
-    Top = 450
-    object MnEdit: TMenuItem
-      Caption = 'Edit...'
-      Default = True
-      ImageIndex = 14
-      OnClick = AcEditScriptExecute
-    end
-    object MnPreview: TMenuItem
-      Action = AcPreview
-    end
-    object N2: TMenuItem
-      Caption = '-'
-    end
-    object MnEditLabel: TMenuItem
-      Action = AcEditTitle
-    end
-    object N1: TMenuItem
-      Caption = '-'
-    end
-    object MnDeleteComponent: TMenuItem
-      Caption = 'Delete'
-      ImageIndex = 15
-      OnClick = MnDeleteComponentClick
-    end
-  end
-  object PopupLink: TPopupMenu
-    Images = DmImages.ILDev32
-    Left = 275
-    Top = 210
-    object MenuItem4: TMenuItem
-      Caption = 'Edit Label...'
-      Default = True
-      OnClick = MenuItem4Click
-    end
-    object MenuItem5: TMenuItem
-      Caption = '-'
-    end
-    object MnDelLink: TMenuItem
-      Caption = 'Delete'
-      ImageIndex = 15
-      OnClick = MnDelLinkClick
     end
   end
   object FileMain: TFDMemTable

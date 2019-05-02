@@ -1,4 +1,4 @@
-unit Form.Princ;
+unit Form.Main;
 
 interface
 
@@ -13,7 +13,7 @@ uses dxRibbonSkins, dxRibbonCustomizationForm, cxGraphics, cxControls, cxLookAnd
   Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls;
 
 type
-  TFoPrinc = class(TForm)
+  TFoMain = class(TForm)
     SQL: TFDScript;
     FDScriptDialog: TFDGUIxScriptDialog;
     CategoryPanelGroup1: TCategoryPanelGroup;
@@ -39,25 +39,11 @@ type
     AcSave: TFileSaveAs;
     AcAutoFecha: TAction;
     AcClose: TAction;
-    AcEditScript: TAction;
     ImExecute: TImage;
     ImScript: TImage;
     ImDerivation: TImage;
     ImFilter: TImage;
     ImJoin: TImage;
-    AcPreview: TAction;
-    AcEditTitle: TAction;
-    PopupComp: TPopupMenu;
-    MnEdit: TMenuItem;
-    MnPreview: TMenuItem;
-    N2: TMenuItem;
-    MnEditLabel: TMenuItem;
-    N1: TMenuItem;
-    MnDeleteComponent: TMenuItem;
-    PopupLink: TPopupMenu;
-    MenuItem4: TMenuItem;
-    MenuItem5: TMenuItem;
-    MnDelLink: TMenuItem;
     FileMain: TFDMemTable;
     FileMainx: TIntegerField;
     FileMainy: TIntegerField;
@@ -80,47 +66,37 @@ type
     procedure AcNewExecute(Sender: TObject);
     procedure SQLSpoolPut(AEngine: TFDScript; const AMessage: string; AKind: TFDScriptOutputKind);
     procedure AcAddQueryExecute(Sender: TObject);
-    procedure AcEditScriptExecute(Sender: TObject);
-    procedure MnDeleteComponentClick(Sender: TObject);
-    procedure AcPreviewExecute(Sender: TObject);
     procedure AcCloseExecute(Sender: TObject);
-    procedure AcEditTitleExecute(Sender: TObject);
     procedure FormDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState;
       var Accept: Boolean);
     procedure FormDragDrop(Sender, Source: TObject; X, Y: Integer);
-    procedure MnDelLinkClick(Sender: TObject);
-    procedure MenuItem4Click(Sender: TObject);
   strict private
     procedure updateEnableButtons;
     procedure Execute;
-  strict protected
-    procedure ComponentPaint(Sender: TObject);
-    procedure ComponentDragDrop(Sender, Source: TObject; X, Y: Integer);
   public
-    function AddComponent(const AType: Byte; const X, Y: Integer): TComponentETL;
   end;
 
 var
-  FoPrinc: TFoPrinc;
+  FoMain: TFoMain;
 
 implementation
 
 {$R *.dfm}
 
-uses uMsg, SysUtils, uDmImages, FileProjectETL;
+uses uMsg, SysUtils, DataModule.Main, FileProjectETL, ComponentETL.Factory;
 
-procedure TFoPrinc.AcNewExecute(Sender: TObject);
+procedure TFoMain.AcNewExecute(Sender: TObject);
 begin
   //
 end;
 
-procedure TFoPrinc.AcOpenBeforeExecute(Sender: TObject);
+procedure TFoMain.AcOpenBeforeExecute(Sender: TObject);
 begin
   // if Assigned(ActiveMDIChild) then // abre dialog no mesmo diretorio do arquivo ja aberto
   // AcOpen.Dialog.InitialDir := ExtractFileDir(ActiveMDIChild.Caption);
 end;
 
-procedure TFoPrinc.AcAddQueryExecute(Sender: TObject);
+procedure TFoMain.AcAddQueryExecute(Sender: TObject);
 
 { c: Integer;
   nome: string;
@@ -147,14 +123,14 @@ begin
     geraNome;
     until NomeNaoExiste; }
 
-  AddComponent(0, 50, 50);
+  TProjectETL.AddComponent(Self, TIPO_COMPONENT_QUERY, 50, 50);
 end;
 
-procedure TFoPrinc.AcOpenAccept(Sender: TObject);
+procedure TFoMain.AcOpenAccept(Sender: TObject);
 begin
   if FileExists(AcOpen.Dialog.FileName) then
   begin
-    TProjectETL.Load(AcOpen.Dialog.FileName)
+    TProjectETL.Load(AcOpen.Dialog.FileName, Self)
   end
   // else
   // TFoEditQuery.Create(Self).Novo(AFile)
@@ -166,15 +142,15 @@ begin
   // visualizaPanel;
 end;
 
-procedure TFoPrinc.AcSaveBeforeExecute(Sender: TObject);
+procedure TFoMain.AcSaveBeforeExecute(Sender: TObject);
 begin
   // if Assigned(ActiveMDIChild) then
   // AcSave.Dialog.InitialDir := ExtractFileDir(ActiveMDIChild.Caption);
 end;
 
-procedure TFoPrinc.AcSaveAccept(Sender: TObject);
+procedure TFoMain.AcSaveAccept(Sender: TObject);
 begin
-    TProjectETL.Save(AcSave.Dialog.FileName)
+  TProjectETL.Save(AcSave.Dialog.FileName)
   { if Assigned(ActiveMDIChild) then
     with ActiveMDIChild as TFoMdiChild do
     begin
@@ -183,24 +159,24 @@ begin
     end; }
 end;
 
-procedure TFoPrinc.AcCloseExecute(Sender: TObject);
+procedure TFoMain.AcCloseExecute(Sender: TObject);
 begin
   Close;
 end;
 
-procedure TFoPrinc.AcCommitAutoExecute(Sender: TObject);
+procedure TFoMain.AcCommitAutoExecute(Sender: TObject);
 begin
   // DmDBRoot.DB.TxOptions.AutoCommit := AcCommitAuto.Checked;
   updateEnableButtons;
 end;
 
-procedure TFoPrinc.updateEnableButtons;
+procedure TFoMain.updateEnableButtons;
 begin
   // AcCommit.Enabled := not DmDBRoot.DB.TxOptions.AutoCommit;
   // AcRollBack.Enabled := not DmDBRoot.DB.TxOptions.AutoCommit;
 end;
 
-procedure TFoPrinc.Execute;
+procedure TFoMain.Execute;
 
 { procedure executaDiretoArquivo;
 
@@ -270,7 +246,7 @@ begin
     executaMM; }
 end;
 
-procedure TFoPrinc.FormCreate(Sender: TObject);
+procedure TFoMain.FormCreate(Sender: TObject);
 begin
   { TMensagem.TryExcept(Name, 'Inicialização',
     procedure
@@ -288,72 +264,42 @@ begin
     end); }
 end;
 
-function TFoPrinc.AddComponent(const AType: Byte; const X, Y: Integer): TComponentETL;
-begin
-  Result := TComponentETL.Factory(Self, Self, AType, X, Y);
-  TProjectETL.AddComponent(Result);
-  Result.OnPaint := ComponentPaint;
-  Result.OnDragDrop := ComponentDragDrop;
-  Result.PopupMenu := PopupComp;
-end;
-
-procedure TFoPrinc.FormDragDrop(Sender, Source: TObject; X, Y: Integer);
+procedure TFoMain.FormDragDrop(Sender, Source: TObject; X, Y: Integer);
 begin
   TImage(Source).EndDrag(True);
   if Source = ImQuery then
-    AddComponent(TIPO_COMPONENT_QUERY, X, Y)
+    TProjectETL.AddComponent(Self, TIPO_COMPONENT_QUERY, X, Y)
   else if Source = ImFile then
-    AddComponent(TIPO_COMPONENT_FILE, X, Y)
+    TProjectETL.AddComponent(Self, TIPO_COMPONENT_FILE, X, Y)
   else if Source = ImFilter then
-    AddComponent(TIPO_COMPONENT_FILTER, X, Y)
+    TProjectETL.AddComponent(Self, TIPO_COMPONENT_FILTER, X, Y)
   else if Source = ImConversion then
-    AddComponent(TIPO_COMPONENT_CONVERSION, X, Y)
+    TProjectETL.AddComponent(Self, TIPO_COMPONENT_CONVERSION, X, Y)
   else if Source = ImDerivation then
-    AddComponent(TIPO_COMPONENT_DERIVATION, X, Y)
+    TProjectETL.AddComponent(Self, TIPO_COMPONENT_DERIVATION, X, Y)
   else if Source = ImJoin then
-    AddComponent(TIPO_COMPONENT_JOIN, X, Y)
+    TProjectETL.AddComponent(Self, TIPO_COMPONENT_JOIN, X, Y)
   else if Source = ImCondensation then
-    AddComponent(TIPO_COMPONENT_CONDENSATION, X, Y)
+    TProjectETL.AddComponent(Self, TIPO_COMPONENT_CONDENSATION, X, Y)
   else if Source = ImExecute then
-    AddComponent(TIPO_COMPONENT_EXECUTE, X, Y)
+    TProjectETL.AddComponent(Self, TIPO_COMPONENT_EXECUTE, X, Y)
   else if Source = ImScript then
-    AddComponent(TIPO_COMPONENT_SCRIPT, X, Y)
+    TProjectETL.AddComponent(Self, TIPO_COMPONENT_SCRIPT, X, Y)
 end;
 
-procedure TFoPrinc.FormDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState;
+procedure TFoMain.FormDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState;
   var Accept: Boolean);
 begin
   Accept := Source is TImage;
 end;
 
-procedure TFoPrinc.ComponentDragDrop(Sender, Source: TObject; X, Y: Integer);
-var
-  temp: TLinkComponents;
-begin
-  TComponentETL(Sender).EndDrag(True);
-
-  temp := TLinkComponents.Create(Self);
-
-  temp.Parent := Self;
-  temp.Source := TComponentETL(Sender);
-  temp.Target := TComponentETL(Source);
-  temp.PopupMenu := PopupLink;
-  temp.Text := 'teste';
-  temp.RefreshSize;
-end;
-
-procedure TFoPrinc.ComponentPaint(Sender: TObject);
-begin
-  DmImages.ILDev64.Draw(TPaintBox(Sender).Canvas, 0, 0, TComponentETL(Sender).Tag);
-end;
-
-procedure TFoPrinc.SQLSpoolPut(AEngine: TFDScript; const AMessage: string;
+procedure TFoMain.SQLSpoolPut(AEngine: TFDScript; const AMessage: string;
   AKind: TFDScriptOutputKind);
 begin
   // SB.Panels[3].Text := AMessage;
 end;
 
-procedure TFoPrinc.AcExecuteExecute(Sender: TObject);
+procedure TFoMain.AcExecuteExecute(Sender: TObject);
 begin
   AcExecute.Enabled := false;
   try
@@ -364,78 +310,27 @@ begin
   end;
 end;
 
-procedure TFoPrinc.AcCommitExecute(Sender: TObject);
+procedure TFoMain.AcCommitExecute(Sender: TObject);
 begin
   // DmDBRoot.DB.Commit;
 end;
 
-procedure TFoPrinc.AcEditScriptExecute(Sender: TObject);
-begin
-  TComponentETL(PopupComp.PopupComponent).Edit;
-end;
-
-procedure TFoPrinc.AcEditTitleExecute(Sender: TObject);
-var
-  s: string;
-begin
-  s := TComponentETL(PopupComp.PopupComponent).Title;
-  if TMensagem.InputQuery('Edit Label', s) then
-    TComponentETL(PopupComp.PopupComponent).Title := s;
-end;
-
-procedure TFoPrinc.AcPreviewExecute(Sender: TObject);
-begin
-  TComponentETL(PopupComp.PopupComponent).Preview;
-end;
-
-procedure TFoPrinc.MnDelLinkClick(Sender: TObject);
-begin
-  PopupLink.PopupComponent.DisposeOf;
-end;
-
-procedure TFoPrinc.MenuItem4Click(Sender: TObject);
-var
-  s: string;
-begin
-  s := TLinkComponents(PopupLink.PopupComponent).Text;
-  if TMensagem.InputQuery('Edit Label', s) then
-    TLinkComponents(PopupLink.PopupComponent).Text := s;
-end;
-
-procedure TFoPrinc.MnDeleteComponentClick(Sender: TObject);
-var
-  i: Integer;
-begin
-  // if PopupComp.PopupComponent is TComponentETL then
-  // begin
-  for i := ControlCount - 1 downto 0 do
-    if Controls[i] is TLinkComponents then
-    begin
-      if (PopupComp.PopupComponent = TLinkComponents(Controls[i]).Source) or
-        (PopupComp.PopupComponent = TLinkComponents(Controls[i]).Target) then
-        Controls[i].DisposeOf;
-    end;
-
-  TComponentETL(PopupComp.PopupComponent).Delete
-  // end;
-end;
-
-procedure TFoPrinc.AcRollBackExecute(Sender: TObject);
+procedure TFoMain.AcRollBackExecute(Sender: TObject);
 begin
   // DmDBRoot.DB.Rollback;
 end;
 
-procedure TFoPrinc.AcTriggersExecute(Sender: TObject);
+procedure TFoMain.AcTriggersExecute(Sender: TObject);
 begin
   //
 end;
 
-procedure TFoPrinc.AcAutoFechaExecute(Sender: TObject);
+procedure TFoMain.AcAutoFechaExecute(Sender: TObject);
 begin
   //
 end;
 
-procedure TFoPrinc.AcForeignKeyExecute(Sender: TObject);
+procedure TFoMain.AcForeignKeyExecute(Sender: TObject);
 begin
   //
 end;

@@ -7,6 +7,7 @@ type
     ['{EF7C533C-DE01-4BD9-87E3-4A4E31A7ABB5}']
     function getTitle: string;
     procedure setTitle(const ATitle: string);
+    procedure setPosition(const Ax, Ay: Integer);
     function GetType: Integer;
     function GetLeft: Integer;
     function GetTop: Integer;

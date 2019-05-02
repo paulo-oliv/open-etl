@@ -6,30 +6,15 @@ uses
   Form.Grid,
   Vcl.ExtCtrls,
   System.Classes,
-  Form.Edit.Query,
-  Form.Edit.Transform,
-  Form.Edit.Load,
   Vcl.StdCtrls,
   Vcl.Controls,
   FileProject.Interfaces;
-
-const
-  TIPO_COMPONENT_QUERY = 0;
-  TIPO_COMPONENT_FILE = 1;
-  TIPO_COMPONENT_FILTER = 2;
-  TIPO_COMPONENT_CONVERSION = 3;
-  TIPO_COMPONENT_DERIVATION = 4;
-  TIPO_COMPONENT_JOIN = 5;
-  TIPO_COMPONENT_CONDENSATION = 6;
-  TIPO_COMPONENT_EXECUTE = 7;
-  TIPO_COMPONENT_SCRIPT = 8;
 
 type
   TComponentETL = class(TPaintBox, IComponentETL)
   strict private
     FLabel: TCustomLabel;
     class var FMoveX, FMoveY: Integer;
-
   class var
     FMover: Boolean;
     FFormGrid: TFoGrid;
@@ -44,15 +29,16 @@ type
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure DblClick; override;
-        procedure DragOver(Source: TObject; X, Y: Integer; State: TDragState;
+    procedure DragOver(Source: TObject; X, Y: Integer; State: TDragState;
       var Accept: Boolean); override;
+    procedure DragDrop(Source: TObject; X, Y: Integer); override;
+    procedure Paint; override;
   public
+    procedure setPosition(const Ax, Ay: Integer);
     function GetType: Integer;
     procedure Edit; virtual; abstract;
     procedure Preview;
     procedure Delete;
-    class function Factory(const AOwner: TComponent; const AParent: TWinControl; const AType: Byte;
-      const Ax, Ay: Integer): TComponentETL;
     function GetLeft: Integer;
     function GetTop: Integer;
   published
@@ -73,61 +59,11 @@ type
     procedure RefreshSize;
   end;
 
-  TCompExtract = class(TComponentETL)
-  end;
-
-  TCompTransform = class(TComponentETL)
-  strict protected
-    FFormEdit: TFoEditTransform;
-  public
-    procedure Edit; override;
-  end;
-
-  TCompLoad = class(TComponentETL)
-  strict protected
-    FFormEdit: TFoEditLoad;
-  public
-    procedure Edit; override;
-  end;
-
-  TCompQuery = class(TCompExtract)
-  strict private
-    FFormEdit: TFoEditQuery;
-  strict protected
-    procedure configQuery; override;
-  public
-    procedure Edit; override;
-  end;
-
-  TCompFile = class(TCompExtract)
-  end;
-
-  TCompFilter = class(TCompTransform)
-  end;
-
-  TCompConversion = class(TCompTransform)
-  end;
-
-  TCompDerivation = class(TCompTransform)
-  end;
-
-  TCompJoin = class(TCompTransform)
-  end;
-
-  TComCondensation = class(TCompTransform)
-  end;
-
-  TCompExecute = class(TCompLoad)
-  end;
-
-  TCompScript = class(TCompLoad)
-  end;
-
 implementation
 
 { TComponentETL }
 
-uses Vcl.Graphics, Windows, SysUtils, Math, Types;
+uses Vcl.Graphics, Windows, SysUtils, Math, Types, DataModule.Main;
 
 const
   COMP_WIDTH = 64;
@@ -167,61 +103,7 @@ begin
   Parent := AParent;
   FLabel.Canvas.Font.Name := 'Segoe UI';
   FLabel.Canvas.Font.Size := 10;
-end;
-
-class function TComponentETL.Factory(const AOwner: TComponent; const AParent: TWinControl;
-  const AType: Byte; const Ax, Ay: Integer): TComponentETL;
-begin
-  case AType of
-    TIPO_COMPONENT_QUERY:
-      begin
-        Result := TCompQuery.Create(AOwner, AParent);
-        Result.Title := 'Query';
-      end;
-    TIPO_COMPONENT_FILE:
-      begin
-        Result := TCompFile.Create(AOwner, AParent);
-        Result.Title := 'File';
-      end;
-    TIPO_COMPONENT_FILTER:
-      begin
-        Result := TCompFilter.Create(AOwner, AParent);
-        Result.Title := 'Filter';
-      end;
-    TIPO_COMPONENT_CONVERSION:
-      begin
-        Result := TCompConversion.Create(AOwner, AParent);
-        Result.Title := 'Conversion';
-      end;
-    TIPO_COMPONENT_DERIVATION:
-      begin
-        Result := TCompDerivation.Create(AOwner, AParent);
-        Result.Title := 'Derivation';
-      end;
-    TIPO_COMPONENT_JOIN:
-      begin
-        Result := TCompJoin.Create(AOwner, AParent);
-        Result.Title := 'Join';
-      end;
-    TIPO_COMPONENT_CONDENSATION:
-      begin
-        Result := TCompConversion.Create(AOwner, AParent);
-        Result.Title := 'Condensation';
-      end;
-    TIPO_COMPONENT_EXECUTE:
-      begin
-        Result := TCompExecute.Create(AOwner, AParent);
-        Result.Title := 'Execute';
-      end;
-  else
-    // TIPO_COMPONENT_SCRIPT:
-    begin
-      Result := TCompScript.Create(AOwner, AParent);
-      Result.Title := 'Script';
-    end;
-  end;
-  Result.Tag := AType;
-  Result.SetBounds(Ax, Ay, COMP_WIDTH, COMP_HEIGHT);
+  PopupMenu := DmMain.PopupComp;
 end;
 
 { TComponenteETL }
@@ -250,6 +132,23 @@ end;
 procedure TComponentETL.Delete;
 begin
   DisposeOf;
+end;
+
+procedure TComponentETL.DragDrop(Source: TObject; X, Y: Integer);
+var
+  temp: TLinkComponents;
+begin
+  inherited DragDrop(Source, X, Y);
+  EndDrag(True);
+
+  temp := TLinkComponents.Create(Self);
+
+  temp.Parent := Parent;
+  temp.Source := Self;
+  temp.Target := TComponentETL(Source);
+  temp.PopupMenu := DmMain.PopupLink;
+  temp.Text := 'teste';
+  temp.RefreshSize;
 end;
 
 procedure TComponentETL.DragOver(Source: TObject; X, Y: Integer; State: TDragState;
@@ -318,10 +217,21 @@ begin
     FMover := false;
 end;
 
+procedure TComponentETL.setPosition(const Ax, Ay: Integer);
+begin
+  SetBounds(Ax, Ay, COMP_WIDTH, COMP_HEIGHT);
+end;
+
 procedure TComponentETL.setTitle(const ATitle: string);
 begin
   FLabel.Caption := ATitle;
   RefreshPositionLabel;
+end;
+
+procedure TComponentETL.Paint;
+begin
+  // inherited;
+  DmMain.ILDev64.Draw(Canvas, 0, 0, Tag);
 end;
 
 procedure TComponentETL.Preview;
@@ -332,41 +242,6 @@ begin
   configQuery;
 
   FFormGrid.ShowModal;
-end;
-
-{ TCompQuery }
-
-procedure TCompQuery.configQuery;
-begin
-  if Assigned(FFormEdit) then
-  begin
-
-  end;
-end;
-
-procedure TCompQuery.Edit;
-begin
-  if not Assigned(FFormEdit) then
-    FFormEdit := TFoEditQuery.New(Self);
-  FFormEdit.ShowModal;
-end;
-
-{ TCompTransform }
-
-procedure TCompTransform.Edit;
-begin
-  if not Assigned(FFormEdit) then
-    FFormEdit := TFoEditTransform.New(Self);
-  FFormEdit.ShowModal;
-end;
-
-{ TCompLoad }
-
-procedure TCompLoad.Edit;
-begin
-  if not Assigned(FFormEdit) then
-    FFormEdit := TFoEditLoad.New(Self);
-  FFormEdit.ShowModal;
 end;
 
 { TLinkComponents }
