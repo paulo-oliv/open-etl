@@ -4,7 +4,8 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Form.Edit, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Samples.Spin;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Form.Edit, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Samples.Spin,
+  System.Actions, Vcl.ActnList;
 
 type
   TFoEditLoad = class(TFoEdit)

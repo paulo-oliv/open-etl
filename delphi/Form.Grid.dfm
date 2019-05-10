@@ -12,8 +12,6 @@ object FoGrid: TFoGrid
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
-  OnDestroy = FormDestroy
-  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object Gr: TcxGrid

@@ -47,7 +47,6 @@ inherited FoEditQuery: TFoEditQuery
       Height = 40
       Action = AcInvert
       Align = alTop
-      Images = DmImages.ILDev32
       TabOrder = 1
     end
   end
@@ -72,7 +71,6 @@ inherited FoEditQuery: TFoEditQuery
     end
   end
   object PopupMenu1: TPopupMenu
-    Images = DmImages.ILDev32
     Left = 80
     Top = 144
     object New1: TMenuItem

@@ -6,6 +6,7 @@ uses ComponentETL,
   Form.Edit.Query,
   Form.Edit.Transform,
   Form.Edit.Load,
+  Form.Grid,
   Vcl.Controls;
 
 const
@@ -39,12 +40,63 @@ type
 
   TCompQuery = class(TCompExtract)
   strict private
+    FFormGrid: TFoGrid;
     FFormEdit: TFoEditQuery;
   strict protected
-    procedure configQuery; override;
+    procedure Preview; override;
   public
     procedure Edit; override;
   end;
+
+  {
+    TComponentQuery = class(TInterfacedObject, IComponentQuery)
+    strict private
+    FKind: TKindComponentQuery;
+    FScript: string;
+    strict protected
+    function getKind: TKindComponentQuery;
+    function getScript: string;
+    procedure setKind(const AKind: TKindComponentQuery);
+    procedure setScript(const AScript: string);
+    public
+    class function New: IComponentQuery; overload;
+    class function New(const AScript: string; const AKind: TKindComponentQuery)
+    : IComponentQuery; overload;
+    end;
+
+    class function TComponentQuery.New: IComponentQuery;
+    begin
+    Result := TComponentQuery.Create;
+    end;
+
+    class function TComponentQuery.New(const AScript: string; const AKind: TKindComponentQuery)
+    : IComponentQuery;
+    begin
+    Result := New;
+    Result.Kind := AKind;
+    Result.Script := AScript;
+    end;
+
+    function TComponentQuery.getScript: string;
+    begin
+    Result := FScript;
+    end;
+
+    function TComponentQuery.getKind: TKindComponentQuery;
+    begin
+    Result := FKind;
+    end;
+
+    procedure TComponentQuery.setScript(const AScript: string);
+    begin
+    FScript := AScript;
+    end;
+
+    procedure TComponentQuery.setKind(const AKind: TKindComponentQuery);
+    begin
+    FKind := AKind;
+    end;
+  }
 
   TCompFile = class(TCompExtract)
   end;
@@ -77,14 +129,55 @@ type
 
 implementation
 
+uses // FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  // FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def, FireDAC.Stan.Pool,
+  // FireDAC.Stan.Async, FireDAC.Phys, FireDAC.VCLUI.Wait, Data.DB,
+  FireDAC.Comp.Client;
+
 { TCompQuery }
 
-procedure TCompQuery.configQuery;
+procedure TCompQuery.Preview;
+var
+  Conn: TFDConnection;
+  Qr: TFDQuery;
 begin
-  if Assigned(FFormEdit) then
-  begin
+  if not Assigned(FFormGrid) then
+    FFormGrid := TFoGrid.New(Self);
 
+  // FFormGrid.tv.
+  Conn := TFDConnection.Create(Self);
+  Qr := TFDQuery.Create(Self);
+  try
+    FFormGrid.ShowModal;
+    {
+
+      // Conn.ConnectionDefName := FFormEdit.ClConexoes.Items[FFormEdit.ClConexoes.ItemIndex];
+      // Conn.Connected := True;
+
+      // Qr.ConnectionName := 'testar';
+      // Qr.Connection := Conn;
+
+      // Qr.SQL.Text := FFormEdit.MM.Lines.Text;
+      // Qr.Filter := Trim(AFilter);
+      // Qr.Filtered := Qr.Filter <> '';
+      // Qr.Open;
+      for i := 0 to Qr.FieldDefs.Count - 1 do
+      with tv.CreateColumn do
+      begin
+      Text := Qr.Fields[i].FieldName;
+      end;
+
+      while not Qr.Eof do
+      begin
+
+      end;
+
+    }
+  finally
+    Qr.DisposeOf;
+    Conn.DisposeOf;
   end;
+
 end;
 
 procedure TCompQuery.Edit;

@@ -3,7 +3,6 @@ unit ComponentETL;
 interface
 
 uses
-  Form.Grid,
   Vcl.ExtCtrls,
   System.Classes,
   Vcl.StdCtrls,
@@ -15,13 +14,12 @@ type
   strict private
     FLabel: TCustomLabel;
     class var FMoveX, FMoveY: Integer;
+
   class var
     FMover: Boolean;
-    FFormGrid: TFoGrid;
   strict protected
     procedure RefreshPositionLabel;
     procedure Resize; override;
-    procedure configQuery; virtual;
     function getTitle: string;
     procedure setTitle(const ATitle: string);
     procedure SetParent(AParent: TWinControl); override;
@@ -37,7 +35,7 @@ type
     procedure setPosition(const Ax, Ay: Integer);
     function GetType: Integer;
     procedure Edit; virtual; abstract;
-    procedure Preview;
+    procedure Preview; virtual; abstract;
     procedure Delete;
     function GetLeft: Integer;
     function GetTop: Integer;
@@ -118,15 +116,11 @@ begin
   Result := Top;
 end;
 
-procedure TComponentETL.configQuery;
-begin
-  //
-end;
-
 procedure TComponentETL.DblClick;
 begin
   inherited DblClick;
   Edit;
+  Abort;
 end;
 
 procedure TComponentETL.Delete;
@@ -232,16 +226,6 @@ procedure TComponentETL.Paint;
 begin
   // inherited;
   DmMain.ILDev64.Draw(Canvas, 0, 0, Tag);
-end;
-
-procedure TComponentETL.Preview;
-begin
-  if not Assigned(FFormGrid) then
-    FFormGrid := TFoGrid.New(Self);
-
-  configQuery;
-
-  FFormGrid.ShowModal;
 end;
 
 { TLinkComponents }
