@@ -7,18 +7,20 @@ uses ComponentETL,
   Form.Edit.Transform,
   Form.Edit.Load,
   Form.Grid,
-  Vcl.Controls;
+  Vcl.Controls,
+  FireDAC.Comp.Client,
+  Generics.Collections;
 
 const
-  TIPO_COMPONENT_QUERY = 0;
-  TIPO_COMPONENT_FILE = 1;
-  TIPO_COMPONENT_FILTER = 2;
-  TIPO_COMPONENT_CONVERSION = 3;
-  TIPO_COMPONENT_DERIVATION = 4;
-  TIPO_COMPONENT_JOIN = 5;
-  TIPO_COMPONENT_CONDENSATION = 6;
-  TIPO_COMPONENT_EXECUTE = 7;
-  TIPO_COMPONENT_SCRIPT = 8;
+  KIND_COMPONENT_QUERY = 0;
+  KIND_COMPONENT_FILE = 1;
+  KIND_COMPONENT_FILTER = 2;
+  KIND_COMPONENT_CONVERSION = 3;
+  KIND_COMPONENT_DERIVATION = 4;
+  KIND_COMPONENT_JOIN = 5;
+  KIND_COMPONENT_CONDENSATION = 6;
+  KIND_COMPONENT_EXECUTE = 7;
+  KIND_COMPONENT_SCRIPT = 8;
 
 type
   TCompExtract = class(TComponentETL)
@@ -42,10 +44,13 @@ type
   strict private
     FFormGrid: TFoGrid;
     FFormEdit: TFoEditQuery;
+    FConnections: TObjectList<TFDConnection>;
   strict protected
     procedure Preview; override;
   public
+    function GetScript: string; override;
     procedure Edit; override;
+    destructor Destroy; override;
   end;
 
   {
@@ -124,60 +129,67 @@ type
 
   TComponentETLFactory = class
   public
-    class function New(const AParent: TWinControl; const AType: Byte): TComponentETL;
+    class function New(const AParent: TWinControl; const AKind: Byte): TComponentETL;
   end;
 
 implementation
 
-uses // FireDAC.Stan.Intf, FireDAC.Stan.Option,
-  // FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def, FireDAC.Stan.Pool,
-  // FireDAC.Stan.Async, FireDAC.Phys, FireDAC.VCLUI.Wait, Data.DB,
-  FireDAC.Comp.Client;
+// uses // FireDAC.Stan.Intf, FireDAC.Stan.Option,
+// FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def, FireDAC.Stan.Pool,
+// FireDAC.Stan.Async, FireDAC.Phys, FireDAC.VCLUI.Wait, Data.DB;
 
 { TCompQuery }
 
 procedure TCompQuery.Preview;
 var
-  Conn: TFDConnection;
   Qr: TFDQuery;
+  i: Integer;
 begin
   if not Assigned(FFormGrid) then
+  begin
     FFormGrid := TFoGrid.New(Self);
-
-  // FFormGrid.tv.
-  Conn := TFDConnection.Create(Self);
-  Qr := TFDQuery.Create(Self);
-  try
-    FFormGrid.ShowModal;
-    {
-
-      // Conn.ConnectionDefName := FFormEdit.ClConexoes.Items[FFormEdit.ClConexoes.ItemIndex];
-      // Conn.Connected := True;
-
-      // Qr.ConnectionName := 'testar';
-      // Qr.Connection := Conn;
-
-      // Qr.SQL.Text := FFormEdit.MM.Lines.Text;
-      // Qr.Filter := Trim(AFilter);
-      // Qr.Filtered := Qr.Filter <> '';
-      // Qr.Open;
-      for i := 0 to Qr.FieldDefs.Count - 1 do
-      with tv.CreateColumn do
-      begin
-      Text := Qr.Fields[i].FieldName;
-      end;
-
-      while not Qr.Eof do
-      begin
-
-      end;
-
-    }
-  finally
-    Qr.DisposeOf;
-    Conn.DisposeOf;
+    FConnections := TObjectList<TFDConnection>.Create;
   end;
 
+  if FConnections.Count = 0 then
+  begin
+    FConnections.Add(TFDConnection.Create(Self));
+    FConnections[0].ConnectionDefName := FFormEdit.ClConexoes.Items[FFormEdit.ClConexoes.ItemIndex];
+  end;
+
+  Qr := TFDQuery.Create(Self);
+  try
+    Qr.Connection := FConnections[0];
+    // Qr.ConnectionName := 'testar';
+    FConnections[0].Connected := True;
+    Qr.SQL.Text := FFormEdit.MM.Lines.Text;
+    // Qr.Filter := Trim(AFilter);
+    Qr.Filtered := Qr.Filter <> '';
+    Qr.Open;
+    FFormGrid.tv.ClearItems;
+    for i := 0 to Qr.FieldDefs.Count - 1 do
+      with FFormGrid.tv.CreateColumn do
+      begin
+        Text := Qr.Fields[i].FieldName;
+      end;
+
+    FFormGrid.ShowModal;
+  finally
+    Qr.DisposeOf;
+  end;
+end;
+
+destructor TCompQuery.Destroy;
+begin
+  if Assigned(FConnections) then
+    try
+      FConnections.DisposeOf
+    except
+    end;
+  try
+    inherited
+  except
+  end;
 end;
 
 procedure TCompQuery.Edit;
@@ -185,6 +197,16 @@ begin
   if not Assigned(FFormEdit) then
     FFormEdit := TFoEditQuery.New(Self);
   FFormEdit.ShowModal;
+end;
+
+function TCompQuery.GetScript: string;
+begin
+  if Assigned(FFormEdit) then
+  begin
+    Result := FFormEdit.MM.Text;
+  end
+  else
+    Result := '';
 end;
 
 { TCompTransform }
@@ -207,58 +229,31 @@ end;
 
 { TComponentETLFactory }
 
-class function TComponentETLFactory.New(const AParent: TWinControl; const AType: Byte)
+class function TComponentETLFactory.New(const AParent: TWinControl; const AKind: Byte)
   : TComponentETL;
 begin
-  case AType of
-    TIPO_COMPONENT_QUERY:
-      begin
-        Result := TCompQuery.Create(AParent, AParent);
-        Result.Title := 'Query';
-      end;
-    TIPO_COMPONENT_FILE:
-      begin
-        Result := TCompFile.Create(AParent, AParent);
-        Result.Title := 'File';
-      end;
-    TIPO_COMPONENT_FILTER:
-      begin
-        Result := TCompFilter.Create(AParent, AParent);
-        Result.Title := 'Filter';
-      end;
-    TIPO_COMPONENT_CONVERSION:
-      begin
-        Result := TCompConversion.Create(AParent, AParent);
-        Result.Title := 'Conversion';
-      end;
-    TIPO_COMPONENT_DERIVATION:
-      begin
-        Result := TCompDerivation.Create(AParent, AParent);
-        Result.Title := 'Derivation';
-      end;
-    TIPO_COMPONENT_JOIN:
-      begin
-        Result := TCompJoin.Create(AParent, AParent);
-        Result.Title := 'Join';
-      end;
-    TIPO_COMPONENT_CONDENSATION:
-      begin
-        Result := TCompConversion.Create(AParent, AParent);
-        Result.Title := 'Condensation';
-      end;
-    TIPO_COMPONENT_EXECUTE:
-      begin
-        Result := TCompExecute.Create(AParent, AParent);
-        Result.Title := 'Execute';
-      end;
+  case AKind of
+    KIND_COMPONENT_QUERY:
+      Result := TCompQuery.Create(AParent, AParent);
+    KIND_COMPONENT_FILE:
+      Result := TCompFile.Create(AParent, AParent);
+    KIND_COMPONENT_FILTER:
+      Result := TCompFilter.Create(AParent, AParent);
+    KIND_COMPONENT_CONVERSION:
+      Result := TCompConversion.Create(AParent, AParent);
+    KIND_COMPONENT_DERIVATION:
+      Result := TCompDerivation.Create(AParent, AParent);
+    KIND_COMPONENT_JOIN:
+      Result := TCompJoin.Create(AParent, AParent);
+    KIND_COMPONENT_CONDENSATION:
+      Result := TCompConversion.Create(AParent, AParent);
+    KIND_COMPONENT_EXECUTE:
+      Result := TCompExecute.Create(AParent, AParent);
   else
-    // TIPO_COMPONENT_SCRIPT:
-    begin
-      Result := TCompScript.Create(AParent, AParent);
-      Result.Title := 'Script';
-    end;
+    // KIND_COMPONENT_SCRIPT:
+    Result := TCompScript.Create(AParent, AParent);
   end;
-  Result.Tag := AType;
+  Result.Tag := AKind;
 end;
 
 end.

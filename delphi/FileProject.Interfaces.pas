@@ -8,9 +8,10 @@ type
     function getTitle: string;
     procedure setTitle(const ATitle: string);
     procedure setPosition(const Ax, Ay: Integer);
-    function GetType: Integer;
+    function GetKind: Integer;
     function GetLeft: Integer;
     function GetTop: Integer;
+    function GetScript: string;
     property Title: string read getTitle write setTitle;
   end;
 
@@ -27,6 +28,7 @@ type
     ['{829D88B9-7255-40AB-8486-2BCE1A6112AC}']
     function GetItem(const AIndex: Integer): IComponentETL;
     function Add(const AComponent: IComponentETL): IListComponentsETL;
+    function GenerateTitle(APrefix: string): string;
   end;
 
   IListLinks = interface(IList)

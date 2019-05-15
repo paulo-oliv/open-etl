@@ -14,9 +14,7 @@ type
   strict private
     FLabel: TCustomLabel;
     class var FMoveX, FMoveY: Integer;
-
-  class var
-    FMover: Boolean;
+    class var FMover: Boolean;
   strict protected
     procedure RefreshPositionLabel;
     procedure Resize; override;
@@ -33,7 +31,8 @@ type
     procedure Paint; override;
   public
     procedure setPosition(const Ax, Ay: Integer);
-    function GetType: Integer;
+    function GetKind: Integer;
+    function GetScript: string; virtual; abstract;
     procedure Edit; virtual; abstract;
     procedure Preview; virtual; abstract;
     procedure Delete;
@@ -157,7 +156,7 @@ begin
   Result := FLabel.Caption;
 end;
 
-function TComponentETL.GetType: Integer;
+function TComponentETL.GetKind: Integer;
 begin
   Result := Tag;
 end;
