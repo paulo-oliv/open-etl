@@ -20,12 +20,16 @@ type
     Edit1: TMenuItem;
     N1: TMenuItem;
     Delete1: TMenuItem;
-    AcInvert: TAction;
-    AcEdit: TAction;
-    AcDelete: TAction;
-    AcNew: TAction;
-    procedure AcInvertExecute(Sender: TObject);
-    procedure AcNewExecute(Sender: TObject);
+    AcReverseChecks: TAction;
+    AcEditConnection: TAction;
+    AcDeleteConnection: TAction;
+    AcNewConnection: TAction;
+    AcCheckAll: TAction;
+    AcUncheckAll: TAction;
+    procedure AcReverseChecksExecute(Sender: TObject);
+    procedure AcNewConnectionExecute(Sender: TObject);
+    procedure AcDeleteConnectionExecute(Sender: TObject);
+    procedure AcEditConnectionExecute(Sender: TObject);
   private
     // FAlterado: Boolean;
   public
@@ -54,7 +58,18 @@ uses SectionConexao, // uMsg
 
 { TFoEditQuery }
 
-procedure TFoEditQuery.AcInvertExecute(Sender: TObject);
+procedure TFoEditQuery.AcDeleteConnectionExecute(Sender: TObject);
+begin
+  //
+
+end;
+
+procedure TFoEditQuery.AcEditConnectionExecute(Sender: TObject);
+begin
+  //
+end;
+
+procedure TFoEditQuery.AcReverseChecksExecute(Sender: TObject);
 var
   i: Integer;
 begin
@@ -62,7 +77,7 @@ begin
     ClConexoes.Checked[i] := not ClConexoes.Checked[i];
 end;
 
-procedure TFoEditQuery.AcNewExecute(Sender: TObject);
+procedure TFoEditQuery.AcNewConnectionExecute(Sender: TObject);
 var
   sConnStr: String;
 begin

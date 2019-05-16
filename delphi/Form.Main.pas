@@ -265,35 +265,43 @@ begin
 end;
 
 procedure TFoMain.FormDragDrop(Sender, Source: TObject; X, Y: Integer);
+
+  procedure AddComp(const AKind: Byte; const APrefix: string);
+  begin
+    TProjectETL.AddComponent(Self, AKind, X, Y).Title :=
+      TProjectETL.GetInstance.getListComponents.GenerateTitle(APrefix)
+  end;
+
+const
+  STR_QUERY = 'Query';
+  STR_FILE = 'File';
+  STR_FILTER = 'Filter';
+  STR_CONVERSION = 'Conversion';
+  STR_DERIVATION = 'Derivation';
+  STR_JOIN = 'Join';
+  STR_CONDENSATION = 'Condensation';
+  STR_EXECUTE = 'Execute';
+  STR_SCRIPT = 'Script';
 begin
   TImage(Source).EndDrag(True);
   if Source = ImQuery then
-    TProjectETL.AddComponent(Self, KIND_COMPONENT_QUERY, X, Y).Title :=
-      TProjectETL.GetInstance.getListComponents.GenerateTitle('Query')
+    AddComp(KIND_COMPONENT_QUERY, STR_QUERY)
   else if Source = ImFile then
-    TProjectETL.AddComponent(Self, KIND_COMPONENT_FILE, X, Y).Title :=
-      TProjectETL.GetInstance.getListComponents.GenerateTitle('File')
+    AddComp(KIND_COMPONENT_FILE, STR_FILE)
   else if Source = ImFilter then
-    TProjectETL.AddComponent(Self, KIND_COMPONENT_FILTER, X, Y).Title :=
-      TProjectETL.GetInstance.getListComponents.GenerateTitle('Filter')
+    AddComp(KIND_COMPONENT_FILTER, STR_FILTER)
   else if Source = ImConversion then
-    TProjectETL.AddComponent(Self, KIND_COMPONENT_CONVERSION, X, Y).Title :=
-      TProjectETL.GetInstance.getListComponents.GenerateTitle('Conversion')
+    AddComp(KIND_COMPONENT_CONVERSION, STR_CONVERSION)
   else if Source = ImDerivation then
-    TProjectETL.AddComponent(Self, KIND_COMPONENT_DERIVATION, X, Y).Title :=
-      TProjectETL.GetInstance.getListComponents.GenerateTitle('Derivation')
+    AddComp(KIND_COMPONENT_DERIVATION, STR_DERIVATION)
   else if Source = ImJoin then
-    TProjectETL.AddComponent(Self, KIND_COMPONENT_JOIN, X, Y).Title :=
-      TProjectETL.GetInstance.getListComponents.GenerateTitle('Join')
+    AddComp(KIND_COMPONENT_JOIN, STR_JOIN)
   else if Source = ImCondensation then
-    TProjectETL.AddComponent(Self, KIND_COMPONENT_CONDENSATION, X, Y).Title :=
-      TProjectETL.GetInstance.getListComponents.GenerateTitle('Condensation')
+    AddComp(KIND_COMPONENT_CONDENSATION, STR_CONDENSATION)
   else if Source = ImExecute then
-    TProjectETL.AddComponent(Self, KIND_COMPONENT_EXECUTE, X, Y).Title :=
-      TProjectETL.GetInstance.getListComponents.GenerateTitle('Execute')
+    AddComp(KIND_COMPONENT_EXECUTE, STR_EXECUTE)
   else if Source = ImScript then
-    TProjectETL.AddComponent(Self, KIND_COMPONENT_SCRIPT, X, Y).Title :=
-      TProjectETL.GetInstance.getListComponents.GenerateTitle('Script');
+    AddComp(KIND_COMPONENT_SCRIPT, STR_SCRIPT)
 end;
 
 procedure TFoMain.FormDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState;

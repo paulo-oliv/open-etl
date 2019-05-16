@@ -8,18 +8,25 @@ uses Vcl.Controls, Vcl.StdCtrls, Vcl.CheckLst, System.Classes, Vcl.Forms, cxGrap
 type
   TFoEdit = class(TForm)
     ActionList: TActionList;
-    AcClose: TAction;
-    procedure AcCloseExecute(Sender: TObject);
-  private
+    AcCloseWindow: TAction;
+    procedure AcCloseWindowExecute(Sender: TObject);
+  public
+    // procedure SetTitle(const ATitle: string);
   end;
 
 implementation
 
 {$R *.dfm}
 
-procedure TFoEdit.AcCloseExecute(Sender: TObject);
+procedure TFoEdit.AcCloseWindowExecute(Sender: TObject);
 begin
   Close;
 end;
+
+{
+  procedure TFoEdit.SetTitle(const ATitle: string);
+  begin
+  Caption := ATitle;
+  end; }
 
 end.

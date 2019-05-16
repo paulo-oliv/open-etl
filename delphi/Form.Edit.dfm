@@ -15,13 +15,14 @@ object FoEdit: TFoEdit
   PixelsPerInch = 96
   TextHeight = 20
   object ActionList: TActionList
-    Images = DmImages.ILDev32
+    Images = DmMain.IL32
     Left = 192
     Top = 96
-    object AcClose: TAction
+    object AcCloseWindow: TAction
       Caption = 'Close'
+      ImageIndex = 2
       ShortCut = 27
-      OnExecute = AcCloseExecute
+      OnExecute = AcCloseWindowExecute
     end
   end
 end

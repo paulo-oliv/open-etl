@@ -8,11 +8,13 @@ type
     function getTitle: string;
     procedure setTitle(const ATitle: string);
     procedure setPosition(const Ax, Ay: Integer);
+    procedure setScript(const AScript: string);
     function GetKind: Integer;
     function GetLeft: Integer;
     function GetTop: Integer;
     function GetScript: string;
     property Title: string read getTitle write setTitle;
+    property Script: string read getScript write setScript;
   end;
 
   ILinkComponents = interface

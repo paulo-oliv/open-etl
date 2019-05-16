@@ -19,7 +19,9 @@ type
     procedure RefreshPositionLabel;
     procedure Resize; override;
     function getTitle: string;
-    procedure setTitle(const ATitle: string);
+    procedure setTitle(const ATitle: string); virtual;
+    function GetScript: string; virtual; abstract;
+    procedure setScript(const AScript: string); virtual; abstract;
     procedure SetParent(AParent: TWinControl); override;
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
@@ -32,7 +34,6 @@ type
   public
     procedure setPosition(const Ax, Ay: Integer);
     function GetKind: Integer;
-    function GetScript: string; virtual; abstract;
     procedure Edit; virtual; abstract;
     procedure Preview; virtual; abstract;
     procedure Delete;
@@ -224,7 +225,7 @@ end;
 procedure TComponentETL.Paint;
 begin
   // inherited;
-  DmMain.ILDev64.Draw(Canvas, 0, 0, Tag);
+  DmMain.IL64.Draw(Canvas, 0, 0, Tag);
 end;
 
 { TLinkComponents }

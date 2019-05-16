@@ -30,6 +30,7 @@ type
   strict protected
     FFormEdit: TFoEditTransform;
   public
+    procedure setTitle(const ATitle: string); override;
     procedure Edit; override;
   end;
 
@@ -45,10 +46,12 @@ type
     FFormGrid: TFoGrid;
     FFormEdit: TFoEditQuery;
     FConnections: TObjectList<TFDConnection>;
+    function GetInstanceFormEdit: TFoEditQuery;
   strict protected
+    function GetScript: string; override;
+    procedure setScript(const AScript: string); override;
     procedure Preview; override;
   public
-    function GetScript: string; override;
     procedure Edit; override;
     destructor Destroy; override;
   end;
@@ -141,9 +144,32 @@ implementation
 { TCompQuery }
 
 procedure TCompQuery.Preview;
-var
-  Qr: TFDQuery;
-  i: Integer;
+
+  procedure chargeConnection(const AConnection: TFDConnection);
+  var
+    LQr: TFDQuery;
+    i: Integer;
+  begin
+    LQr := TFDQuery.Create(Self);
+    try
+    finally
+      LQr.DisposeOf;
+    end;
+    AConnection.Connected := True;
+    LQr.Connection := AConnection;
+    // Qr.ConnectionName := 'testar';
+    LQr.SQL.Text := FFormEdit.MM.Lines.Text;
+    // Qr.Filter := Trim(AFilter);
+    LQr.Filtered := LQr.Filter <> '';
+    LQr.Open;
+    FFormGrid.tv.ClearItems;
+    for i := 0 to LQr.FieldDefs.Count - 1 do
+      with FFormGrid.tv.CreateColumn do
+      begin
+        Text := LQr.Fields[i].FieldName;
+      end;
+  end;
+
 begin
   if not Assigned(FFormGrid) then
   begin
@@ -157,26 +183,9 @@ begin
     FConnections[0].ConnectionDefName := FFormEdit.ClConexoes.Items[FFormEdit.ClConexoes.ItemIndex];
   end;
 
-  Qr := TFDQuery.Create(Self);
-  try
-    Qr.Connection := FConnections[0];
-    // Qr.ConnectionName := 'testar';
-    FConnections[0].Connected := True;
-    Qr.SQL.Text := FFormEdit.MM.Lines.Text;
-    // Qr.Filter := Trim(AFilter);
-    Qr.Filtered := Qr.Filter <> '';
-    Qr.Open;
-    FFormGrid.tv.ClearItems;
-    for i := 0 to Qr.FieldDefs.Count - 1 do
-      with FFormGrid.tv.CreateColumn do
-      begin
-        Text := Qr.Fields[i].FieldName;
-      end;
+  chargeConnection(FConnections[0]);
 
-    FFormGrid.ShowModal;
-  finally
-    Qr.DisposeOf;
-  end;
+  FFormGrid.ShowModal;
 end;
 
 destructor TCompQuery.Destroy;
@@ -192,11 +201,16 @@ begin
   end;
 end;
 
-procedure TCompQuery.Edit;
+function TCompQuery.GetInstanceFormEdit: TFoEditQuery;
 begin
   if not Assigned(FFormEdit) then
     FFormEdit := TFoEditQuery.New(Self);
-  FFormEdit.ShowModal;
+  Result := FFormEdit;
+end;
+
+procedure TCompQuery.Edit;
+begin
+  GetInstanceFormEdit.ShowModal;
 end;
 
 function TCompQuery.GetScript: string;
@@ -209,13 +223,28 @@ begin
     Result := '';
 end;
 
+procedure TCompQuery.setScript(const AScript: string);
+begin
+  GetInstanceFormEdit.MM.Text := AScript;
+end;
+
 { TCompTransform }
 
 procedure TCompTransform.Edit;
 begin
   if not Assigned(FFormEdit) then
+  begin
     FFormEdit := TFoEditTransform.New(Self);
+    FFormEdit.Caption := Title;
+  end;
   FFormEdit.ShowModal;
+end;
+
+procedure TCompTransform.setTitle(const ATitle: string);
+begin
+  inherited setTitle(ATitle);
+  if Assigned(FFormEdit) then
+    FFormEdit.Caption := ATitle;
 end;
 
 { TCompLoad }

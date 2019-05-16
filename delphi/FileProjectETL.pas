@@ -185,8 +185,12 @@ begin
     for i := 0 to LJSONArray.Count - 1 do
     begin
       LJSONObject := TJSONObject(LJSONArray.Items[i]);
-      AddComponent(AParent, LJSONObject.GetValue<Byte>(VAR_KIND),
-        LJSONObject.GetValue<Integer>(VAR_X), LJSONObject.GetValue<Integer>(VAR_Y))
+      with AddComponent(AParent, LJSONObject.GetValue<Byte>(VAR_KIND),
+        LJSONObject.GetValue<Integer>(VAR_X), LJSONObject.GetValue<Integer>(VAR_Y)) do
+      begin
+        Title := LJSONObject.GetValue<string>(VAR_TITLE);
+        Script := LJSONObject.GetValue<string>(VAR_SCRIPT);
+      end;
     end;
   finally
     LJSONArray.DisposeOf

@@ -45,49 +45,55 @@ inherited FoEditQuery: TFoEditQuery
       Top = 3
       Width = 179
       Height = 40
-      Action = AcInvert
+      Action = AcReverseChecks
       Align = alTop
+      Images = DmMain.IL32
       TabOrder = 1
     end
   end
   inherited ActionList: TActionList
-    object AcInvert: TAction
+    object AcReverseChecks: TAction
       Caption = 'Reverse Checks'
       ImageIndex = 13
-      OnExecute = AcInvertExecute
+      OnExecute = AcReverseChecksExecute
     end
-    object AcEdit: TAction
-      Caption = 'Edit...'
+    object AcEditConnection: TAction
+      Caption = 'Edit Connection...'
       ImageIndex = 14
+      OnExecute = AcEditConnectionExecute
     end
-    object AcDelete: TAction
-      Caption = 'Delete'
+    object AcDeleteConnection: TAction
+      Caption = 'Delete Connection'
       ImageIndex = 15
+      OnExecute = AcDeleteConnectionExecute
     end
-    object AcNew: TAction
-      Caption = 'New...'
+    object AcNewConnection: TAction
+      Caption = 'New Connection...'
       ImageIndex = 11
-      OnExecute = AcNewExecute
+      OnExecute = AcNewConnectionExecute
+    end
+    object AcCheckAll: TAction
+      Caption = 'AcCheckAll'
+    end
+    object AcUncheckAll: TAction
+      Caption = 'AcUncheckAll'
     end
   end
   object PopupMenu1: TPopupMenu
+    Images = DmMain.IL32
     Left = 80
     Top = 144
     object New1: TMenuItem
-      Caption = 'New...'
-      ImageIndex = 11
-      OnClick = AcNewExecute
+      Action = AcNewConnection
     end
     object Edit1: TMenuItem
-      Caption = 'Edit...'
-      ImageIndex = 14
+      Action = AcEditConnection
     end
     object N1: TMenuItem
       Caption = '-'
     end
     object Delete1: TMenuItem
-      Caption = 'Delete'
-      ImageIndex = 15
+      Action = AcDeleteConnection
     end
   end
 end

@@ -7,9 +7,9 @@ uses Vcl.Controls, System.Classes, System.ImageList, Vcl.ImgList, cxGraphics, Vc
 
 type
   TDmMain = class(TDataModule)
-    ILDev32: TcxImageList;
-    ILDev64: TcxImageList;
-    IL16: TImageList;
+    IL32: TcxImageList;
+    IL64: TcxImageList;
+    ILOld16: TImageList;
     PopupLink: TPopupMenu;
     MnEditLabel: TMenuItem;
     MenuItem5: TMenuItem;
@@ -26,6 +26,7 @@ type
     N1: TMenuItem;
     MnDeleteComponent: TMenuItem;
     AcDelete: TAction;
+    IL16: TcxImageList;
     procedure MnDelLinkClick(Sender: TObject);
     procedure MnEditLabelClick(Sender: TObject);
     procedure AcEditScriptExecute(Sender: TObject);
