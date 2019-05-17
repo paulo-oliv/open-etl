@@ -45,7 +45,7 @@ type
   strict private
     FFormGrid: TFoGrid;
     FFormEdit: TFoEditQuery;
-    FConnections: TObjectList<TFDConnection>;
+    // FConnections: TObjectList<TFDConnection>;
     function GetInstanceFormEdit: TFoEditQuery;
   strict protected
     function GetScript: string; override;
@@ -137,64 +137,85 @@ type
 
 implementation
 
-// uses // FireDAC.Stan.Intf, FireDAC.Stan.Option,
-// FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def, FireDAC.Stan.Pool,
-// FireDAC.Stan.Async, FireDAC.Phys, FireDAC.VCLUI.Wait, Data.DB;
+uses SysUtils;
 
 { TCompQuery }
 
 procedure TCompQuery.Preview;
+var
+  LQr: TFDQuery;
 
-  procedure chargeConnection(const AConnection: TFDConnection);
+  procedure chargeConnection(const AConnectionName: string);
   var
-    LQr: TFDQuery;
+    LConn: TFDConnection;
     i: Integer;
   begin
-    LQr := TFDQuery.Create(Self);
+    LConn := TFDConnection.Create(nil);
+    FFormGrid.tv.BeginUpdate;
     try
-    finally
-      LQr.DisposeOf;
-    end;
-    AConnection.Connected := True;
-    LQr.Connection := AConnection;
-    // Qr.ConnectionName := 'testar';
-    LQr.SQL.Text := FFormEdit.MM.Lines.Text;
-    // Qr.Filter := Trim(AFilter);
-    LQr.Filtered := LQr.Filter <> '';
-    LQr.Open;
-    FFormGrid.tv.ClearItems;
-    for i := 0 to LQr.FieldDefs.Count - 1 do
-      with FFormGrid.tv.CreateColumn do
+      LQr.Close;
+      LConn.ConnectionDefName := AConnectionName;
+      LQr.Connection := LConn;
+      LConn.Connected := True;
+      // Qr.ConnectionName := 'testar';
+      LQr.SQL.Text := FFormEdit.MM.Lines.Text;
+      // Qr.Filter := Trim(AFilter);
+      LQr.Filtered := LQr.Filter <> '';
+      LQr.Open;
+      i := FFormGrid.tv.ColumnCount;
+      while i < LQr.FieldDefs.Count do
       begin
-        Text := LQr.Fields[i].FieldName;
+        with FFormGrid.tv.CreateColumn do
+        begin
+          Caption := LQr.Fields[i].DisplayLabel;
+          // Name := '';
+          // DataBinding.ValueTypeClass := TcxStringValueType;
+          // Text := LQr.Fields[i].DisplayLabel;
+        end;
+        i := i + 1;
       end;
+      while not LQr.Eof do
+      begin
+        FFormGrid.tv.DataController.RecordCount := FFormGrid.tv.DataController.RecordCount + 1;
+        for i := 0 to LQr.FieldDefs.Count - 1 do
+          FFormGrid.tv.DataController.Values[FFormGrid.tv.DataController.RecordCount - 1, i] :=
+            LQr.Fields[i].Value;
+        LQr.Next;
+      end;
+    finally
+      FFormGrid.tv.EndUpdate;
+      LConn.DisposeOf;
+    end;
   end;
 
+var
+  i: Integer;
 begin
   if not Assigned(FFormGrid) then
   begin
     FFormGrid := TFoGrid.New(Self);
-    FConnections := TObjectList<TFDConnection>.Create;
+    // FConnections := TObjectList<TFDConnection>.Create;
   end;
-
-  if FConnections.Count = 0 then
-  begin
-    FConnections.Add(TFDConnection.Create(Self));
-    FConnections[0].ConnectionDefName := FFormEdit.ClConexoes.Items[FFormEdit.ClConexoes.ItemIndex];
+  LQr := TFDQuery.Create(nil);
+  try
+    FFormGrid.tv.DataController.RecordCount := 0;
+    FFormGrid.tv.ClearItems;
+    for i := 0 to FFormEdit.ClConexoes.Count - 1 do
+      if FFormEdit.ClConexoes.Checked[i] then
+        chargeConnection(FFormEdit.ClConexoes.Items[i]);
+    FFormGrid.ShowModal;
+  finally
+    LQr.DisposeOf;
   end;
-
-  chargeConnection(FConnections[0]);
-
-  FFormGrid.ShowModal;
 end;
 
 destructor TCompQuery.Destroy;
 begin
-  if Assigned(FConnections) then
-    try
-      FConnections.DisposeOf
-    except
-    end;
+  // if Assigned(FConnections) then
+  // try
+  // FConnections.DisposeOf
+  // except
+  // end;
   try
     inherited
   except
@@ -214,18 +235,28 @@ begin
 end;
 
 function TCompQuery.GetScript: string;
+var
+  i: Integer;
 begin
+  Result := '';
   if Assigned(FFormEdit) then
   begin
+    for i := 0 to FFormEdit.ClConexoes.Count - 1 do
+      if FFormEdit.ClConexoes.Checked[i] then
+        Result := Result + IntToStr(i) + ',';
+    Result := Result + '|';
     Result := FFormEdit.MM.Text;
-  end
-  else
-    Result := '';
+  end;
 end;
 
 procedure TCompQuery.setScript(const AScript: string);
+var
+  LConnections: string;
+  p: Integer;
 begin
-  GetInstanceFormEdit.MM.Text := AScript;
+  p := Pos('|', AScript);
+  GetInstanceFormEdit.MM.Text := Copy(AScript, p + 1);
+  LConnections := Copy(AScript, 1, p - 1);
 end;
 
 { TCompTransform }
