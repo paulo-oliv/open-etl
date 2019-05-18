@@ -2,24 +2,18 @@ inherited FoEditQuery: TFoEditQuery
   Caption = 'Edit Query'
   PixelsPerInch = 96
   TextHeight = 20
-  object pSplitter1: TpSplitter [0]
-    Left = 191
-    Top = 0
-    Width = 8
-    Height = 304
-  end
-  object MM: TMemo [1]
+  object MM: TMemo [0]
     AlignWithMargins = True
-    Left = 202
+    Left = 194
     Top = 3
-    Width = 430
+    Width = 438
     Height = 298
     Align = alClient
     Color = clBtnFace
     ScrollBars = ssBoth
     TabOrder = 1
   end
-  object PnEsquerda: TPanel [2]
+  object PnEsquerda: TPanel [1]
     AlignWithMargins = True
     Left = 3
     Top = 3
@@ -27,7 +21,7 @@ inherited FoEditQuery: TFoEditQuery
     Height = 298
     Align = alLeft
     BevelOuter = bvNone
-    TabOrder = 2
+    TabOrder = 0
     object ClConexoes: TCheckListBox
       AlignWithMargins = True
       Left = 3
@@ -38,6 +32,8 @@ inherited FoEditQuery: TFoEditQuery
       ItemHeight = 20
       PopupMenu = PopupMenu1
       TabOrder = 0
+      ExplicitLeft = -77
+      ExplicitTop = -39
     end
     object Button1: TButton
       AlignWithMargins = True

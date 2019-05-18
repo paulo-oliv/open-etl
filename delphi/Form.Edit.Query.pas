@@ -40,21 +40,25 @@ implementation
 
 {$R *.dfm}
 
-uses SectionConexao, // uMsg
-  // IPPeerClient,
-  FireDAC.VCLUI.ConnEdit, FireDAC.Stan.Def, FireDAC.Phys.Intf, FireDAC.Phys.TDBXDef,
-  FireDAC.Phys.DSDef, FireDAC.Phys.MongoDBDef, FireDAC.Phys.TDataDef, FireDAC.Phys.MSSQLDef,
-  FireDAC.Phys.InfxDef, FireDAC.Phys.DB2Def, FireDAC.Phys.OracleDef, FireDAC.Stan.ExprFuncs,
+uses SectionConexao,
+  FireDAC.VCLUI.ConnEdit, FireDAC.Stan.Def, FireDAC.Phys.Intf,
+  // FireDAC.Phys.TDBXDef, FireDAC.Phys.DSDef, FireDAC.Phys.MongoDBDef, FireDAC.Phys.TDataDef,
+  // FireDAC.Phys.MSSQLDef, FireDAC.Phys.InfxDef, FireDAC.Phys.DB2Def, FireDAC.Phys.OracleDef,
+  // FireDAC.Phys.ODBCDef, FireDAC.Phys.ASADef, FireDAC.Phys.ASA, FireDAC.Phys.ODBC,
+  // FireDAC.Phys.Oracle, FireDAC.Phys.DB2, FireDAC.Phys.Infx, FireDAC.Phys.MSSQL,
+  // FireDAC.Phys.TData, FireDAC.Phys.MongoDB, FireDAC.Phys.DS, FireDAC.Phys.TDBXBase,
+  // FireDAC.Phys.TDBX
+  FireDAC.Stan.ExprFuncs,
   FireDAC.Phys.SQLiteDef, FireDAC.UI.Intf, FireDAC.VCLUI.Wait, FireDAC.Phys.IBDef,
-  FireDAC.Phys.ODBCDef, FireDAC.Phys.MSAccDef, FireDAC.Phys.MySQLDef, FireDAC.Phys.ASADef,
+  FireDAC.Phys.MSAccDef, FireDAC.Phys.MySQLDef,
   FireDAC.Phys.ADSDef, FireDAC.Phys.FBDef, FireDAC.Phys.PGDef, FireDAC.Phys.PG, FireDAC.Phys.FB,
-  FireDAC.Phys.ADS, FireDAC.Phys.ASA, FireDAC.Phys.MySQL, FireDAC.Phys.MSAcc, FireDAC.Phys.ODBC,
+  FireDAC.Phys.ADS,
+  FireDAC.Phys.MySQL, FireDAC.Phys.MSAcc,
   FireDAC.Stan.StorageJSON, FireDAC.Stan.StorageXML, FireDAC.Stan.StorageBin, FireDAC.Moni.FlatFile,
   FireDAC.Moni.Custom, FireDAC.Moni.Base, FireDAC.Moni.RemoteClient, FireDAC.Phys.IBBase,
-  FireDAC.Phys.IB, FireDAC.Comp.UI, FireDAC.Phys.SQLite, FireDAC.Phys.Oracle, FireDAC.Phys.DB2,
-  FireDAC.Phys.Infx, FireDAC.Phys.MSSQL, FireDAC.Phys.ODBCBase, FireDAC.Phys.TData,
-  FireDAC.Phys.MongoDB, FireDAC.Phys.DS, FireDAC.Stan.Intf, FireDAC.Phys, FireDAC.Phys.TDBXBase,
-  FireDAC.Phys.TDBX;
+  FireDAC.Phys.IB, FireDAC.Comp.UI, FireDAC.Phys.SQLite,
+  FireDAC.Phys.ODBCBase,
+  FireDAC.Stan.Intf, FireDAC.Phys;
 
 { TFoEditQuery }
 

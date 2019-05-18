@@ -251,12 +251,21 @@ end;
 
 procedure TCompQuery.setScript(const AScript: string);
 var
-  LConnections: string;
-  p: Integer;
+  LConnections, LNum: string;
+  i: Integer;
 begin
-  p := Pos('|', AScript);
-  GetInstanceFormEdit.MM.Text := Copy(AScript, p + 1);
-  LConnections := Copy(AScript, 1, p - 1);
+  i := Pos('|', AScript);
+  GetInstanceFormEdit.MM.Text := Copy(AScript, i + 1);
+  LConnections := Copy(AScript, 1, i - 1);
+  LNum := '';
+  for i := 1 to LConnections.Length do
+    if LConnections[i] = ',' then
+    begin
+      FFormEdit.ClConexoes.Checked[StrToInt(LNum)] := True;
+      LNum := '';
+    end
+    else
+      LNum := LNum + LConnections[i];
 end;
 
 { TCompTransform }
