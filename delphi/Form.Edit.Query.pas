@@ -2,15 +2,12 @@ unit Form.Edit.Query;
 
 interface
 
-uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Form.Edit, cxGraphics, cxControls, cxLookAndFeels,
-  cxLookAndFeelPainters, Vcl.StdCtrls, cxSplitter, upControls, Vcl.CheckLst, Vcl.Buttons,
-  Vcl.ExtCtrls, System.Actions, Vcl.ActnList, Vcl.Menus;
+uses Form.Edit, Vcl.Menus, Vcl.StdCtrls, Vcl.Controls, Vcl.CheckLst, Vcl.ExtCtrls, System.Classes,
+  System.Actions, Vcl.ActnList, cxSplitter, upControls, cxGraphics, cxControls, cxLookAndFeels,
+  cxLookAndFeelPainters;
 
 type
   TFoEditQuery = class(TFoEdit)
-    pSplitter1: TpSplitter;
     MM: TMemo;
     PnEsquerda: TPanel;
     ClConexoes: TCheckListBox;
@@ -26,6 +23,7 @@ type
     AcNewConnection: TAction;
     AcCheckAll: TAction;
     AcUncheckAll: TAction;
+    pSplitter1: TpSplitter;
     procedure AcReverseChecksExecute(Sender: TObject);
     procedure AcNewConnectionExecute(Sender: TObject);
     procedure AcDeleteConnectionExecute(Sender: TObject);
@@ -40,7 +38,7 @@ implementation
 
 {$R *.dfm}
 
-uses SectionConexao,
+uses SectionConexao, System.SysUtils, Vcl.Dialogs,
   FireDAC.VCLUI.ConnEdit, FireDAC.Stan.Def, FireDAC.Phys.Intf,
   // FireDAC.Phys.TDBXDef, FireDAC.Phys.DSDef, FireDAC.Phys.MongoDBDef, FireDAC.Phys.TDataDef,
   // FireDAC.Phys.MSSQLDef, FireDAC.Phys.InfxDef, FireDAC.Phys.DB2Def, FireDAC.Phys.OracleDef,
@@ -62,17 +60,6 @@ uses SectionConexao,
 
 { TFoEditQuery }
 
-procedure TFoEditQuery.AcDeleteConnectionExecute(Sender: TObject);
-begin
-  //
-
-end;
-
-procedure TFoEditQuery.AcEditConnectionExecute(Sender: TObject);
-begin
-  //
-end;
-
 procedure TFoEditQuery.AcReverseChecksExecute(Sender: TObject);
 var
   i: Integer;
@@ -81,15 +68,87 @@ begin
     ClConexoes.Checked[i] := not ClConexoes.Checked[i];
 end;
 
-procedure TFoEditQuery.AcNewConnectionExecute(Sender: TObject);
+procedure TFoEditQuery.AcDeleteConnectionExecute(Sender: TObject);
+var
+  LSection: string;
+begin
+  if ClConexoes.ItemIndex < 0 then
+    Exit;
+  LSection := ClConexoes.Items[ClConexoes.ItemIndex];
+  TConnectionDefsIni.GetInstance.EraseSection(LSection);
+  TConnectionDefsIni.GetInstance.ReadSections(ClConexoes.Items);
+end;
+
+procedure TFoEditQuery.AcEditConnectionExecute(Sender: TObject);
 var
   sConnStr: String;
+  LStrings: TStrings;
+  LRow, LSection, LIdent: string;
+  p: Integer;
+begin
+  if ClConexoes.ItemIndex < 0 then
+    Exit;
+  LSection := ClConexoes.Items[ClConexoes.ItemIndex];
+
+  if TfrmFDGUIxFormsConnEdit.Execute(sConnStr, LSection) then
+  begin
+    LStrings := TStringList.Create;
+    try
+      LStrings.Delimiter := ';';
+      LStrings.DelimitedText := sConnStr;
+      for LRow in LStrings do
+      begin
+        p := Pos('=', LRow);
+        LIdent := Copy(LRow, 1, p - 1);
+        TConnectionDefsIni.GetInstance.WriteString(LSection, LIdent, Copy(LRow, p + 1));
+      end;
+      TConnectionDefsIni.GetInstance.ReadSections(ClConexoes.Items);
+    finally
+      LStrings.DisposeOf;
+    end;
+  end;
+end;
+
+procedure TFoEditQuery.AcNewConnectionExecute(Sender: TObject);
+const
+  DEFAULT_SECTION = 'NewConnection';
+var
+  sConnStr: String;
+  LStrings: TStrings;
+  LRow, LSection, LIdent: string;
+  p: Integer;
 begin
   // sConnStr := FDConnection1.ResultConnectionDef.BuildString();
-  if TfrmFDGUIxFormsConnEdit.Execute(sConnStr, '') then
+  if TfrmFDGUIxFormsConnEdit.Execute(sConnStr, DEFAULT_SECTION) then
   begin
-    // FDConnection1.ResultConnectionDef.ParseString(sConnStr);
-    // FDConnection1.Connected := True;
+    LStrings := TStringList.Create;
+    try
+      LStrings.Delimiter := ';';
+      LStrings.DelimitedText := sConnStr;
+      LSection := DEFAULT_SECTION;
+      for LRow in LStrings do
+      begin
+        p := Pos('=', LRow);
+        LIdent := Copy(LRow, 1, p - 1);
+        if LIdent.ToLower = 'connectiondef' then
+          LSection := Copy(LRow, p + 1)
+        else if LIdent.ToLower = 'database' then
+          if LSection = DEFAULT_SECTION then
+            LSection := Copy(LRow, p + 1);
+      end;
+      if LSection = '' then
+        LSection := DEFAULT_SECTION;
+      LSection := InputBox('Connection Name', 'Set connection name', LSection);
+      for LRow in LStrings do
+      begin
+        p := Pos('=', LRow);
+        LIdent := Copy(LRow, 1, p - 1);
+        TConnectionDefsIni.GetInstance.WriteString(LSection, LIdent, Copy(LRow, p + 1));
+      end;
+      TConnectionDefsIni.GetInstance.ReadSections(ClConexoes.Items);
+    finally
+      LStrings.DisposeOf;
+    end;
   end;
 end;
 

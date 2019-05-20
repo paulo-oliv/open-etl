@@ -4,14 +4,16 @@ inherited FoEditQuery: TFoEditQuery
   TextHeight = 20
   object MM: TMemo [0]
     AlignWithMargins = True
-    Left = 194
+    Left = 202
     Top = 3
-    Width = 438
+    Width = 430
     Height = 298
     Align = alClient
     Color = clBtnFace
     ScrollBars = ssBoth
     TabOrder = 1
+    ExplicitLeft = 194
+    ExplicitWidth = 438
   end
   object PnEsquerda: TPanel [1]
     AlignWithMargins = True
@@ -32,8 +34,6 @@ inherited FoEditQuery: TFoEditQuery
       ItemHeight = 20
       PopupMenu = PopupMenu1
       TabOrder = 0
-      ExplicitLeft = -77
-      ExplicitTop = -39
     end
     object Button1: TButton
       AlignWithMargins = True
@@ -46,6 +46,16 @@ inherited FoEditQuery: TFoEditQuery
       Images = DmMain.IL32
       TabOrder = 1
     end
+  end
+  object pSplitter1: TpSplitter [2]
+    Left = 191
+    Top = 0
+    Width = 8
+    Height = 304
+    Hint = ''
+    ExplicitLeft = 184
+    ExplicitTop = 168
+    ExplicitHeight = 100
   end
   inherited ActionList: TActionList
     object AcReverseChecks: TAction

@@ -155,6 +155,7 @@ var
     try
       LQr.Close;
       LConn.ConnectionDefName := AConnectionName;
+
       LQr.Connection := LConn;
       LConn.Connected := True;
       // Qr.ConnectionName := 'testar';
