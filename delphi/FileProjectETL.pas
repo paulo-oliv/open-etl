@@ -22,6 +22,8 @@ type
   end;
 
   TListLinks = class(TInterfacedList<ILinkComponents>, IListLinks)
+    // function GetItem(const AIndex: Integer): ILinkComponents;
+    // function Add(const ALink: ILinkComponents): IListLinks;
   end;
 
   TProjectETL = class(TInterfacedObject, IProjectETL)
@@ -35,6 +37,7 @@ type
     procedure setFileName(const AFileName: string);
   public
     function getListComponents: IListComponentsETL;
+    function getListLinks: IListLinks;
     class function GetInstance: IProjectETL;
     class function AddComponent(const AParent: TWinControl; const AKind: Byte;
       const Ax, Ay: Integer): IComponentETL;
@@ -90,6 +93,11 @@ end;
 function TProjectETL.getListComponents: IListComponentsETL;
 begin
   Result := FListComponentsETL;
+end;
+
+function TProjectETL.getListLinks: IListLinks;
+begin
+  Result := FListLinks;
 end;
 
 class function TProjectETL.GetInstance: IProjectETL;

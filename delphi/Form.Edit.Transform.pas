@@ -2,13 +2,10 @@ unit Form.Edit.Transform;
 
 interface
 
-uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Form.Edit, Vcl.StdCtrls;
+uses Form.Edit, System.Classes, System.Actions, Vcl.ActnList;
 
 type
   TFoEditTransform = class(TFoEdit)
-    Memo1: TMemo;
   private
   public
     class function New(const AOwner: TComponent): TFoEditTransform;

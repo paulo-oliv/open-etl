@@ -20,7 +20,7 @@ type
     procedure Resize; override;
     function getTitle: string;
     procedure setTitle(const ATitle: string); virtual;
-    function GetScript: string; virtual; abstract;
+    function getScript: string; virtual; abstract;
     procedure setScript(const AScript: string); virtual; abstract;
     procedure SetParent(AParent: TWinControl); override;
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;

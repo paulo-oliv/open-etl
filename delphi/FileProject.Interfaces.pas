@@ -12,7 +12,7 @@ type
     function GetKind: Integer;
     function GetLeft: Integer;
     function GetTop: Integer;
-    function GetScript: string;
+    function getScript: string;
     property Title: string read getTitle write setTitle;
     property Script: string read getScript write setScript;
   end;

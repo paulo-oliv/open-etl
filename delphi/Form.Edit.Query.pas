@@ -28,9 +28,8 @@ type
     procedure AcNewConnectionExecute(Sender: TObject);
     procedure AcDeleteConnectionExecute(Sender: TObject);
     procedure AcEditConnectionExecute(Sender: TObject);
-  private
-    // FAlterado: Boolean;
   public
+    procedure UpdateConnections;
     class function New(const AOwner: TComponent): TFoEditQuery;
   end;
 
@@ -38,7 +37,7 @@ implementation
 
 {$R *.dfm}
 
-uses SectionConexao, System.SysUtils, Vcl.Dialogs,
+uses SectionConexao, System.SysUtils, Vcl.Dialogs, FireDAC.Comp.Client,
   FireDAC.VCLUI.ConnEdit, FireDAC.Stan.Def, FireDAC.Phys.Intf,
   // FireDAC.Phys.TDBXDef, FireDAC.Phys.DSDef, FireDAC.Phys.MongoDBDef, FireDAC.Phys.TDataDef,
   // FireDAC.Phys.MSSQLDef, FireDAC.Phys.InfxDef, FireDAC.Phys.DB2Def, FireDAC.Phys.OracleDef,
@@ -60,6 +59,11 @@ uses SectionConexao, System.SysUtils, Vcl.Dialogs,
 
 { TFoEditQuery }
 
+procedure TFoEditQuery.UpdateConnections;
+begin
+  TConnectionDefsIni.GetInstance.ReadSections(ClConexoes.Items);
+end;
+
 procedure TFoEditQuery.AcReverseChecksExecute(Sender: TObject);
 var
   i: Integer;
@@ -76,33 +80,42 @@ begin
     Exit;
   LSection := ClConexoes.Items[ClConexoes.ItemIndex];
   TConnectionDefsIni.GetInstance.EraseSection(LSection);
-  TConnectionDefsIni.GetInstance.ReadSections(ClConexoes.Items);
+  UpdateConnections;
 end;
 
 procedure TFoEditQuery.AcEditConnectionExecute(Sender: TObject);
 var
-  sConnStr: String;
+  LConnStr: String;
   LStrings: TStrings;
   LRow, LSection, LIdent: string;
   p: Integer;
+  LConn: TFDConnection;
 begin
   if ClConexoes.ItemIndex < 0 then
     Exit;
   LSection := ClConexoes.Items[ClConexoes.ItemIndex];
 
-  if TfrmFDGUIxFormsConnEdit.Execute(sConnStr, LSection) then
+  LConn := TFDConnection.Create(nil);
+  try
+    LConn.ConnectionDefName := LSection;
+    LConnStr := LConn.ResultConnectionDef.BuildString;
+  finally
+    LConn.DisposeOf;
+  end;
+
+  if TfrmFDGUIxFormsConnEdit.Execute(LConnStr, LSection) then
   begin
     LStrings := TStringList.Create;
     try
       LStrings.Delimiter := ';';
-      LStrings.DelimitedText := sConnStr;
+      LStrings.DelimitedText := LConnStr;
       for LRow in LStrings do
       begin
         p := Pos('=', LRow);
         LIdent := Copy(LRow, 1, p - 1);
         TConnectionDefsIni.GetInstance.WriteString(LSection, LIdent, Copy(LRow, p + 1));
       end;
-      TConnectionDefsIni.GetInstance.ReadSections(ClConexoes.Items);
+      UpdateConnections;
     finally
       LStrings.DisposeOf;
     end;
@@ -113,18 +126,17 @@ procedure TFoEditQuery.AcNewConnectionExecute(Sender: TObject);
 const
   DEFAULT_SECTION = 'NewConnection';
 var
-  sConnStr: String;
+  LConnStr: String;
   LStrings: TStrings;
   LRow, LSection, LIdent: string;
   p: Integer;
 begin
-  // sConnStr := FDConnection1.ResultConnectionDef.BuildString();
-  if TfrmFDGUIxFormsConnEdit.Execute(sConnStr, DEFAULT_SECTION) then
+  if TfrmFDGUIxFormsConnEdit.Execute(LConnStr, DEFAULT_SECTION) then
   begin
     LStrings := TStringList.Create;
     try
       LStrings.Delimiter := ';';
-      LStrings.DelimitedText := sConnStr;
+      LStrings.DelimitedText := LConnStr;
       LSection := DEFAULT_SECTION;
       for LRow in LStrings do
       begin
@@ -145,7 +157,7 @@ begin
         LIdent := Copy(LRow, 1, p - 1);
         TConnectionDefsIni.GetInstance.WriteString(LSection, LIdent, Copy(LRow, p + 1));
       end;
-      TConnectionDefsIni.GetInstance.ReadSections(ClConexoes.Items);
+      UpdateConnections;
     finally
       LStrings.DisposeOf;
     end;
@@ -155,7 +167,7 @@ end;
 class function TFoEditQuery.New(const AOwner: TComponent): TFoEditQuery;
 begin
   Result := TFoEditQuery.Create(AOwner);
-  TConnectionDefsIni.GetInstance.ReadSections(Result.ClConexoes.Items);
+  Result.UpdateConnections;
 end;
 
 end.

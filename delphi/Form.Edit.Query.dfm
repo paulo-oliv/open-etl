@@ -1,19 +1,21 @@
 inherited FoEditQuery: TFoEditQuery
   Caption = 'Edit Query'
+  ClientWidth = 642
+  ExplicitWidth = 658
+  ExplicitHeight = 338
   PixelsPerInch = 96
   TextHeight = 20
   object MM: TMemo [0]
     AlignWithMargins = True
     Left = 202
     Top = 3
-    Width = 430
+    Width = 437
     Height = 298
     Align = alClient
     Color = clBtnFace
     ScrollBars = ssBoth
     TabOrder = 1
-    ExplicitLeft = 194
-    ExplicitWidth = 438
+    ExplicitWidth = 430
   end
   object PnEsquerda: TPanel [1]
     AlignWithMargins = True
@@ -52,10 +54,6 @@ inherited FoEditQuery: TFoEditQuery
     Top = 0
     Width = 8
     Height = 304
-    Hint = ''
-    ExplicitLeft = 184
-    ExplicitTop = 168
-    ExplicitHeight = 100
   end
   inherited ActionList: TActionList
     object AcReverseChecks: TAction
