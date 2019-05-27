@@ -9,6 +9,7 @@ type
   public
     function GetItem(const AIndex: Integer): IComponentETL;
     function Add(const AComponent: IComponentETL): IListComponentsETL;
+    function Locate(const AId: string): IComponentETL;
     function GenerateTitle(APrefix: string): string;
   end;
 
@@ -41,7 +42,7 @@ type
 
 implementation
 
-uses Classes, SysUtils, System.JSON, ETL.Component.Factory;
+uses Classes, SysUtils, System.JSON, ETL.Component.Factory, Dialogs;
 
 { TProjectETL }
 
@@ -156,12 +157,20 @@ end;
 
 class function TProjectETL.Load(const AFileName: string; const AParent: TWinControl): IProjectETL;
 
-  procedure LoadLinks(const AJSONArray: TJSONArray);
-  begin 
-    
-  
+  procedure LoadLinks(const AId: string; const ASourcesJSONArray: TJSONArray);
+  var
+    i: Integer;
+    LSource, LTarget: IComponentETL;
+  begin
+    LTarget := Result.getListComponents.Locate(AId);
+    for i := 0 to ASourcesJSONArray.Count - 1 do
+    begin
+      LSource := Result.getListComponents.Locate(ASourcesJSONArray.Items[i].Value);
+      if LSource <> nil then
+        LTarget.AddSource(LSource);
+    end;
   end;
-  
+
 var
   LJSONArray: TJSONArray;
   LJSONObject: TJSONObject;
@@ -188,13 +197,20 @@ begin
         LJSONObject.GetValue<Integer>(VAR_X), LJSONObject.GetValue<Integer>(VAR_Y),
         LJSONObject.GetValue<string>(VAR_ID)) do
       begin
-        Title := LJSONObject.GetValue<string>(VAR_TITLE);
-        Script := LJSONObject.GetValue<string>(VAR_SCRIPT);
+        try
+          Title := LJSONObject.GetValue<string>(VAR_TITLE)
+        except
+        end;
+        try
+          Script := LJSONObject.GetValue<string>(VAR_SCRIPT)
+        except
+        end;
       end;
     end;
     for i := 0 to LJSONArray.Count - 1 do
     begin
-      LoadLinks(LJSONArray.Items[i].GetValue<TJSONArray>(VAR_SOURCES))
+      LJSONObject := TJSONObject(LJSONArray.Items[i]);
+      LoadLinks(LJSONObject.GetValue<string>(VAR_ID), LJSONObject.GetValue<TJSONArray>(VAR_SOURCES))
     end;
   finally
     LJSONArray.DisposeOf
@@ -206,6 +222,16 @@ begin
 end;
 
 { TListComponentsETL }
+
+function TListComponentsETL.Locate(const AId: string): IComponentETL;
+var
+  i: Integer;
+begin
+  Result := nil;
+  for i := 0 to Count - 1 do
+    if GetItem(i).getID = AId then
+      exit(GetItem(i));
+end;
 
 function TListComponentsETL.GenerateTitle(APrefix: string): string;
 

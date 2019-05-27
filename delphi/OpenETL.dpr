@@ -14,7 +14,8 @@ uses
   ETL.Component.Factory in 'ETL.Component.Factory.pas',
   ETL.DataModule.Main in 'ETL.DataModule.Main.pas' {DmMain: TDataModule},
   ETL.Form.Edit.Transform.Condensation in 'ETL.Form.Edit.Transform.Condensation.pas' {FoEditCondensation},
-  ETL.Component.Transform in 'ETL.Component.Transform.pas';
+  ETL.Component.Transform in 'ETL.Component.Transform.pas',
+  ETL.Link in 'ETL.Link.pas';
 
 {$R *.res}
 

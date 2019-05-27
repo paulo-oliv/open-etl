@@ -482,7 +482,6 @@ object FoMain: TFoMain
     Top = 603
     Width = 984
     Height = 23
-    Hint = ''
     Panels = <>
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clDefault
@@ -528,9 +527,8 @@ object FoMain: TFoMain
     object AcOpen: TFileOpen
       Category = 'File'
       Caption = '&Open...'
-      Dialog.Filter = 
-        'Todos Arquivos|*|Arquivo Texto *.txt|*.txt|Script SQL *.sql|*.sq' +
-        'l|Arquivo SPED *.sped|*.sped'
+      Dialog.DefaultExt = 'ETL'
+      Dialog.Filter = 'OpenETL Project *.ETL|*.ETL|Todos Arquivos|*'
       Hint = 'Open|Opens an existing file'
       ImageIndex = 0
       ShortCut = 16449
@@ -595,7 +593,8 @@ object FoMain: TFoMain
     object AcSave: TFileSaveAs
       Category = 'File'
       Caption = '&Save...'
-      Dialog.Filter = 'Script SQL *.sql|*.sql|Todos Arquivos|*'
+      Dialog.DefaultExt = 'ETL'
+      Dialog.Filter = 'OpenETL Project *.ETL|*.ETL|Todos Arquivos|*'
       Hint = 'Save As|Saves the active file with a new name'
       ImageIndex = 9
       ShortCut = 16467

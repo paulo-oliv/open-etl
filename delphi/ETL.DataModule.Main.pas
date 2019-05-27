@@ -46,7 +46,7 @@ implementation
 
 {$R *.dfm}
 
-uses uMsg, ETL.Component;
+uses uMsg, ETL.Component, ETL.Link;
 
 procedure TDmMain.AcDeleteExecute(Sender: TObject);
 // var

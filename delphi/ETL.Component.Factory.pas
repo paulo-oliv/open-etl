@@ -2,7 +2,8 @@ unit ETL.Component.Factory;
 
 interface
 
-uses ETL.Component,
+uses
+  ETL.Component,
   ETL.Form.Edit.Extract.Query,
   ETL.Form.Edit.Load,
   ETL.Form.Grid,
@@ -47,7 +48,19 @@ type
     destructor Destroy; override;
   end;
 
-  {
+  (* TKindComponentQuery = (Json, Xml, UnionAll, Union, Join, Filter, Conversion, Derivation,
+    Condensation);
+
+    IComponentQuery = interface
+    ['{EE590AE6-0D13-424E-8EBB-83C5E8B1B92F}']
+    function getKind: TKindComponentQuery;
+    function getScript: string;
+    procedure setKind(const AKind: TKindComponentQuery);
+    procedure setScript(const AScript: string);
+    property Kind: TKindComponentQuery read getKind write setKind;
+    property Script: string read getScript write setScript;
+    end;
+
     TComponentQuery = class(TInterfacedObject, IComponentQuery)
     strict private
     FKind: TKindComponentQuery;
@@ -95,7 +108,7 @@ type
     begin
     FKind := AKind;
     end;
-  }
+  *)
 
   TCompFile = class(TCompExtract)
   end;

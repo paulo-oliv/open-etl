@@ -32,6 +32,7 @@ type
     function GetTop: Integer;
     function getScript: string;
     function GetSources: IListSources;
+    procedure AddSource(const ASource: IComponentETL);
     property Title: string read getTitle write setTitle;
     property Script: string read getScript write setScript;
   end;
@@ -40,6 +41,7 @@ type
     ['{829D88B9-7255-40AB-8486-2BCE1A6112AC}']
     function GetItem(const AIndex: Integer): IComponentETL;
     function Add(const AComponent: IComponentETL): IListComponentsETL;
+    function Locate(const AId: string): IComponentETL;
     function GenerateTitle(APrefix: string): string;
   end;
 
@@ -55,19 +57,6 @@ type
     property FileName: string read getFileName write setFileName;
   end;
 
-  (* TKindComponentQuery = (Json, Xml, UnionAll, Union, Join, Filter, Conversion, Derivation,
-    Condensation);
-
-    IComponentQuery = interface
-    ['{EE590AE6-0D13-424E-8EBB-83C5E8B1B92F}']
-    function getKind: TKindComponentQuery;
-    function getScript: string;
-    procedure setKind(const AKind: TKindComponentQuery);
-    procedure setScript(const AScript: string);
-    property Kind: TKindComponentQuery read getKind write setKind;
-    property Script: string read getScript write setScript;
-    end; *)
-
   TInterfacedList<T> = class(TInterfacedObject, IList)
   strict protected
     FList: TList<T>;
@@ -75,12 +64,6 @@ type
     function Count: Integer;
     constructor Create;
     destructor Destroy; override;
-  end;
-
-  TListSources = class(TInterfacedList<ISourceETL>, IListSources)
-  public
-    function GetItem(const AIndex: Integer): ISourceETL;
-    function Add(const ASource: ISourceETL): IListSources;
   end;
 
 implementation
@@ -106,19 +89,6 @@ begin
     inherited
   except
   end;
-end;
-
-{ TListSources }
-
-function TListSources.Add(const ASource: ISourceETL): IListSources;
-begin
-  Result := Self;
-  FList.Add(ASource);
-end;
-
-function TListSources.GetItem(const AIndex: Integer): ISourceETL;
-begin
-  Result := FList[AIndex];
 end;
 
 end.
