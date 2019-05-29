@@ -12,8 +12,6 @@ type
     Lv: TcxGridLevel;
     Gr: TcxGrid;
     tv: TcxGridBandedTableView;
-    Button1: TButton;
-    Button2: TButton;
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
   strict private

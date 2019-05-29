@@ -28,7 +28,7 @@ type
       const Ax, Ay: Integer; const AGUID: string): IComponentETL; overload;
     class function AddComponent(const AParent: TWinControl; const AKind: Byte;
       const Ax, Ay: Integer): IComponentETL; overload;
-    class function Load(const AFileName: string; const AParent: TWinControl): IProjectETL;
+    class function Open(const AFileName: string; const AParent: TWinControl): IProjectETL;
     class function Save(const AFileName: string): IProjectETL; overload;
     class function Save: IProjectETL; overload;
 
@@ -155,7 +155,7 @@ begin
   Result := Save(Result.FileName);
 end;
 
-class function TProjectETL.Load(const AFileName: string; const AParent: TWinControl): IProjectETL;
+class function TProjectETL.Open(const AFileName: string; const AParent: TWinControl): IProjectETL;
 
   procedure LoadLinks(const AId: string; const ASourcesJSONArray: TJSONArray);
   var
@@ -177,6 +177,7 @@ var
   s: string;
   i: Integer;
   f: TextFile;
+  LComponent: IComponentETL;
 begin
   Result := GetInstance;
   Result.FileName := AFileName;
@@ -193,24 +194,21 @@ begin
     for i := 0 to LJSONArray.Count - 1 do
     begin
       LJSONObject := TJSONObject(LJSONArray.Items[i]);
-      with AddComponent(AParent, LJSONObject.GetValue<Byte>(VAR_KIND),
+      LComponent := AddComponent(AParent, LJSONObject.GetValue<Byte>(VAR_KIND),
         LJSONObject.GetValue<Integer>(VAR_X), LJSONObject.GetValue<Integer>(VAR_Y),
-        LJSONObject.GetValue<string>(VAR_ID)) do
-      begin
-        try
-          Title := LJSONObject.GetValue<string>(VAR_TITLE)
-        except
-        end;
-        try
-          Script := LJSONObject.GetValue<string>(VAR_SCRIPT)
-        except
-        end;
-      end;
+        LJSONObject.GetValue<string>(VAR_ID));
+      LComponent.Title := LJSONObject.GetValue<string>(VAR_TITLE)
     end;
     for i := 0 to LJSONArray.Count - 1 do
     begin
       LJSONObject := TJSONObject(LJSONArray.Items[i]);
       LoadLinks(LJSONObject.GetValue<string>(VAR_ID), LJSONObject.GetValue<TJSONArray>(VAR_SOURCES))
+    end;
+    for i := 0 to LJSONArray.Count - 1 do
+    begin
+      LJSONObject := TJSONObject(LJSONArray.Items[i]);
+      LComponent := Result.getListComponents.Locate(LJSONObject.GetValue<string>(VAR_ID));
+      LComponent.Script := LJSONObject.GetValue<string>(VAR_SCRIPT);
     end;
   finally
     LJSONArray.DisposeOf

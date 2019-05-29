@@ -131,7 +131,7 @@ procedure TFoMain.AcOpenAccept(Sender: TObject);
 begin
   if FileExists(AcOpen.Dialog.FileName) then
   begin
-    TProjectETL.Load(AcOpen.Dialog.FileName, Self)
+    TProjectETL.Open(AcOpen.Dialog.FileName, Self)
   end
   // else
   // TFoEditQuery.Create(Self).Novo(AFile)

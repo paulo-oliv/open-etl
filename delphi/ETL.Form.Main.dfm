@@ -20,7 +20,7 @@ object FoMain: TFoMain
     AlignWithMargins = True
     Left = 3
     Top = 3
-    Width = 112
+    Width = 118
     Height = 597
     HorzScrollBar.Style = ssFlat
     VertScrollBar.Tracking = True
@@ -46,7 +46,7 @@ object FoMain: TFoMain
         AlignWithMargins = True
         Left = 3
         Top = 3
-        Width = 102
+        Width = 108
         Height = 32
         Hint = 'Execute'
         Align = alTop
@@ -91,7 +91,7 @@ object FoMain: TFoMain
         AlignWithMargins = True
         Left = 3
         Top = 41
-        Width = 102
+        Width = 108
         Height = 32
         Hint = 'Script SQL'
         Align = alTop
@@ -138,7 +138,7 @@ object FoMain: TFoMain
         AlignWithMargins = True
         Left = 3
         Top = 155
-        Width = 102
+        Width = 108
         Height = 32
         Hint = 'Condensation'
         Align = alTop
@@ -187,7 +187,7 @@ object FoMain: TFoMain
         AlignWithMargins = True
         Left = 3
         Top = 41
-        Width = 102
+        Width = 108
         Height = 32
         Hint = 'Conversion'
         Align = alTop
@@ -226,7 +226,7 @@ object FoMain: TFoMain
         AlignWithMargins = True
         Left = 3
         Top = 79
-        Width = 102
+        Width = 108
         Height = 32
         Hint = 'Derivation'
         Align = alTop
@@ -287,7 +287,7 @@ object FoMain: TFoMain
         AlignWithMargins = True
         Left = 3
         Top = 3
-        Width = 102
+        Width = 108
         Height = 32
         Hint = 'Filter'
         Align = alTop
@@ -327,7 +327,7 @@ object FoMain: TFoMain
         AlignWithMargins = True
         Left = 3
         Top = 117
-        Width = 102
+        Width = 108
         Height = 32
         Hint = 'Join'
         Align = alTop
@@ -393,7 +393,7 @@ object FoMain: TFoMain
         AlignWithMargins = True
         Left = 3
         Top = 3
-        Width = 102
+        Width = 108
         Height = 33
         Align = alTop
         Center = True
@@ -441,12 +441,13 @@ object FoMain: TFoMain
           00000049454E44AE426082}
         ShowHint = True
         ExplicitLeft = 8
+        ExplicitWidth = 102
       end
       object ImFile: TImage
         AlignWithMargins = True
         Left = 3
         Top = 42
-        Width = 102
+        Width = 108
         Height = 32
         Hint = 'File'
         Align = alTop

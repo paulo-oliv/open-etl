@@ -1,35 +1,32 @@
 inherited FoEditCondensation: TFoEditCondensation
   Caption = 'Edit Condensation'
   ClientHeight = 440
-  ClientWidth = 413
-  ExplicitWidth = 429
-  ExplicitHeight = 479
+  ClientWidth = 385
+  ExplicitWidth = 401
+  ExplicitHeight = 474
   PixelsPerInch = 96
   TextHeight = 20
-  object RgKind: TRadioGroup [0]
+  object Gr: TcxVerticalGrid [0]
     AlignWithMargins = True
     Left = 3
     Top = 3
-    Width = 185
-    Height = 434
-    Align = alLeft
-    Items.Strings = (
-      'Sum'
-      'Average'
-      'Max'
-      'Min'
-      'Count'
-      'Best')
-    TabOrder = 0
-  end
-  object ClColumns: TCheckListBox [1]
-    AlignWithMargins = True
-    Left = 194
-    Top = 3
-    Width = 216
+    Width = 379
     Height = 434
     Align = alClient
-    ItemHeight = 20
-    TabOrder = 1
+    TabOrder = 0
+    ExplicitLeft = 111
+    ExplicitWidth = 271
+    Version = 1
+    object GrEditorRow1: TcxEditorRow
+      Properties.Caption = 'Teste'
+      Properties.EditPropertiesClassName = 'TcxComboBoxProperties'
+      Properties.EditProperties.DropDownListStyle = lsEditFixedList
+      Properties.DataBinding.ValueType = 'String'
+      Properties.Value = Null
+      ID = 0
+      ParentID = -1
+      Index = 0
+      Version = 1
+    end
   end
 end

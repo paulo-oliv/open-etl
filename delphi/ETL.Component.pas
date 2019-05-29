@@ -7,11 +7,13 @@ uses
   System.Classes,
   Vcl.StdCtrls,
   Vcl.Controls,
+  ETL.Form.Grid,
   ETL.FileProject.Interfaces;
 
 type
   TComponentETL = class(TPaintBox, IComponentETL, ISourceETL)
   strict private
+    FFormGrid: TFoGrid;
     FLabel: TCustomLabel;
     FSources: IListSources;
     FGUID: string;
@@ -40,10 +42,11 @@ type
     procedure AddSource(const ASource: IComponentETL);
     function GetKind: Integer;
     procedure Edit; virtual; abstract;
-    procedure Preview; virtual; abstract;
+    procedure Preview;
     procedure Delete;
     function GetLeft: Integer;
     function GetTop: Integer;
+    function GetGrid: TFoGrid; virtual;
     constructor Create(const AOwnerAndParent: TWinControl; const AGUID: string);
   published
     property Title: string read getTitle write setTitle;
@@ -134,6 +137,18 @@ end;
 function TComponentETL.getTitle: string;
 begin
   Result := FLabel.Caption;
+end;
+
+function TComponentETL.GetGrid: TFoGrid;
+begin
+  if not Assigned(FFormGrid) then
+    FFormGrid := TFoGrid.New(Owner);
+  Result := FFormGrid;
+end;
+
+procedure TComponentETL.Preview;
+begin
+  GetGrid.Show;
 end;
 
 function TComponentETL.GetId: string;

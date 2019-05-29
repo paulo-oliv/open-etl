@@ -2,12 +2,13 @@ unit ETL.FileProject.Interfaces;
 
 interface
 
-uses Generics.Collections;
+uses ETL.Form.Grid, Generics.Collections;
 
 type
   ISourceETL = interface
     ['{8D0C91ED-10E1-4C14-9E35-7A01237BD8A4}']
-    function getID: string;
+    function GetID: string;
+    function GetGrid: TFoGrid;
   end;
 
   IList = interface
@@ -45,8 +46,16 @@ type
     function GenerateTitle(APrefix: string): string;
   end;
 
+  IComponentExtract = interface(IComponentETL)
+    ['{06C636E3-93E2-420B-AD22-CD3F5B4C9F83}']
+  end;
+
   IComponentTransform = interface(IComponentETL)
     ['{FCB1B851-02E5-4768-9903-763034678F39}']
+  end;
+
+  IComponentLoad = interface(IComponentETL)
+    ['{AA5EB842-3CF8-4E57-81D0-520929331B4D}']
   end;
 
   IProjectETL = interface

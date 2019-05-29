@@ -65,12 +65,24 @@ end;
 { TCompCondensation }
 
 function TCompCondensation.GetInstanceFormEdit: TFoEditCondensation;
+var
+  LSources: IListSources;
+  i, j: Integer;
 begin
   if not Assigned(FFormEdit) then
-  begin
     FFormEdit := TFoEditCondensation.New(Self);
-    Caption := Title;
-  end;
+  FFormEdit.Caption := Title;
+  LSources := GetSources;
+  if Assigned(LSources) then
+    for i := 0 to LSources.Count - 1 do
+    begin
+      with LSources.GetItem(i).GetGrid do
+      begin
+        for j := 0 to tv.ColumnCount - 1 do
+          if tv.Columns[j].Visible then
+            TFoEditCondensation(FFormEdit).AddField(tv.Columns[j].Caption)
+      end;
+    end;
   Result := TFoEditCondensation(FFormEdit);
 end;
 
@@ -82,42 +94,34 @@ begin
   end;
 end;
 
-const
-  SEPARATE_CONDENSATION_CHAR = '|';
-
 function TCompCondensation.GetScript: string;
-var
-  i: Integer;
 begin
   Result := '';
   if Assigned(FFormEdit) then
-  begin
-    for i := 0 to TFoEditCondensation(FFormEdit).ClColumns.Count - 1 do
-      if TFoEditCondensation(FFormEdit).ClColumns.Checked[i] then
-        Result := Result + IntToStr(i) + ',';
-    Result := IntToStr(TFoEditCondensation(FFormEdit).RgKind.ItemIndex) +
-      SEPARATE_CONDENSATION_CHAR + Result;
-  end;
+    Result := TFoEditCondensation(FFormEdit).ToString;
 end;
 
 procedure TCompCondensation.setScript(const AScript: string);
 var
-  LColumns, LNum: string;
-  p, i: Integer;
+  LValue: string;
+  i, j: Integer;
+  LFormEdit: TFoEditCondensation;
 begin
-  p := Pos(SEPARATE_CONDENSATION_CHAR, AScript);
-  if TryStrToInt(Copy(AScript, 1, p - 1), i) then
-    GetInstanceFormEdit.RgKind.ItemIndex := i;
-  LColumns := Copy(AScript, p + 1);
-  LNum := '';
-  for i := 1 to LColumns.Length do
-    if LColumns[i] = ',' then
+  j := 0;
+  LValue := '';
+  LFormEdit := GetInstanceFormEdit;
+  for i := 1 to AScript.Length do
+    if AScript[i] = SEPARATE_CONDENSATION_CHAR then
     begin
-      TFoEditCondensation(FFormEdit).ClColumns.Checked[StrToInt(LNum)] := True;
-      LNum := '';
+      if LValue <> '' then
+      begin
+        LFormEdit.SetValue(j, LValue);
+        j := j + 1;
+        LValue := '';
+      end;
     end
     else
-      LNum := LNum + LColumns[i];
+      LValue := LValue + AScript[i];
 end;
 
 end.

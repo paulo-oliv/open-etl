@@ -19,10 +19,10 @@ object FoGrid: TFoGrid
     Left = 3
     Top = 3
     Width = 629
-    Height = 335
-    Hint = ''
+    Height = 385
     Align = alClient
     TabOrder = 0
+    ExplicitHeight = 335
     object tv: TcxGridBandedTableView
       Navigator.Buttons.CustomButtons = <>
       Navigator.Buttons.Insert.Visible = False
@@ -52,25 +52,5 @@ object FoGrid: TFoGrid
     object Lv: TcxGridLevel
       GridView = tv
     end
-  end
-  object Button1: TButton
-    Left = 0
-    Top = 341
-    Width = 635
-    Height = 25
-    Align = alBottom
-    Caption = 'Button1'
-    TabOrder = 1
-    OnClick = Button1Click
-  end
-  object Button2: TButton
-    Left = 0
-    Top = 366
-    Width = 635
-    Height = 25
-    Align = alBottom
-    Caption = 'Button2'
-    TabOrder = 2
-    OnClick = Button2Click
   end
 end

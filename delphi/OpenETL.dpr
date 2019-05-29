@@ -15,7 +15,9 @@ uses
   ETL.DataModule.Main in 'ETL.DataModule.Main.pas' {DmMain: TDataModule},
   ETL.Form.Edit.Transform.Condensation in 'ETL.Form.Edit.Transform.Condensation.pas' {FoEditCondensation},
   ETL.Component.Transform in 'ETL.Component.Transform.pas',
-  ETL.Link in 'ETL.Link.pas';
+  ETL.Link in 'ETL.Link.pas',
+  ETL.Component.Extract in 'ETL.Component.Extract.pas',
+  ETL.Component.Load in 'ETL.Component.Load.pas';
 
 {$R *.res}
 
