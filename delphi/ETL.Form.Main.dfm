@@ -1,8 +1,8 @@
 object FoMain: TFoMain
   Left = 246
   Top = 188
-  ClientHeight = 626
-  ClientWidth = 984
+  ClientHeight = 463
+  ClientWidth = 797
   Color = clWhite
   DoubleBuffered = True
   Font.Charset = ANSI_CHARSET
@@ -21,7 +21,7 @@ object FoMain: TFoMain
     Left = 3
     Top = 3
     Width = 118
-    Height = 597
+    Height = 434
     HorzScrollBar.Style = ssFlat
     VertScrollBar.Tracking = True
     BevelEdges = []
@@ -36,6 +36,7 @@ object FoMain: TFoMain
     HeaderFont.Style = []
     ParentCtl3D = False
     TabOrder = 0
+    ExplicitHeight = 597
     object CpLoad: TCategoryPanel
       Top = 321
       Height = 104
@@ -480,15 +481,18 @@ object FoMain: TFoMain
   end
   object dxRibbonStatusBar1: TdxRibbonStatusBar
     Left = 0
-    Top = 603
-    Width = 984
+    Top = 440
+    Width = 797
     Height = 23
+    Hint = ''
     Panels = <>
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clDefault
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = []
+    ExplicitTop = 603
+    ExplicitWidth = 984
   end
   object Button1: TButton
     Left = 368
