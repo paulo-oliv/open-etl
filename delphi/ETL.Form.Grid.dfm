@@ -20,9 +20,9 @@ object FoGrid: TFoGrid
     Top = 3
     Width = 629
     Height = 385
+    Hint = ''
     Align = alClient
     TabOrder = 0
-    ExplicitHeight = 335
     object tv: TcxGridBandedTableView
       Navigator.Buttons.CustomButtons = <>
       Navigator.Buttons.Insert.Visible = False

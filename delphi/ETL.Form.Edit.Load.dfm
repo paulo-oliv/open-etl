@@ -129,4 +129,8 @@ inherited FoEditLoad: TFoEditLoad
     Caption = '...'
     TabOrder = 10
   end
+  inherited ActionList: TActionList
+    Left = 200
+    Top = 128
+  end
 end

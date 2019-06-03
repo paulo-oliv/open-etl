@@ -4,6 +4,7 @@ interface
 
 uses
   ETL.Component,
+  ETL.Form.Grid,
   ETL.Form.Edit.Transform,
   ETL.Form.Edit.Transform.Condensation,
   ETL.FileProject.Interfaces;
@@ -12,6 +13,7 @@ type
   TCompTransform = class(TComponentETL, IComponentTransform)
   strict protected
     FFormEdit: TFoEditTransform;
+    procedure RefreshGrid(const AFormGrid: TFoGrid); override;
   public
     procedure setTitle(const ATitle: string); override;
     procedure Edit; override;
@@ -53,6 +55,13 @@ begin
     FFormEdit.Caption := Title;
   end;
   FFormEdit.ShowModal;
+end;
+
+procedure TCompTransform.RefreshGrid(const AFormGrid: TFoGrid);
+begin
+  inherited;
+  //
+
 end;
 
 procedure TCompTransform.setTitle(const ATitle: string);

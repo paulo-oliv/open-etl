@@ -12,11 +12,8 @@ type
     Lv: TcxGridLevel;
     Gr: TcxGrid;
     tv: TcxGridBandedTableView;
-    procedure Button1Click(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
   strict private
   public
-    procedure Save;
     class function New(const AOwner: TComponent): TFoGrid;
   end;
 
@@ -26,6 +23,14 @@ implementation
 
 uses uMsg;
 { TFoGrid }
+
+class function TFoGrid.New(const AOwner: TComponent): TFoGrid;
+begin
+  Result := TFoGrid.Create(AOwner);
+end;
+
+
+(*
 
 procedure TFoGrid.Button1Click(Sender: TObject);
 begin
@@ -37,10 +42,6 @@ begin
   tv.RestoreFromIniFile('testeINI');
 end;
 
-class function TFoGrid.New(const AOwner: TComponent): TFoGrid;
-begin
-  Result := TFoGrid.Create(AOwner);
-end;
 
 procedure TFoGrid.Save;
 var
@@ -60,7 +61,7 @@ begin
   end;
 end;
 
-(*
+
   procedure AbrirFiltro;
   var
   AStream: TMemoryStream;

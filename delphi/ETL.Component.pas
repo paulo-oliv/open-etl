@@ -35,6 +35,7 @@ type
       var Accept: Boolean); override;
     procedure DragDrop(Source: TObject; X, Y: Integer); override;
     procedure Paint; override;
+    procedure RefreshGrid(const AGrid: TFoGrid); virtual; abstract;
   public
     procedure setPosition(const Ax, Ay: Integer);
     function GetId: string;
@@ -142,7 +143,10 @@ end;
 function TComponentETL.GetGrid: TFoGrid;
 begin
   if not Assigned(FFormGrid) then
+  begin
     FFormGrid := TFoGrid.New(Owner);
+    RefreshGrid(FFormGrid);
+  end;
   Result := FFormGrid;
 end;
 
