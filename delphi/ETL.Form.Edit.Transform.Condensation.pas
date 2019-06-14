@@ -12,6 +12,7 @@ type
     GrEditorRow1: TcxEditorRow;
   public
     procedure SetValue(const ARow: Integer; const AValue: string);
+    function GetValue(const ARow: Integer): string;
     procedure AddField(const AField: string);
     function ToString: string; override;
     class function New(const AOwner: TComponent): TFoEditCondensation;
@@ -19,6 +20,17 @@ type
 
 const
   SEPARATE_CONDENSATION_CHAR = '|';
+
+  CONDENSATION_NULL = 'Null';
+  CONDENSATION_GROUP_BY = 'GROUP BY';
+  CONDENSATION_SUM = 'Sum';
+  CONDENSATION_AVERAGE = 'Average';
+  CONDENSATION_MAX = 'Max';
+  CONDENSATION_MIN = 'Min';
+  CONDENSATION_COUNT = 'Count';
+  CONDENSATION_FIRST = 'First';
+  CONDENSATION_LAST = 'Last';
+  CONDENSATION_BEST = 'Best';
 
 implementation
 
@@ -28,10 +40,14 @@ uses Variants;
 
 { TFoEditCondensation }
 
+function TFoEditCondensation.GetValue(const ARow: Integer): string;
+begin
+  Result := VarToStr(TcxEditorRow(Gr.Rows.Items[ARow]).Properties.Value);
+end;
+
 class function TFoEditCondensation.New(const AOwner: TComponent): TFoEditCondensation;
 begin
   Result := TFoEditCondensation.Create(AOwner);
-  Result.Gr.ClearRows;
 end;
 
 procedure TFoEditCondensation.SetValue(const ARow: Integer; const AValue: string);
@@ -48,16 +64,16 @@ begin
     with TcxComboBoxProperties(Properties.EditProperties) do
     begin
       DropDownListStyle := lsEditFixedList;
-      Items.Add('Null');
-      Items.Add('GROUP BY');
-      Items.Add('Sum');
-      Items.Add('Average');
-      Items.Add('Max');
-      Items.Add('Min');
-      Items.Add('Count');
-      Items.Add('First');
-      Items.Add('Last');
-      Items.Add('Best');
+      Items.Add(CONDENSATION_NULL);
+      Items.Add(CONDENSATION_GROUP_BY);
+      Items.Add(CONDENSATION_SUM);
+      Items.Add(CONDENSATION_AVERAGE);
+      Items.Add(CONDENSATION_MAX);
+      Items.Add(CONDENSATION_MIN);
+      Items.Add(CONDENSATION_COUNT);
+      Items.Add(CONDENSATION_FIRST);
+      Items.Add(CONDENSATION_LAST);
+      Items.Add(CONDENSATION_BEST);
     end;
   end;
 end;

@@ -3,7 +3,7 @@ inherited FoEditCondensation: TFoEditCondensation
   ClientHeight = 440
   ClientWidth = 385
   ExplicitWidth = 401
-  ExplicitHeight = 474
+  ExplicitHeight = 479
   PixelsPerInch = 96
   TextHeight = 20
   object Gr: TcxVerticalGrid [0]
@@ -14,8 +14,6 @@ inherited FoEditCondensation: TFoEditCondensation
     Height = 434
     Align = alClient
     TabOrder = 0
-    ExplicitLeft = 111
-    ExplicitWidth = 271
     Version = 1
     object GrEditorRow1: TcxEditorRow
       Properties.Caption = 'Teste'

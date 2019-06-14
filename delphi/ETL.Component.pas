@@ -141,11 +141,30 @@ begin
 end;
 
 function TComponentETL.GetGrid: TFoGrid;
+var
+  i: Integer;
+  LSource: ISourceETL;
 begin
   if not Assigned(FFormGrid) then
   begin
-    FFormGrid := TFoGrid.New(Owner);
-    RefreshGrid(FFormGrid);
+    if Assigned(FSources) then
+      for i := 0 to FSources.Count - 1 do
+      begin
+        LSource := FSources.GetItem(i);
+        if Assigned(LSource) then
+          FFormGrid := LSource.GetGrid;
+      end;
+    if not Assigned(FFormGrid) then
+      FFormGrid := TFoGrid.New(Owner);
+
+    FFormGrid.tv.BeginUpdate;
+    try
+      RefreshGrid(FFormGrid);
+      FFormGrid.tv.OptionsView.BandHeaders := (FFormGrid.tv.Bands.Count > 1) or
+        (FFormGrid.tv.Bands[0].Caption <> '');
+    finally
+      FFormGrid.tv.EndUpdate;
+    end;
   end;
   Result := FFormGrid;
 end;

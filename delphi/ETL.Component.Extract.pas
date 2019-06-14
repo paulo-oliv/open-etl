@@ -107,7 +107,6 @@ var
     i: Integer;
   begin
     LConn := TFDConnection.Create(nil);
-    AFormGrid.tv.BeginUpdate;
     try
       LQr.Close;
       LConn.ConnectionDefName := AConnectionName;
@@ -127,6 +126,7 @@ var
           Caption := LQr.Fields[i].DisplayLabel;
           // Name := '';
           // DataBinding.ValueTypeClass := TcxStringValueType;
+          // DataBinding.FieldName := LQr.Fields[i].FieldName;
           // Text := LQr.Fields[i].DisplayLabel;
         end;
         i := i + 1;
@@ -137,10 +137,10 @@ var
         for i := 0 to LQr.FieldDefs.Count - 1 do
           AFormGrid.tv.DataController.Values[AFormGrid.tv.DataController.RecordCount - 1, i] :=
             LQr.Fields[i].Value;
+
         LQr.Next;
       end;
     finally
-      AFormGrid.tv.EndUpdate;
       LConn.DisposeOf;
     end;
   end;
@@ -152,6 +152,7 @@ begin
   LQr := TFDQuery.Create(nil);
   try
     AFormGrid.tv.DataController.RecordCount := 0;
+    // AFormGrid.tv.Bands.Clear;
     AFormGrid.tv.ClearItems;
     for i := 0 to FFormEdit.ClConexoes.Count - 1 do
       if FFormEdit.ClConexoes.Checked[i] then
@@ -159,7 +160,6 @@ begin
   finally
     LQr.DisposeOf;
   end;
-
 end;
 
 destructor TCompQuery.Destroy;
