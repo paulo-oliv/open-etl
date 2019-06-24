@@ -178,7 +178,10 @@ end;
 function TCompQuery.GetInstanceFormEdit: TFoEditQuery;
 begin
   if not Assigned(FFormEdit) then
+  begin
     FFormEdit := TFoEditQuery.New(Self);
+    FFormEdit.OnChange := OnFormEditChange;
+  end;
   Result := FFormEdit;
 end;
 

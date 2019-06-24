@@ -10,6 +10,7 @@ type
   TFoEditCondensation = class(TFoEditTransform)
     Gr: TcxVerticalGrid;
     GrEditorRow1: TcxEditorRow;
+    procedure GrEditValueChanged(Sender: TObject; ARowProperties: TcxCustomEditorRowProperties);
   public
     procedure SetValue(const ARow: Integer; const AValue: string);
     function GetValue(const ARow: Integer): string;
@@ -43,6 +44,12 @@ uses Variants;
 function TFoEditCondensation.GetValue(const ARow: Integer): string;
 begin
   Result := VarToStr(TcxEditorRow(Gr.Rows.Items[ARow]).Properties.Value);
+end;
+
+procedure TFoEditCondensation.GrEditValueChanged(Sender: TObject;
+  ARowProperties: TcxCustomEditorRowProperties);
+begin
+  DoChange;
 end;
 
 class function TFoEditCondensation.New(const AOwner: TComponent): TFoEditCondensation;

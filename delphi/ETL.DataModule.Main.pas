@@ -27,12 +27,15 @@ type
     MnDeleteComponent: TMenuItem;
     AcDelete: TAction;
     IL16: TcxImageList;
+    AcRefresh: TAction;
+    Refresh1: TMenuItem;
     procedure MnDelLinkClick(Sender: TObject);
     procedure MnEditLabelClick(Sender: TObject);
     procedure AcEditScriptExecute(Sender: TObject);
     procedure AcPreviewExecute(Sender: TObject);
     procedure AcEditTitleExecute(Sender: TObject);
     procedure AcDeleteExecute(Sender: TObject);
+    procedure AcRefreshExecute(Sender: TObject);
   private
   public
   end;
@@ -49,17 +52,7 @@ implementation
 uses uMsg, ETL.Component, ETL.Link;
 
 procedure TDmMain.AcDeleteExecute(Sender: TObject);
-// var
-// i: Integer;
 begin
-  // for i := ControlCount - 1 downto 0 do
-  // if Controls[i] is TLinkComponents then
-  // begin
-  // if (PopupComp.PopupComponent = TLinkComponents(Controls[i]).Source) or
-  // (PopupComp.PopupComponent = TLinkComponents(Controls[i]).Target) then
-  // Controls[i].DisposeOf;
-  // end;
-
   TComponentETL(PopupComp.PopupComponent).Delete
 end;
 
@@ -78,8 +71,21 @@ begin
 end;
 
 procedure TDmMain.AcPreviewExecute(Sender: TObject);
+var
+  LComponentETL: TComponentETL;
 begin
-  TComponentETL(PopupComp.PopupComponent).Preview;
+  LComponentETL := TComponentETL(PopupComp.PopupComponent);
+  if LComponentETL.Updated then
+    if TMensagem.Confirmacao('Do you want to update the data?') then
+      // if TMensagem.Confirmacao('Deseja atualizar os dados?') then
+      LComponentETL.RefreshPreviewForm;
+
+  LComponentETL.Preview;
+end;
+
+procedure TDmMain.AcRefreshExecute(Sender: TObject);
+begin
+  TComponentETL(PopupComp.PopupComponent).RefreshPreviewForm;
 end;
 
 procedure TDmMain.MnDelLinkClick(Sender: TObject);

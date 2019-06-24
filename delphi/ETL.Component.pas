@@ -13,12 +13,14 @@ uses
 type
   TComponentETL = class(TPaintBox, IComponentETL, ISourceETL)
   strict private
+    FUpdated: Boolean;
     FFormGrid: TFoGrid;
     FLabel: TCustomLabel;
     FSources: IListSources;
     FGUID: string;
     class var FMoveX, FMoveY: Integer;
     class var FMover: Boolean;
+    function GetGrid: TFoGrid;
   strict protected
     procedure RefreshPositionLabel;
     procedure Resize; override;
@@ -36,20 +38,24 @@ type
     procedure DragDrop(Source: TObject; X, Y: Integer); override;
     procedure Paint; override;
     procedure RefreshGrid(const AGrid: TFoGrid); virtual; abstract;
+    procedure OnFormEditChange(Sender: TObject);
+    function GetId: string;
   public
     procedure setPosition(const Ax, Ay: Integer);
-    function GetId: string;
     function GetSources: IListSources;
     procedure AddSource(const ASource: IComponentETL);
     function GetKind: Integer;
     procedure Edit; virtual; abstract;
     procedure Preview;
     procedure Delete;
+    procedure RefreshPreviewForm;
+
     function GetLeft: Integer;
     function GetTop: Integer;
-    function GetGrid: TFoGrid; virtual;
+
     constructor Create(const AOwnerAndParent: TWinControl; const AGUID: string);
   published
+    property Updated: Boolean read FUpdated;
     property Title: string read getTitle write setTitle;
   end;
 
@@ -140,7 +146,7 @@ begin
   Result := FLabel.Caption;
 end;
 
-function TComponentETL.GetGrid: TFoGrid;
+procedure TComponentETL.RefreshPreviewForm;
 var
   i: Integer;
   LSource: ISourceETL;
@@ -156,16 +162,23 @@ begin
       end;
     if not Assigned(FFormGrid) then
       FFormGrid := TFoGrid.New(Owner);
-
-    FFormGrid.tv.BeginUpdate;
-    try
-      RefreshGrid(FFormGrid);
-      FFormGrid.tv.OptionsView.BandHeaders := (FFormGrid.tv.Bands.Count > 1) or
-        (FFormGrid.tv.Bands[0].Caption <> '');
-    finally
-      FFormGrid.tv.EndUpdate;
-    end;
   end;
+
+  FFormGrid.tv.BeginUpdate;
+  try
+    RefreshGrid(FFormGrid);
+    FFormGrid.tv.OptionsView.BandHeaders := (FFormGrid.tv.Bands.Count > 1) or
+      (FFormGrid.tv.Bands[0].Caption <> '');
+    FUpdated := True;
+  finally
+    FFormGrid.tv.EndUpdate;
+  end;
+end;
+
+function TComponentETL.GetGrid: TFoGrid;
+begin
+  if not FUpdated then
+    RefreshPreviewForm;
   Result := FFormGrid;
 end;
 
@@ -233,6 +246,11 @@ begin
     FMover := false;
 end;
 
+procedure TComponentETL.OnFormEditChange(Sender: TObject);
+begin
+  FUpdated := False;
+end;
+
 procedure TComponentETL.setPosition(const Ax, Ay: Integer);
 begin
   SetBounds(Ax, Ay, COMP_WIDTH, COMP_HEIGHT);
@@ -257,6 +275,7 @@ begin
   if not Assigned(FSources) then
     FSources := TListSources.Create;
   FSources.Add(ASource);
+  FUpdated := False;
 end;
 
 procedure TComponentETL.DragDrop(Source: TObject; X, Y: Integer);

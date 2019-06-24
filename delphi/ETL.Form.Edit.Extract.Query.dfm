@@ -16,6 +16,7 @@ inherited FoEditQuery: TFoEditQuery
     Color = clBtnFace
     ScrollBars = ssBoth
     TabOrder = 1
+    OnChange = MMChange
   end
   object PnEsquerda: TPanel [1]
     AlignWithMargins = True
@@ -32,6 +33,7 @@ inherited FoEditQuery: TFoEditQuery
       Top = 49
       Width = 179
       Height = 378
+      OnClickCheck = ClConexoesClickCheck
       Align = alClient
       ItemHeight = 20
       PopupMenu = PopupMenu1

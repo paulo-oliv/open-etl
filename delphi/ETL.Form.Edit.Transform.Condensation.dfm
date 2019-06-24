@@ -12,8 +12,10 @@ inherited FoEditCondensation: TFoEditCondensation
     Top = 3
     Width = 379
     Height = 434
+    Hint = ''
     Align = alClient
     TabOrder = 0
+    OnEditValueChanged = GrEditValueChanged
     Version = 1
     object GrEditorRow1: TcxEditorRow
       Properties.Caption = 'Teste'

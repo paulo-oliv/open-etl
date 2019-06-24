@@ -10,7 +10,12 @@ type
     ActionList: TActionList;
     AcCloseWindow: TAction;
     procedure AcCloseWindowExecute(Sender: TObject);
+  strict private
+    FOnChange: TNotifyEvent;
+  strict protected
+    procedure DoChange;
   public
+    property OnChange: TNotifyEvent read FOnChange write FOnChange;
     // procedure SetTitle(const ATitle: string);
   end;
 
@@ -28,5 +33,11 @@ end;
   begin
   Caption := ATitle;
   end; }
+
+procedure TFoEdit.DoChange;
+begin
+  if Assigned(FOnChange) then
+    FOnChange(Self);
+end;
 
 end.

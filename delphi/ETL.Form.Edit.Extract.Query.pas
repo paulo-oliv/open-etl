@@ -28,6 +28,8 @@ type
     procedure AcNewConnectionExecute(Sender: TObject);
     procedure AcDeleteConnectionExecute(Sender: TObject);
     procedure AcEditConnectionExecute(Sender: TObject);
+    procedure ClConexoesClickCheck(Sender: TObject);
+    procedure MMChange(Sender: TObject);
   public
     procedure UpdateConnections;
     class function New(const AOwner: TComponent): TFoEditQuery;
@@ -67,6 +69,16 @@ var
 begin
   for i := 0 to ClConexoes.Count - 1 do
     ClConexoes.Checked[i] := not ClConexoes.Checked[i];
+end;
+
+procedure TFoEditQuery.ClConexoesClickCheck(Sender: TObject);
+begin
+  DoChange;
+end;
+
+procedure TFoEditQuery.MMChange(Sender: TObject);
+begin
+  DoChange;
 end;
 
 procedure TFoEditQuery.AcDeleteConnectionExecute(Sender: TObject);

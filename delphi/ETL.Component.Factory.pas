@@ -26,7 +26,8 @@ type
 
 implementation
 
-uses ETL.Component.Extract, ETL.Component.Transform, ETL.Component.Load;
+uses ETL.Component.Extract, ETL.Component.Transform, ETL.Component.Transform.Condensation,
+  ETL.Component.Load;
 
 { TComponentETLFactory }
 
