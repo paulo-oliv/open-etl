@@ -17,7 +17,8 @@ uses
   ETL.Component.Transform in 'ETL.Component.Transform.pas',
   ETL.Link in 'ETL.Link.pas',
   ETL.Component.Extract in 'ETL.Component.Extract.pas',
-  ETL.Component.Load in 'ETL.Component.Load.pas';
+  ETL.Component.Load in 'ETL.Component.Load.pas',
+  ETL.Component.Transform.Condensation in 'ETL.Component.Transform.Condensation.pas';
 
 {$R *.res}
 
