@@ -18,13 +18,16 @@ uses
   ETL.Link in 'ETL.Link.pas',
   ETL.Component.Extract in 'ETL.Component.Extract.pas',
   ETL.Component.Load in 'ETL.Component.Load.pas',
-  ETL.Component.Transform.Condensation in 'ETL.Component.Transform.Condensation.pas';
+  ETL.Component.Transform.Condensation in 'ETL.Component.Transform.Condensation.pas',
+  uEnum in 'C:\osd\lib\uEnum.pas';
 
 {$R *.res}
 
 begin
   Application.Initialize;
+{$IFDEF DEBUG}
   ReportMemoryLeaksOnShutdown := True;
+{$ENDIF}
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TDmMain, DmMain);
   Application.CreateForm(TFoMain, FoMain);

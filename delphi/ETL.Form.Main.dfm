@@ -1,9 +1,9 @@
 object FoMain: TFoMain
   Left = 246
   Top = 188
-  ClientHeight = 463
+  ClientHeight = 506
   ClientWidth = 797
-  Color = clWhite
+  Color = 2368548
   DoubleBuffered = True
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
@@ -19,9 +19,9 @@ object FoMain: TFoMain
   object CategoryPanelGroup1: TCategoryPanelGroup
     AlignWithMargins = True
     Left = 3
-    Top = 3
-    Width = 118
-    Height = 434
+    Top = 44
+    Width = 134
+    Height = 436
     HorzScrollBar.Style = ssFlat
     VertScrollBar.Tracking = True
     BevelEdges = []
@@ -29,14 +29,19 @@ object FoMain: TFoMain
     BevelOuter = bvNone
     Color = clBtnFace
     Ctl3D = False
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -15
+    Font.Name = 'Segoe UI Semibold'
+    Font.Style = [fsBold]
     HeaderFont.Charset = DEFAULT_CHARSET
     HeaderFont.Color = clWindowText
     HeaderFont.Height = -11
     HeaderFont.Name = 'Tahoma'
     HeaderFont.Style = []
     ParentCtl3D = False
+    ParentFont = False
     TabOrder = 0
-    ExplicitHeight = 597
     object CpLoad: TCategoryPanel
       Top = 321
       Height = 104
@@ -47,7 +52,7 @@ object FoMain: TFoMain
         AlignWithMargins = True
         Left = 3
         Top = 3
-        Width = 108
+        Width = 124
         Height = 32
         Hint = 'Execute'
         Align = alTop
@@ -92,7 +97,7 @@ object FoMain: TFoMain
         AlignWithMargins = True
         Left = 3
         Top = 41
-        Width = 108
+        Width = 124
         Height = 32
         Hint = 'Script SQL'
         Align = alTop
@@ -139,7 +144,7 @@ object FoMain: TFoMain
         AlignWithMargins = True
         Left = 3
         Top = 155
-        Width = 108
+        Width = 124
         Height = 32
         Hint = 'Condensation'
         Align = alTop
@@ -188,7 +193,7 @@ object FoMain: TFoMain
         AlignWithMargins = True
         Left = 3
         Top = 41
-        Width = 108
+        Width = 124
         Height = 32
         Hint = 'Conversion'
         Align = alTop
@@ -227,7 +232,7 @@ object FoMain: TFoMain
         AlignWithMargins = True
         Left = 3
         Top = 79
-        Width = 108
+        Width = 124
         Height = 32
         Hint = 'Derivation'
         Align = alTop
@@ -288,7 +293,7 @@ object FoMain: TFoMain
         AlignWithMargins = True
         Left = 3
         Top = 3
-        Width = 108
+        Width = 124
         Height = 32
         Hint = 'Filter'
         Align = alTop
@@ -328,7 +333,7 @@ object FoMain: TFoMain
         AlignWithMargins = True
         Left = 3
         Top = 117
-        Width = 108
+        Width = 124
         Height = 32
         Hint = 'Join'
         Align = alTop
@@ -394,7 +399,7 @@ object FoMain: TFoMain
         AlignWithMargins = True
         Left = 3
         Top = 3
-        Width = 108
+        Width = 124
         Height = 33
         Align = alTop
         Center = True
@@ -448,7 +453,7 @@ object FoMain: TFoMain
         AlignWithMargins = True
         Left = 3
         Top = 42
-        Width = 108
+        Width = 124
         Height = 32
         Hint = 'File'
         Align = alTop
@@ -481,7 +486,7 @@ object FoMain: TFoMain
   end
   object dxRibbonStatusBar1: TdxRibbonStatusBar
     Left = 0
-    Top = 440
+    Top = 483
     Width = 797
     Height = 23
     Hint = ''
@@ -491,24 +496,41 @@ object FoMain: TFoMain
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = []
-    ExplicitTop = 603
-    ExplicitWidth = 984
   end
-  object Button1: TButton
-    Left = 368
-    Top = 48
-    Width = 75
-    Height = 25
-    Action = AcSave
+  object Panel1: TPanel
+    Left = 0
+    Top = 0
+    Width = 797
+    Height = 41
+    Align = alTop
+    BevelOuter = bvNone
+    Color = 1118481
+    Ctl3D = False
+    ParentBackground = False
+    ParentCtl3D = False
     TabOrder = 2
-  end
-  object Button2: TButton
-    Left = 376
-    Top = 79
-    Width = 75
-    Height = 25
-    Action = AcOpen
-    TabOrder = 3
+    object Button2: TButton
+      AlignWithMargins = True
+      Left = 3
+      Top = 3
+      Width = 100
+      Height = 35
+      Action = AcOpen
+      Align = alLeft
+      Images = DmMain.IL32
+      TabOrder = 0
+    end
+    object Button1: TButton
+      AlignWithMargins = True
+      Left = 109
+      Top = 3
+      Width = 100
+      Height = 35
+      Action = AcSave
+      Align = alLeft
+      Images = DmMain.IL32
+      TabOrder = 1
+    end
   end
   object SQL: TFDScript
     SQLScripts = <>
@@ -527,6 +549,7 @@ object FoMain: TFoMain
     Top = 296
   end
   object AlPrinc: TActionList
+    Images = DmMain.IL32
     Left = 516
     Top = 175
     object AcOpen: TFileOpen
@@ -588,12 +611,10 @@ object FoMain: TFoMain
     object AcCommit: TAction
       Caption = 'Commit'
       ImageIndex = 8
-      OnExecute = AcCommitExecute
     end
     object AcRollBack: TAction
       Caption = 'RollBack'
       ImageIndex = 7
-      OnExecute = AcRollBackExecute
     end
     object AcSave: TFileSaveAs
       Category = 'File'
@@ -609,7 +630,6 @@ object FoMain: TFoMain
     object AcAutoFecha: TAction
       AutoCheck = True
       Caption = 'Close After Success'
-      OnExecute = AcAutoFechaExecute
     end
     object AcClose: TAction
       Caption = 'Close'

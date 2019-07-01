@@ -9289,7 +9289,6 @@ object DmMain: TDmMain
     object MnDelLink: TMenuItem
       Caption = 'Delete'
       ImageIndex = 15
-      OnClick = MnDelLinkClick
     end
   end
   object AlComp: TActionList

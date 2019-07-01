@@ -15,7 +15,7 @@ type
   strict private
     FUpdated: Boolean;
     FFormGrid: TFoGrid;
-    FLabel: TCustomLabel;
+    FLabel: TLabel;
     FSources: IListSources;
     FGUID: string;
     class var FMoveX, FMoveY: Integer;
@@ -63,7 +63,7 @@ implementation
 
 { TComponentETL }
 
-uses SysUtils, ETL.DataModule.Main, ETL.Link;
+uses SysUtils, ETL.DataModule.Main, ETL.Link, graphics;
 
 const
   COMP_WIDTH = 64;
@@ -103,11 +103,12 @@ end;
 
 constructor TComponentETL.Create(const AOwnerAndParent: TWinControl; const AGUID: string);
 begin
-  FLabel := TCustomLabel.Create(AOwnerAndParent);
+  FLabel := TLabel.Create(AOwnerAndParent);
   inherited Create(AOwnerAndParent);
+  FLabel.Font.Name := 'Segoe UI';
+  FLabel.Font.Size := 10;
+  FLabel.Font.Color := Clwhite;
   Parent := AOwnerAndParent;
-  FLabel.Canvas.Font.Name := 'Segoe UI';
-  FLabel.Canvas.Font.Size := 10;
   FGUID := AGUID;
   PopupMenu := DmMain.PopupComp;
 end;
@@ -130,7 +131,22 @@ begin
 end;
 
 procedure TComponentETL.Delete;
+
+  procedure DeleteLinks;
+  var
+    i: Integer;
+  begin
+    for i := Parent.ControlCount - 1 downto 0 do
+      if Parent.Controls[i] is TLinkComponents then
+        if (TLinkComponents(Parent.Controls[i]).Target = IComponentETL(Self)) or
+          (TLinkComponents(Parent.Controls[i]).Source = IComponentETL(Self)) then
+          TLinkComponents(Parent.Controls[i]).DisposeOf;
+  end;
+
 begin
+  if Assigned(Parent) then
+    DeleteLinks;
+
   DisposeOf;
 end;
 
@@ -248,7 +264,7 @@ end;
 
 procedure TComponentETL.OnFormEditChange(Sender: TObject);
 begin
-  FUpdated := False;
+  FUpdated := false;
 end;
 
 procedure TComponentETL.setPosition(const Ax, Ay: Integer);
@@ -275,7 +291,7 @@ begin
   if not Assigned(FSources) then
     FSources := TListSources.Create;
   FSources.Add(ASource);
-  FUpdated := False;
+  FUpdated := false;
 end;
 
 procedure TComponentETL.DragDrop(Source: TObject; X, Y: Integer);

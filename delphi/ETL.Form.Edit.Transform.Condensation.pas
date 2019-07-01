@@ -7,23 +7,38 @@ uses ETL.Form.Edit.Transform, Vcl.Controls, Vcl.StdCtrls, Vcl.CheckLst, Vcl.ExtC
   cxLookAndFeelPainters, cxStyles, cxEdit, cxInplaceContainer, cxVGrid, cxDropDownEdit;
 
 type
+  TKindCondensation = (Null = 0, GroupBy, Sum, Average, Max, Min, Count, First, Last, Best);
+
   TFoEditCondensation = class(TFoEditTransform)
     Gr: TcxVerticalGrid;
     GrEditorRow1: TcxEditorRow;
     procedure GrEditValueChanged(Sender: TObject; ARowProperties: TcxCustomEditorRowProperties);
   public
     procedure SetValue(const ARow: Integer; const AValue: string);
+    function GetKind(const ARow: Integer): TKindCondensation;
     function GetValue(const ARow: Integer): string;
     procedure AddField(const AField: string);
     function ToString: string; override;
     class function New(const AOwner: TComponent): TFoEditCondensation;
   end;
 
+  TKindCondensationHelper = record helper for TKindCondensation
+    function AsByte: byte;
+    function ToString: string;
+  end;
+
+  TConversions<T> = class
+  strict private
+  public
+    class function StringToEnumeration(x: String): T;
+    class function EnumerationToString(x: T): String;
+  end;
+
 const
   SEPARATE_CONDENSATION_CHAR = '|';
 
   CONDENSATION_NULL = 'Null';
-  CONDENSATION_GROUP_BY = 'GROUP BY';
+  CONDENSATION_GROUP_BY = 'GroupBy';
   CONDENSATION_SUM = 'Sum';
   CONDENSATION_AVERAGE = 'Average';
   CONDENSATION_MAX = 'Max';
@@ -37,9 +52,34 @@ implementation
 
 {$R *.dfm}
 
-uses Variants;
+uses Variants, System.TypInfo;
+
+{ TConversions }
+
+class function TConversions<T>.EnumerationToString(x: T): String;
+begin
+  case Sizeof(T) of
+    1: Result := GetEnumName(TypeInfo(T), PByte(@x)^);
+    2: Result := GetEnumName(TypeInfo(T), PWord(@x)^);
+    4: Result := GetEnumName(TypeInfo(T), PCardinal(@x)^);
+  end;
+end;
+
+class function TConversions<T>.StringToEnumeration(x: String): T;
+begin
+  case Sizeof(T) of
+    1: PByte(@Result)^ := GetEnumValue(TypeInfo(T), x);
+    2: PWord(@Result)^ := GetEnumValue(TypeInfo(T), x);
+    4: PCardinal(@Result)^ := GetEnumValue(TypeInfo(T), x);
+  end;
+end;
 
 { TFoEditCondensation }
+
+function TFoEditCondensation.GetKind(const ARow: Integer): TKindCondensation;
+begin
+  Result := TConversions<TKindCondensation>.StringToEnumeration(GetValue(ARow));
+end;
 
 function TFoEditCondensation.GetValue(const ARow: Integer): string;
 begin
@@ -93,6 +133,39 @@ begin
   for i := 0 to Gr.Rows.Count - 1 do
     Result := Result + VarToStr(TcxEditorRow(Gr.Rows.Items[i]).Properties.Value) +
       SEPARATE_CONDENSATION_CHAR;
+end;
+
+{ TKindCondensationHelper }
+
+function TKindCondensationHelper.AsByte: byte;
+begin
+  Result := byte(Self);
+end;
+
+function TKindCondensationHelper.ToString: string;
+begin
+  case Self of
+    Null:
+      Result := CONDENSATION_NULL;
+    GroupBy:
+      Result := CONDENSATION_GROUP_BY;
+    Sum:
+      Result := CONDENSATION_SUM;
+    Average:
+      Result := CONDENSATION_AVERAGE;
+    Max:
+      Result := CONDENSATION_MAX;
+    Min:
+      Result := CONDENSATION_MIN;
+    Count:
+      Result := CONDENSATION_COUNT;
+    First:
+      Result := CONDENSATION_FIRST;
+    Last:
+      Result := CONDENSATION_LAST;
+    Best:
+      Result := CONDENSATION_BEST;
+  end;
 end;
 
 end.

@@ -10,7 +10,7 @@ uses dxRibbonSkins, dxRibbonCustomizationForm, cxGraphics, cxControls, cxLookAnd
   Vcl.Controls, Vcl.ExtCtrls, Vcl.Forms, ETL.Component, FireDAC.Stan.Option, FireDAC.Stan.Param,
   FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf, Data.DB,
   FireDAC.Comp.DataSet, FireDAC.Comp.Client, Vcl.ToolWin, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus,
-  Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls;
+  Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, Vcl.ComCtrls;
 
 type
   TFoMain = class(TForm)
@@ -49,20 +49,16 @@ type
     FileMainy: TIntegerField;
     FileMaintype: TShortintField;
     FileMainscript: TMemoField;
-    Button1: TButton;
+    Panel1: TPanel;
     Button2: TButton;
+    Button1: TButton;
     procedure FormCreate(Sender: TObject);
     procedure AcExecuteExecute(Sender: TObject);
     procedure AcOpenAccept(Sender: TObject);
-    procedure AcCommitExecute(Sender: TObject);
     procedure AcSaveAccept(Sender: TObject);
     procedure AcSaveBeforeExecute(Sender: TObject);
     procedure AcOpenBeforeExecute(Sender: TObject);
-    procedure AcRollBackExecute(Sender: TObject);
     procedure AcCommitAutoExecute(Sender: TObject);
-    procedure AcTriggersExecute(Sender: TObject);
-    procedure AcForeignKeyExecute(Sender: TObject);
-    procedure AcAutoFechaExecute(Sender: TObject);
     procedure AcNewExecute(Sender: TObject);
     procedure SQLSpoolPut(AEngine: TFDScript; const AMessage: string; AKind: TFDScriptOutputKind);
     procedure AcAddQueryExecute(Sender: TObject);
@@ -326,31 +322,6 @@ begin
   finally
     AcExecute.Enabled := True;
   end;
-end;
-
-procedure TFoMain.AcCommitExecute(Sender: TObject);
-begin
-  // DmDBRoot.DB.Commit;
-end;
-
-procedure TFoMain.AcRollBackExecute(Sender: TObject);
-begin
-  // DmDBRoot.DB.Rollback;
-end;
-
-procedure TFoMain.AcTriggersExecute(Sender: TObject);
-begin
-  //
-end;
-
-procedure TFoMain.AcAutoFechaExecute(Sender: TObject);
-begin
-  //
-end;
-
-procedure TFoMain.AcForeignKeyExecute(Sender: TObject);
-begin
-  //
 end;
 
 end.

@@ -29,7 +29,6 @@ type
     IL16: TcxImageList;
     AcRefresh: TAction;
     Refresh1: TMenuItem;
-    procedure MnDelLinkClick(Sender: TObject);
     procedure MnEditLabelClick(Sender: TObject);
     procedure AcEditScriptExecute(Sender: TObject);
     procedure AcPreviewExecute(Sender: TObject);
@@ -86,11 +85,6 @@ end;
 procedure TDmMain.AcRefreshExecute(Sender: TObject);
 begin
   TComponentETL(PopupComp.PopupComponent).RefreshPreviewForm;
-end;
-
-procedure TDmMain.MnDelLinkClick(Sender: TObject);
-begin
-  PopupLink.PopupComponent.DisposeOf;
 end;
 
 procedure TDmMain.MnEditLabelClick(Sender: TObject);
