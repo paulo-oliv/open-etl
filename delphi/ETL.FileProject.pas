@@ -5,10 +5,8 @@ interface
 uses Controls, ETL.FileProject.Interfaces;
 
 type
-  TListComponentsETL = class(TInterfacedList<IComponentETL>, IListComponentsETL)
+  TListComponentsETL = class(TInterfacedListComponentsETL, IListComponentsETL)
   public
-    function GetItem(const AIndex: Integer): IComponentETL;
-    function Add(const AComponent: IComponentETL): IListComponentsETL;
     function Locate(const AId: string): IComponentETL;
     function GenerateTitle(APrefix: string): string;
   end;
@@ -251,17 +249,6 @@ begin
     LNum := LNum + 1;
     Result := APrefix + IntToStr(LNum);
   until NewTitle(Result);
-end;
-
-function TListComponentsETL.GetItem(const AIndex: Integer): IComponentETL;
-begin
-  Result := FList[AIndex];
-end;
-
-function TListComponentsETL.Add(const AComponent: IComponentETL): IListComponentsETL;
-begin
-  Result := Self;
-  FList.Add(AComponent);
 end;
 
 end.

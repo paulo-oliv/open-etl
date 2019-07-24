@@ -101,20 +101,17 @@ procedure TCompQuery.RefreshGrid(const AFormGrid: TFoGrid);
 var
   LQr: TFDQuery;
 
-  procedure chargeConnection(const AConnectionName: string);
+  procedure chargeConnection(const AConn: TFDConnection);
   var
-    LConn: TFDConnection;
     i: Integer;
   begin
-    LConn := TFDConnection.Create(nil);
     try
       LQr.Close;
-      LConn.ConnectionDefName := AConnectionName;
-
-      LQr.Connection := LConn;
-      LConn.Connected := True;
+      LQr.Connection := AConn;
+      AConn.Connected := True;
       // Qr.ConnectionName := 'testar';
-      LQr.SQL.Text := FFormEdit.MM.Lines.Text;
+      FFormEdit.UpdateSqlOut;
+      LQr.SQL.Text := FFormEdit.MmOut.Lines.Text;
       // Qr.Filter := Trim(AFilter);
       LQr.Filtered := LQr.Filter <> '';
       LQr.Open;
@@ -141,7 +138,7 @@ var
         LQr.Next;
       end;
     finally
-      LConn.DisposeOf;
+      AConn.DisposeOf;
     end;
   end;
 
@@ -156,7 +153,8 @@ begin
     AFormGrid.tv.ClearItems;
     for i := 0 to FFormEdit.ClConexoes.Count - 1 do
       if FFormEdit.ClConexoes.Checked[i] then
-        chargeConnection(FFormEdit.ClConexoes.Items[i]);
+        chargeConnection(FFormEdit.CreateConnection(i));
+
   finally
     LQr.DisposeOf;
   end;
@@ -203,7 +201,7 @@ begin
     for i := 0 to FFormEdit.ClConexoes.Count - 1 do
       if FFormEdit.ClConexoes.Checked[i] then
         Result := Result + IntToStr(i) + ',';
-    Result := Result + SEPARATE_QUERY_CHAR + FFormEdit.MM.Text;
+    Result := Result + SEPARATE_QUERY_CHAR + FFormEdit.MmIn.Text;
   end;
 end;
 
@@ -213,7 +211,7 @@ var
   i: Integer;
 begin
   i := Pos(SEPARATE_QUERY_CHAR, AScript);
-  GetInstanceFormEdit.MM.Text := Copy(AScript, i + 1);
+  GetInstanceFormEdit.MmIn.Text := Copy(AScript, i + 1);
   LConnections := Copy(AScript, 1, i - 1);
   LNum := '';
   for i := 1 to LConnections.Length do

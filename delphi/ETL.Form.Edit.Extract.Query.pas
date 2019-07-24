@@ -2,13 +2,13 @@ unit ETL.Form.Edit.Extract.Query;
 
 interface
 
-uses ETL.Form.Edit, Vcl.Menus, Vcl.StdCtrls, Vcl.Controls, Vcl.CheckLst, Vcl.ExtCtrls,
+uses ETL.Form.Edit.Extract, Vcl.Menus, Vcl.StdCtrls, Vcl.Controls, Vcl.CheckLst, Vcl.ExtCtrls,
   System.Classes, System.Actions, Vcl.ActnList, cxSplitter, upControls, cxGraphics, cxControls,
-  cxLookAndFeels, cxLookAndFeelPainters;
+  cxLookAndFeels, cxLookAndFeelPainters, Vcl.ComCtrls, System.ImageList, Vcl.ImgList,
+  FireDAC.Comp.Client;
 
 type
-  TFoEditQuery = class(TFoEdit)
-    MM: TMemo;
+  TFoEditQuery = class(TFoEditExtract)
     PnEsquerda: TPanel;
     ClConexoes: TCheckListBox;
     Button1: TButton;
@@ -24,22 +24,38 @@ type
     AcCheckAll: TAction;
     AcUncheckAll: TAction;
     pSplitter1: TpSplitter;
+    PcQuery: TPageControl;
+    TsIn: TTabSheet;
+    TsOut: TTabSheet;
+    MmIn: TMemo;
+    MmOut: TMemo;
+    TvTable: TTreeView;
+    IL: TImageList;
+    pSplitter2: TpSplitter;
     procedure AcReverseChecksExecute(Sender: TObject);
     procedure AcNewConnectionExecute(Sender: TObject);
     procedure AcDeleteConnectionExecute(Sender: TObject);
     procedure AcEditConnectionExecute(Sender: TObject);
     procedure ClConexoesClickCheck(Sender: TObject);
-    procedure MMChange(Sender: TObject);
+    procedure MmInChange(Sender: TObject);
+    procedure TsOutEnter(Sender: TObject);
+    procedure ClConexoesDblClick(Sender: TObject);
+    procedure ClConexoesClick(Sender: TObject);
+    procedure TsInEnter(Sender: TObject);
+    procedure TvTableDblClick(Sender: TObject);
   public
     procedure UpdateConnections;
+    procedure UpdateTreeTables;
+    procedure UpdateSqlOut;
     class function New(const AOwner: TComponent): TFoEditQuery;
+    function CreateConnection(const AIndex: Integer): TFDConnection;
   end;
 
 implementation
 
 {$R *.dfm}
 
-uses SectionConexao, System.SysUtils, Vcl.Dialogs, FireDAC.Comp.Client,
+uses SectionConexao, System.SysUtils, Vcl.Dialogs,
   FireDAC.VCLUI.ConnEdit, FireDAC.Stan.Def, FireDAC.Phys.Intf, FireDAC.Stan.ExprFuncs,
   FireDAC.Phys.SQLiteDef, FireDAC.UI.Intf, FireDAC.VCLUI.Wait, FireDAC.Phys.IBDef,
   FireDAC.Phys.MSAccDef, FireDAC.Phys.MySQLDef, FireDAC.Phys.ADSDef, FireDAC.Phys.FBDef,
@@ -58,9 +74,87 @@ uses SectionConexao, System.SysUtils, Vcl.Dialogs, FireDAC.Comp.Client,
 
 { TFoEditQuery }
 
+function TFoEditQuery.CreateConnection(const AIndex: Integer): TFDConnection;
+begin
+  Result := TFDConnection.Create(nil);
+  Result.ConnectionDefName := ClConexoes.Items[AIndex];
+end;
+
+procedure TFoEditQuery.UpdateTreeTables;
+var
+  LConn: TFDConnection;
+  LTables: TFDMetaInfoQuery;
+  LFields: TFDMetaInfoQuery;
+  LNode: TTreeNode;
+begin
+  TvTable.Visible := False;
+  TvTable.Items.Clear;
+  if PcQuery.ActivePage <> TsIn then
+    exit;
+
+  if ClConexoes.ItemIndex < 0 then
+    exit;
+
+  if not ClConexoes.Checked[ClConexoes.ItemIndex] then
+    exit;
+
+  LConn := CreateConnection(ClConexoes.ItemIndex);
+  try
+    LTables := TFDMetaInfoQuery.Create(nil); // LConn.GetTableNames();
+    try
+      LFields := TFDMetaInfoQuery.Create(nil); // LConn.GetFieldNames();
+      try
+        LTables.Connection := LConn;
+        LFields.Connection := LConn;
+        LTables.MetaInfoKind := TFDPhysMetaInfoKind.mkTables;
+        LFields.MetaInfoKind := TFDPhysMetaInfoKind.mkTableFields;
+        LTables.Open;
+        while not LTables.Eof do
+        begin
+          LNode := TvTable.Items.Add(nil, { LTables.Fields[1].AsString + '.' + } LTables.Fields[3]
+            .AsString);
+          LNode.ImageIndex := 0;
+          LFields.Close;
+          LFields.ObjectName := LTables.Fields[3].AsString;
+          LFields.Open;
+          while not LFields.Eof do
+          begin
+            with TvTable.Items.AddChild(LNode, LFields.Fields[4].AsString) do
+            begin
+              ImageIndex := 1;
+              SelectedIndex := 1;
+            end;
+            LFields.Next;
+          end;
+          LTables.Next;
+        end;
+      finally
+        LFields.DisposeOf;
+      end;
+    finally
+      LTables.DisposeOf;
+    end;
+  //  TvTable.FullExpand;
+  finally
+    LConn.DisposeOf;
+  end;
+  TvTable.Visible := True;
+end;
+
+procedure TFoEditQuery.ClConexoesClick(Sender: TObject);
+begin
+  UpdateTreeTables;
+end;
+
 procedure TFoEditQuery.UpdateConnections;
 begin
   TConnectionDefsIni.GetInstance.ReadSections(ClConexoes.Items);
+  UpdateTreeTables;
+end;
+
+procedure TFoEditQuery.UpdateSqlOut;
+begin
+  MmOut.Text := MmIn.Text;
 end;
 
 procedure TFoEditQuery.AcReverseChecksExecute(Sender: TObject);
@@ -76,7 +170,12 @@ begin
   DoChange;
 end;
 
-procedure TFoEditQuery.MMChange(Sender: TObject);
+procedure TFoEditQuery.ClConexoesDblClick(Sender: TObject);
+begin
+  AcEditConnection.Execute;
+end;
+
+procedure TFoEditQuery.MmInChange(Sender: TObject);
 begin
   DoChange;
 end;
@@ -86,7 +185,7 @@ var
   LSection: string;
 begin
   if ClConexoes.ItemIndex < 0 then
-    Exit;
+    exit;
   LSection := ClConexoes.Items[ClConexoes.ItemIndex];
   TConnectionDefsIni.GetInstance.EraseSection(LSection);
   UpdateConnections;
@@ -101,12 +200,11 @@ var
   LConn: TFDConnection;
 begin
   if ClConexoes.ItemIndex < 0 then
-    Exit;
+    exit;
   LSection := ClConexoes.Items[ClConexoes.ItemIndex];
 
-  LConn := TFDConnection.Create(nil);
+  LConn := CreateConnection(ClConexoes.ItemIndex);
   try
-    LConn.ConnectionDefName := LSection;
     LConnStr := LConn.ResultConnectionDef.BuildString;
   finally
     LConn.DisposeOf;
@@ -177,6 +275,29 @@ class function TFoEditQuery.New(const AOwner: TComponent): TFoEditQuery;
 begin
   Result := TFoEditQuery.Create(AOwner);
   Result.UpdateConnections;
+end;
+
+procedure TFoEditQuery.TsInEnter(Sender: TObject);
+begin
+  if TvTable.Items.Count = 0 then
+    UpdateTreeTables;
+end;
+
+procedure TFoEditQuery.TsOutEnter(Sender: TObject);
+begin
+  UpdateSqlOut
+end;
+
+procedure TFoEditQuery.TvTableDblClick(Sender: TObject);
+begin
+  if Assigned(TvTable.Selected) then
+  begin
+    MmIn.SelText := TvTable.Selected.Text;
+    try
+      MmIn.SetFocus
+    except
+    end;
+  end;
 end;
 
 end.

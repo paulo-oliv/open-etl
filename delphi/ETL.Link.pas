@@ -23,28 +23,11 @@ type
     property Target: IComponentETL read FTarget write FTarget;
   end;
 
-  TListSources = class(TInterfacedList<ISourceETL>, IListSources)
-  public
-    function GetItem(const AIndex: Integer): ISourceETL;
-    function Add(const ASource: ISourceETL): IListSources;
-  end;
-
 implementation
 
 { TListSources }
 
 uses ETL.Datamodule.Main, Math, Types, Vcl.Graphics;
-
-function TListSources.Add(const ASource: ISourceETL): IListSources;
-begin
-  Result := Self;
-  FList.Add(ASource);
-end;
-
-function TListSources.GetItem(const AIndex: Integer): ISourceETL;
-begin
-  Result := FList[AIndex];
-end;
 
 { TLinkComponents }
 

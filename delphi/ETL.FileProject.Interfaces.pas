@@ -2,7 +2,7 @@ unit ETL.FileProject.Interfaces;
 
 interface
 
-uses ETL.Form.Grid, Generics.Collections;
+uses ETL.Form.Grid, uList;
 
 type
   ISourceETL = interface
@@ -11,16 +11,11 @@ type
     function GetGrid: TFoGrid;
   end;
 
-  IList = interface
-    ['{43DB5D2D-7418-41AB-94E7-FD036C99DD4B}']
-    function Count: Integer;
+  IListSources = interface(IList<ISourceETL>)
+    ['{65B200A3-F463-43D7-9F70-3AFA7881B6FB}']
   end;
 
-  IListSources = interface(IList)
-    ['{65B200A3-F463-43D7-9F70-3AFA7881B6FB}']
-    function GetItem(const AIndex: Integer): ISourceETL;
-    function Add(const ASource: ISourceETL): IListSources;
-  end;
+  TListSources = class(TInterfacedList<ISourceETL>, IListSources);
 
   IComponentETL = interface(ISourceETL)
     ['{EF7C533C-DE01-4BD9-87E3-4A4E31A7ABB5}']
@@ -38,10 +33,10 @@ type
     property Script: string read getScript write setScript;
   end;
 
-  IListComponentsETL = interface(IList)
+  TInterfacedListComponentsETL = class(TInterfacedList<IComponentETL>);
+
+  IListComponentsETL = interface(IList<IComponentETL>)
     ['{829D88B9-7255-40AB-8486-2BCE1A6112AC}']
-    function GetItem(const AIndex: Integer): IComponentETL;
-    function Add(const AComponent: IComponentETL): IListComponentsETL;
     function Locate(const AId: string): IComponentETL;
     function GenerateTitle(APrefix: string): string;
   end;
@@ -66,38 +61,7 @@ type
     property FileName: string read getFileName write setFileName;
   end;
 
-  TInterfacedList<T> = class(TInterfacedObject, IList)
-  strict protected
-    FList: TList<T>;
-  public
-    function Count: Integer;
-    constructor Create;
-    destructor Destroy; override;
-  end;
-
 implementation
 
-{ TInterfacedList }
-function TInterfacedList<T>.Count: Integer;
-begin
-  Result := FList.Count;
-end;
-
-constructor TInterfacedList<T>.Create;
-begin
-  FList := TList<T>.Create;
-end;
-
-destructor TInterfacedList<T>.Destroy;
-begin
-  try
-    FList.DisposeOf
-  except
-  end;
-  try
-    inherited
-  except
-  end;
-end;
 
 end.
