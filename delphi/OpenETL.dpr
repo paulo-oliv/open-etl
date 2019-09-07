@@ -25,7 +25,9 @@ uses
   ETL.Form.Edit.Transform.Conversion in 'ETL.Form.Edit.Transform.Conversion.pas' {FoEditConversion},
   ETL.Form.Edit.Transform.Derivation in 'ETL.Form.Edit.Transform.Derivation.pas' {FoEditDerivation},
   ETL.Form.Edit.Extract in 'ETL.Form.Edit.Extract.pas' {FoEditExtract},
-  ETL.Form.Edit.Extract.Files in 'ETL.Form.Edit.Extract.Files.pas' {FoEditFiles};
+  ETL.Form.Edit.Extract.Files in 'ETL.Form.Edit.Extract.Files.pas' {FoEditFiles},
+  ETL.Component.Load.Script in 'ETL.Component.Load.Script.pas',
+  ETL.ListConnections.Singleton in 'ETL.ListConnections.Singleton.pas';
 
 {$R *.res}
 

@@ -44,40 +44,25 @@ type
     procedure TsInEnter(Sender: TObject);
     procedure TvTableDblClick(Sender: TObject);
   public
+    function GetConnection(const AIndex: Integer): TFDConnection;
     procedure UpdateConnections;
     procedure UpdateTreeTables;
     procedure UpdateSqlOut;
     class function New(const AOwner: TComponent): TFoEditQuery;
-    function CreateConnection(const AIndex: Integer): TFDConnection;
   end;
 
 implementation
 
 {$R *.dfm}
 
-uses SectionConexao, System.SysUtils, Vcl.Dialogs,
-  FireDAC.VCLUI.ConnEdit, FireDAC.Stan.Def, FireDAC.Phys.Intf, FireDAC.Stan.ExprFuncs,
-  FireDAC.Phys.SQLiteDef, FireDAC.UI.Intf, FireDAC.VCLUI.Wait, FireDAC.Phys.IBDef,
-  FireDAC.Phys.MSAccDef, FireDAC.Phys.MySQLDef, FireDAC.Phys.ADSDef, FireDAC.Phys.FBDef,
-  FireDAC.Phys.PGDef, FireDAC.Phys.PG, FireDAC.Phys.FB, FireDAC.Phys.ADS,
-  FireDAC.Phys.MySQL, FireDAC.Phys.MSAcc, FireDAC.Stan.StorageJSON, FireDAC.Stan.StorageXML,
-  FireDAC.Stan.StorageBin, FireDAC.Moni.FlatFile, FireDAC.Moni.Custom, FireDAC.Moni.Base,
-  FireDAC.Moni.RemoteClient, FireDAC.Phys.IBBase, FireDAC.Phys.IB, FireDAC.Comp.UI,
-  FireDAC.Phys.SQLite, FireDAC.Phys.ODBCBase, FireDAC.Stan.Intf, FireDAC.Phys
-  // FireDAC.Phys.TDBXDef, FireDAC.Phys.DSDef, FireDAC.Phys.MongoDBDef, FireDAC.Phys.TDataDef,
-  // FireDAC.Phys.MSSQLDef, FireDAC.Phys.InfxDef, FireDAC.Phys.DB2Def, FireDAC.Phys.OracleDef,
-  // FireDAC.Phys.ODBCDef, FireDAC.Phys.ASADef, FireDAC.Phys.ASA, FireDAC.Phys.ODBC,
-  // FireDAC.Phys.Oracle, FireDAC.Phys.DB2, FireDAC.Phys.Infx, FireDAC.Phys.MSSQL,
-  // FireDAC.Phys.TData, FireDAC.Phys.MongoDB, FireDAC.Phys.DS, FireDAC.Phys.TDBXBase,
-  // FireDAC.Phys.TDBX
-    ;
+uses SectionConexao, System.SysUtils, Vcl.Dialogs, RegularExpressions, FireDAC.VCLUI.ConnEdit,
+  ETL.ListConnections.Singleton;
 
 { TFoEditQuery }
 
-function TFoEditQuery.CreateConnection(const AIndex: Integer): TFDConnection;
+function TFoEditQuery.GetConnection(const AIndex: Integer): TFDConnection;
 begin
-  Result := TFDConnection.Create(nil);
-  Result.ConnectionDefName := ClConexoes.Items[AIndex];
+  Result := TListConnections.GetConnection(ClConexoes.Items[AIndex]);
 end;
 
 procedure TFoEditQuery.UpdateTreeTables;
@@ -98,46 +83,41 @@ begin
   if not ClConexoes.Checked[ClConexoes.ItemIndex] then
     exit;
 
-  LConn := CreateConnection(ClConexoes.ItemIndex);
+  LConn := GetConnection(ClConexoes.ItemIndex);
+  LTables := TConnectionDatabase.CreateMetaInfoTables; // LConn.GetTableNames();
   try
-    LTables := TFDMetaInfoQuery.Create(nil); // LConn.GetTableNames();
+    LFields := TConnectionDatabase.CreateMetaInfoFields; // LConn.GetFieldNames();
     try
-      LFields := TFDMetaInfoQuery.Create(nil); // LConn.GetFieldNames();
-      try
-        LTables.Connection := LConn;
-        LFields.Connection := LConn;
-        LTables.MetaInfoKind := TFDPhysMetaInfoKind.mkTables;
-        LFields.MetaInfoKind := TFDPhysMetaInfoKind.mkTableFields;
-        LTables.Open;
-        while not LTables.Eof do
+      LTables.Connection := LConn;
+      LFields.Connection := LConn;
+
+      LTables.Open;
+      while not LTables.Eof do
+      begin
+        LNode := TvTable.Items.Add(nil, { LTables.Fields[1].AsString + '.' + } LTables.Fields[3]
+          .AsString);
+        LNode.ImageIndex := 0;
+        LFields.Close;
+        LFields.ObjectName := LTables.Fields[3].AsString;
+        LFields.Open;
+        while not LFields.Eof do
         begin
-          LNode := TvTable.Items.Add(nil, { LTables.Fields[1].AsString + '.' + } LTables.Fields[3]
-            .AsString);
-          LNode.ImageIndex := 0;
-          LFields.Close;
-          LFields.ObjectName := LTables.Fields[3].AsString;
-          LFields.Open;
-          while not LFields.Eof do
+          with TvTable.Items.AddChild(LNode, LFields.Fields[4].AsString) do
           begin
-            with TvTable.Items.AddChild(LNode, LFields.Fields[4].AsString) do
-            begin
-              ImageIndex := 1;
-              SelectedIndex := 1;
-            end;
-            LFields.Next;
+            ImageIndex := 1;
+            SelectedIndex := 1;
           end;
-          LTables.Next;
+          LFields.Next;
         end;
-      finally
-        LFields.DisposeOf;
+        LTables.Next;
       end;
     finally
-      LTables.DisposeOf;
+      LFields.DisposeOf;
     end;
-  //  TvTable.FullExpand;
   finally
-    LConn.DisposeOf;
+    LTables.DisposeOf;
   end;
+  // TvTable.FullExpand;
   TvTable.Visible := True;
 end;
 
@@ -153,8 +133,50 @@ begin
 end;
 
 procedure TFoEditQuery.UpdateSqlOut;
+
+  procedure addSchemas(const AIdxConn: Integer);
+  var
+    LSchemas: TFDMetaInfoQuery;
+    LConn: TFDConnection;
+  begin
+    LConn := GetConnection(AIdxConn);
+    LSchemas := TConnectionDatabase.CreateMetaInfoSchemas;
+    // LConn.GetSchemaNames('', '', LStrList.Items)
+    try
+      LSchemas.Connection := LConn;
+      LSchemas.Open;
+      while not LSchemas.Eof do
+      begin
+        MmOut.Lines.Add(LSchemas.Fields[2].AsString);
+        LSchemas.Next;
+      end;
+    finally
+      LSchemas.DisposeOf;
+    end;
+  end;
+
+const
+  PREFIX_REGEX = '/* ^';
+  SUFFIX_REGEX = '*/';
+var
+  LStartPos, LEndPos, i: Integer;
+
 begin
   MmOut.Text := MmIn.Text;
+  LStartPos := Pos(PREFIX_REGEX, MmIn.Text);
+  if LStartPos > 0 then
+  begin
+    MmOut.SelStart := LStartPos - 1;
+    MmOut.SelLength := Pos(SUFFIX_REGEX, MmOut.Text) - LStartPos + 2;
+
+    for i := 0 to ClConexoes.Count - 1 do
+      if ClConexoes.Checked[i] then
+        addSchemas(i);
+
+    MmOut.SelText := 'pub.';
+  end;
+  // if TRegEx.IsMatch(paramstr(1), ) then
+
 end;
 
 procedure TFoEditQuery.AcReverseChecksExecute(Sender: TObject);
@@ -203,12 +225,8 @@ begin
     exit;
   LSection := ClConexoes.Items[ClConexoes.ItemIndex];
 
-  LConn := CreateConnection(ClConexoes.ItemIndex);
-  try
-    LConnStr := LConn.ResultConnectionDef.BuildString;
-  finally
-    LConn.DisposeOf;
-  end;
+  LConn := GetConnection(ClConexoes.ItemIndex);
+  LConnStr := LConn.ResultConnectionDef.BuildString;
 
   if TfrmFDGUIxFormsConnEdit.Execute(LConnStr, LSection) then
   begin

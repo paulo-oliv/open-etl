@@ -18,9 +18,6 @@ type
   TCompExecute = class(TCompLoad)
   end;
 
-  TCompScript = class(TCompLoad)
-  end;
-
 implementation
 
 { TCompLoad }

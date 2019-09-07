@@ -37,7 +37,7 @@ type
       var Accept: Boolean); override;
     procedure DragDrop(Source: TObject; X, Y: Integer); override;
     procedure Paint; override;
-    procedure RefreshGrid(const AGrid: TFoGrid); virtual; abstract;
+    procedure RefreshGrid(var AGrid: TFoGrid); virtual; abstract;
     procedure OnFormEditChange(Sender: TObject);
     function GetId: string;
   public

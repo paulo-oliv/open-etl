@@ -20,7 +20,7 @@ type
   strict protected
     function GetScript: string; override;
     procedure setScript(const AScript: string); override;
-    procedure RefreshGrid(const AFormGrid: TFoGrid); override;
+    procedure RefreshGrid(var AFormGrid: TFoGrid); override;
   public
     procedure Edit; override;
     destructor Destroy; override;
@@ -97,7 +97,7 @@ uses System.SysUtils, FireDAC.Comp.Client, Generics.Collections;
 
 { TCompQuery }
 
-procedure TCompQuery.RefreshGrid(const AFormGrid: TFoGrid);
+procedure TCompQuery.RefreshGrid(var AFormGrid: TFoGrid);
 var
   LQr: TFDQuery;
 
@@ -105,40 +105,34 @@ var
   var
     i: Integer;
   begin
-    try
-      LQr.Close;
-      LQr.Connection := AConn;
-      AConn.Connected := True;
-      // Qr.ConnectionName := 'testar';
-      FFormEdit.UpdateSqlOut;
-      LQr.SQL.Text := FFormEdit.MmOut.Lines.Text;
-      // Qr.Filter := Trim(AFilter);
-      LQr.Filtered := LQr.Filter <> '';
-      LQr.Open;
-      i := AFormGrid.tv.ColumnCount;
-      while i < LQr.FieldDefs.Count do
+    LQr.Close;
+    LQr.Connection := AConn;
+    // Qr.ConnectionName := 'testar';
+    FFormEdit.UpdateSqlOut;
+    LQr.SQL.Text := FFormEdit.MmOut.Lines.Text;
+    // Qr.Filter := Trim(AFilter);
+    LQr.Filtered := LQr.Filter <> '';
+    LQr.Open;
+    i := AFormGrid.tv.ColumnCount;
+    while i < LQr.FieldDefs.Count do
+    begin
+      with AFormGrid.tv.CreateColumn do
       begin
-        with AFormGrid.tv.CreateColumn do
-        begin
-          Caption := LQr.Fields[i].DisplayLabel;
-          // Name := '';
-          // DataBinding.ValueTypeClass := TcxStringValueType;
-          // DataBinding.FieldName := LQr.Fields[i].FieldName;
-          // Text := LQr.Fields[i].DisplayLabel;
-        end;
-        i := i + 1;
+        Caption := LQr.Fields[i].DisplayLabel;
+        // Name := '';
+        // DataBinding.ValueTypeClass := TcxStringValueType;
+        // DataBinding.FieldName := LQr.Fields[i].FieldName;
+        // Text := LQr.Fields[i].DisplayLabel;
       end;
-      while not LQr.Eof do
-      begin
-        AFormGrid.tv.DataController.RecordCount := AFormGrid.tv.DataController.RecordCount + 1;
-        for i := 0 to LQr.FieldDefs.Count - 1 do
-          AFormGrid.tv.DataController.Values[AFormGrid.tv.DataController.RecordCount - 1, i] :=
-            LQr.Fields[i].Value;
-
-        LQr.Next;
-      end;
-    finally
-      AConn.DisposeOf;
+      i := i + 1;
+    end;
+    while not LQr.Eof do
+    begin
+      AFormGrid.tv.DataController.RecordCount := AFormGrid.tv.DataController.RecordCount + 1;
+      for i := 0 to LQr.FieldDefs.Count - 1 do
+        AFormGrid.tv.DataController.Values[AFormGrid.tv.DataController.RecordCount - 1, i] :=
+          LQr.Fields[i].Value;
+      LQr.Next;
     end;
   end;
 
@@ -153,8 +147,7 @@ begin
     AFormGrid.tv.ClearItems;
     for i := 0 to FFormEdit.ClConexoes.Count - 1 do
       if FFormEdit.ClConexoes.Checked[i] then
-        chargeConnection(FFormEdit.CreateConnection(i));
-
+        chargeConnection(FFormEdit.GetConnection(i));
   finally
     LQr.DisposeOf;
   end;

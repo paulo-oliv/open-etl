@@ -37,12 +37,16 @@ object FoGrid: TFoGrid
       DataController.Summary.SummaryGroups = <>
       FilterRow.Visible = True
       OptionsBehavior.NavigatorHints = True
+      OptionsBehavior.FixedGroups = True
       OptionsCustomize.ColumnHiding = True
       OptionsCustomize.GroupBySorting = True
       OptionsCustomize.BandHiding = True
       OptionsData.Deleting = False
       OptionsData.Editing = False
       OptionsData.Inserting = False
+      OptionsView.Footer = True
+      OptionsView.GroupFooters = gfVisibleWhenExpanded
+      OptionsView.GroupSummaryLayout = gslAlignWithColumns
       OptionsView.Indicator = True
       OptionsView.BandHeaders = False
       Bands = <

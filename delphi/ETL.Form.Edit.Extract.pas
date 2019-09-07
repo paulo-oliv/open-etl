@@ -6,7 +6,7 @@ uses ETL.Form.Edit, System.Classes, System.Actions, Vcl.ActnList;
 
 type
   TFoEditExtract = class(TFoEdit)
-  strict private
+  strict protected
   end;
 
 implementation

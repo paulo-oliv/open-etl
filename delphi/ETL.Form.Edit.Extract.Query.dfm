@@ -58,8 +58,6 @@ inherited FoEditQuery: TFoEditQuery
     ActivePage = TsIn
     Align = alClient
     TabOrder = 2
-    ExplicitLeft = 178
-    ExplicitTop = 8
     object TsIn: TTabSheet
       Caption = 'Query In'
       OnEnter = TsInEnter
@@ -118,6 +116,10 @@ inherited FoEditQuery: TFoEditQuery
       Caption = 'Query Out'
       ImageIndex = 1
       OnEnter = TsOutEnter
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object MmOut: TMemo
         AlignWithMargins = True
         Left = 3

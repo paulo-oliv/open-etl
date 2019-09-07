@@ -5,132 +5,122 @@ interface
 uses
   ETL.Component.Transform,
   ETL.Form.Edit.Transform.Condensation,
-  ETL.Form.Grid,
-  cxCustomData,
-  System.Generics.Collections;
+  ETL.Form.Grid;
 
 type
-  (* IBestKey = interface
-    ['{98AC9B68-DB33-422D-A8FD-D799F9FDBC14}']
-    function AddKey(const AKey: Variant): IBestKey;
-    end;
-
-    TBestKeySelected = class(TInterfacedObject, IBestKey)
-    strict private
-    FKeys: TList<Variant>;
-    public
-    destructor Destroy; override;
-    function AddKey(const AKey: Variant): IBestKey;
-    end;
-
-    TBestKey = class(TBestKeySelected, IBestKey)
-    strict private
-    FKeys: TList<Variant>;
-    FValue: Variant;
-    public
-    constructor Create(const AValue: Variant);
-    end; *)
-
   TCompCondensation = class(TCompTransform)
   strict private
-    FIdx: Integer;
-    // FGroupByIndexList: TList<Integer>;
-    // FSelectedBestDictionary: TDictionary<IBestKey, Variant>;
     function GetInstanceFormEdit: TFoEditCondensation;
-    procedure SummaryBEST(ASender: TcxDataSummaryItems; Arguments: TcxSummaryEventArguments;
-      var OutArguments: TcxSummaryEventOutArguments);
   strict protected
     function GetScript: string; override;
     procedure setScript(const AScript: string); override;
-    procedure RefreshGrid(const AFormGrid: TFoGrid); override;
+    procedure RefreshGrid(var AFormGrid: TFoGrid); override;
   public
-    destructor Destroy; override;
     procedure Edit; override;
   end;
 
 implementation
 
-uses ETL.FileProject.Interfaces, System.SysUtils, Classes, Dialogs, Variants;
+uses ETL.FileProject.Interfaces, System.SysUtils, System.Generics.Collections, cxCustomData,
+  Variants, IdHashMessageDigest;
 
-(* type
-  IBestScore = interface
-  ['{69D1AB83-7AF3-4961-B9DB-4104918397C8}']
-  function IncScore(const AInc: Integer = 1): IBestScore;
+type
+  TBestItem = record
+    Key: string;
+    Value: Variant;
+    Score: integer;
+    procedure IncScore(const AInc: integer = 1);
   end;
 
-  TBestScore = class(TInterfacedObject, IBestScore)
-  strict private
-  FScore: Integer;
+  TBest = class
   public
-  constructor Create;
-  function IncScore(const AInc: Integer = 1): IBestScore;
+    FItens: TList<TBestItem>;
+    FCol: integer;
+    constructor Create(const ACol: integer);
+    destructor Destroy; override;
+    procedure Add(const AKey: string; const AValue: Variant);
+    function BestValue(const AKey: string): Variant;
   end;
 
-  TBestDictionary = class(TDictionary<IBestKey, IBestScore>)
-  strict private
-  FColumn: Integer;
-  public
-  constructor Create(const AColumn: Integer);
-  property Column: Integer read FColumn;
-  end; *)
+  { TBestItem }
 
-{ TKeyBestSelected }
+procedure TBestItem.IncScore(const AInc: integer);
+begin
+  Score := Score + AInc;
+end;
 
-(* function TBestKeySelected.AddKey(const AKey: Variant): IBestKey;
+{ TBest }
+
+procedure TBest.Add(const AKey: string; const AValue: Variant);
+
+  function LocateValue: Boolean;
+  var
+    i: integer;
   begin
-  if not Assigned(FKeys) then
-  FKeys := TList<Variant>.Create;
-  FKeys.Add(AKey);
+    Result := False;
+    for i := 0 to FItens.Count - 1 do
+      if FItens[i].Key = AKey then
+        if FItens[i].Value = AValue then
+        begin
+          FItens[i].IncScore;
+          exit(True);
+        end;
   end;
 
-  destructor TBestKeySelected.Destroy;
+var
+  LItem: TBestItem;
+begin
+  if not LocateValue then
   begin
+    LItem.Key := AKey;
+    LItem.Value := AValue;
+    LItem.Score := 1;
+    FItens.Add(LItem);
+  end;
+end;
+
+constructor TBest.Create(const ACol: integer);
+begin
+  FCol := ACol;
+  FItens := TList<TBestItem>.Create;
+end;
+
+destructor TBest.Destroy;
+begin
   try
-  if Assigned(FKeys) then
-  FKeys.DisposeOf;
+    FItens.DisposeOf
   except
   end;
   try
-  inherited
+    inherited
   except
   end;
-  end;
+end;
 
-  { TBestKey }
+function TBest.BestValue(const AKey: string): Variant;
+var
+  LItem: TBestItem;
+  LScore: integer;
+begin
+  LScore := 0;
+  Result := Null;
+  for LItem in FItens do
+    if LItem.Key = AKey then
+    begin
+      if LItem.Score > LScore then
+      begin
+        Result := LItem.Value;
+        LScore := LItem.Score;
+      end;
+    end;
+end;
 
-  constructor TBestKey.Create(const AValue: Variant);
-  begin
-  inherited Create;
-  FValue := AValue;
-  end;
-
-  { TBestValue }
-
-  constructor TBestScore.Create;
-  begin
-  FScore := 0;
-  end;
-
-  function TBestScore.IncScore(const AInc: Integer): IBestScore;
-  begin
-  Result := Self;
-  FScore := FScore + AInc;
-  end;
-
-  { TBestDictionary }
-
-  constructor TBestDictionary.Create(const AColumn: Integer);
-  begin
-  inherited Create;
-  FColumn := AColumn;
-  end;
-*)
 { TCompCondensation }
 
 function TCompCondensation.GetInstanceFormEdit: TFoEditCondensation;
 var
   LSources: IListSources;
-  i, j: Integer;
+  i, j: integer;
 begin
   if not Assigned(FFormEdit) then
   begin
@@ -149,24 +139,6 @@ begin
       end;
   end;
   Result := TFoEditCondensation(FFormEdit);
-end;
-
-destructor TCompCondensation.Destroy;
-begin
-  (* try
-    if Assigned(FGroupByIndexList) then
-    FGroupByIndexList.DisposeOf;
-    except
-    end;
-    try
-    if Assigned(FSelectedBestDictionary) then
-    FSelectedBestDictionary.DisposeOf
-    except
-    end; *)
-  try
-    inherited
-  except
-  end;
 end;
 
 procedure TCompCondensation.Edit;
@@ -188,7 +160,7 @@ end;
 procedure TCompCondensation.setScript(const AScript: string);
 var
   LValue: string;
-  i, j: Integer;
+  i, j: integer;
   LFormEdit: TFoEditCondensation;
 begin
   j := 0;
@@ -208,141 +180,180 @@ begin
       LValue := LValue + AScript[i];
 end;
 
-procedure TCompCondensation.SummaryBEST(ASender: TcxDataSummaryItems;
-  Arguments: TcxSummaryEventArguments; var OutArguments: TcxSummaryEventOutArguments);
+procedure TCompCondensation.RefreshGrid(var AFormGrid: TFoGrid);
+const
+  TAG_COL_GROUP_BY = 1;
+  TAG_COL_BEST = 22;
+  TAG_COL_NEW_GROUP_BY = 23;
+var
+  LGroupByCols: TList<integer>;
+  LBestList: TObjectList<TBest>;
 
-  function calculateSummary: Variant;
+  function KeyRow(const ARow: integer): string;
   var
-    // LKey: IBestKey;
-    LValue: Variant;
-    k: Integer;
+    i: integer;
   begin
-    (* if Assigned(FGroupByIndexList) then
-      if Assigned(FSelectedBestDictionary) then
-      begin
-      LKey := TBestKeySelected.Create;
-      //    for k := 0 to FGroupByIndexList.Count - 1 do
-      //      LKey.AddKey(ASender.DataController.Values[j, FGroupByIndexList[k]]);
-
-      //  if FSelectedBestDictionary.TryGetValue(LKey, LValue) then
-
-      //      (ASender.DataController.Values[j, FBestDictionaryList[i].Column]);
-
-      Result := '333';
-      end;
-    *)
-    // AQUANTITY := ASender.DataController.Values[Arguments.RecordIndex, Arguments.SummaryItem.Index];
-    // AQUANTITY := ASender.DataController.Values[Arguments.RecordIndex,
-    // ASender.DataController.DataSource.DataSet.FieldByName('MHDSasia').Index];
-
-    // var
-    // AIndex, AGroupIndex: integer;
-    // AValue: variant;
-    // begin
-    // with <AcxGridDBTableView>.DataController do
-    // begin
-    // AGroupIndex := Groups.DataGroupIndexByRowIndex[<ARowIndex>];
-    // AIndex := Summary.DefaultGroupSummaryItems.IndexOfItemLink(<AColumn>);
-    // AValue := Summary.GroupSummaryValues[AGroupIndex, AIndex];
-    // end;
-    // Caption := VarToStr(AValue);
-    // end;
+    Result := '';
+    for i := 0 to LGroupByCols.Count - 1 do
+      Result := VarToStr(AFormGrid.tv.DataController.Values[ARow, i]) + ',';
   end;
 
-begin
-  // ShowMessage('Arguments.RecordIndex: ' + IntToStr(Arguments.RecordIndex) +
-  // #13'Arguments.SummaryItem.Index: ' + IntToStr(Arguments.SummaryItem.Index) +
-  // #13'OutArguments.Value: ' + vartostr(OutArguments.Value));
-  if Arguments.SummaryItem.Kind <> skNone then
-  begin
-    FIdx := FIdx + 1;
-    OutArguments.Value := FIdx;
-    OutArguments.SummaryValue := FIdx; // IntToStr(Arguments.RecordIndex) + '.' +
-     // IntToStr(Arguments.SummaryItem.Index) ;
-    OutArguments.Done := True;
-  end;
-end;
-
-{ procedure TPortalMatrixFrm.OnSummary(
-  ASender: TcxDataSummaryItems; Arguments: TcxSummaryEventArguments;
-  var OutArguments: TcxSummaryEventOutArguments);
+  procedure populateBests;
   var
-  AValue: Variant;
-  AItem: TcxGridTableSummaryItem;
+    i, j: integer;
+    LKey: string;
   begin
-  AItem := TcxGridTableSummaryItem(Arguments.SummaryItem);
-
-  AValue := tvMatrix.DataController.Values[Arguments.RecordIndex, Arguments.SummaryItem.Field.Index];
-  if (not VarIsNull(AValue)) AND (AValue = DSZUSTAND_OFFLINE) then
-  begin
-  Dec(OutArguments.CountValue);
-  end;
-  end; }
-
-procedure TCompCondensation.RefreshGrid(const AFormGrid: TFoGrid);
-
-  procedure AddDefaultGroupSummaryItems(const AIndex: Integer; const AKind: TCXSummarykind);
-  begin
-    AFormGrid.tv.Columns[AIndex].Summary.FooterKind := AKind;
-    with AFormGrid.tv.DataController.Summary.DefaultGroupSummaryItems.Add do
+    for i := 0 to AFormGrid.tv.DataController.RowCount - 1 do
     begin
-      // Format := '';
-      Kind := AKind;
-    end;
-  end;
-
-// var
-// LBestDictionaryList: TObjectList<TBestDictionary>;
-
-  procedure populateBestDictionary;
-  var
-    i, j, k: Integer;
-    // LKey: IBestKey;
-    // LValue: IBestScore;
-  begin
-    (* for i := 0 to LBestDictionaryList.Count - 1 do
-      for j := 0 to AFormGrid.tv.DataController.RowCount - 1 do
+      LKey := KeyRow(i);
+      for j := 0 to LBestList.Count - 1 do
       begin
-      LKey := TBestKey.Create(AFormGrid.tv.DataController.Values[j,
-      LBestDictionaryList[i].Column]);
-      for k := 0 to FGroupByIndexList.Count - 1 do
-      LKey.AddKey(AFormGrid.tv.DataController.Values[j, FGroupByIndexList[k]]);
-
-      LValue := TBestScore.Create;
-      if LBestDictionaryList[i].TryGetValue(LKey, LValue) then
-      LValue.IncScore
-      else
-      LBestDictionaryList[i].Add(LKey, LValue);
-      end; *)
+        LBestList[j].Add(LKey, AFormGrid.tv.DataController.Values[i, LBestList[j].FCol]);
+      end;
+    end;
   end;
 
   procedure selectBests;
   var
-    i, j: Integer;
-    // LKey: IBestKey;
-  begin
-    (* if Assigned(FSelectedBestDictionary) then
-      FSelectedBestDictionary.Clear
-      else
-      FSelectedBestDictionary := TDictionary<IBestKey, Variant>.Create;
-      for i := 0 to LBestDictionaryList.Count - 1 do
-      for j := 0 to LBestDictionaryList[i].Count - 1 do
+    i, j, LCol: integer;
+
+    { procedure createColunmGroupBy; // apenas como apresentação
+      var
+      i, j: integer;
+      LValue: string;
       begin
-      // LKey.Row := 1;
-      // LKey.Column := LBestDictionaryList[i].Column;
-      // FSelectedBestDictionary.Add(LKey, LBestDictionaryList[i]. );
+      for i := AFormGrid.tv.ColumnCount - 1 downto 0 do
+      if AFormGrid.tv.Columns[i].Tag = TAG_COL_NEW_GROUP_BY then
+      AFormGrid.tv.Columns[i].DisposeOf;
+      with AFormGrid.tv.CreateColumn do
+      begin
+      LCol := Index;
+      Tag := TAG_COL_NEW_GROUP_BY;
+      Caption := 'GROUP BY';
+      // Position.BandIndex := 1;
+      Visible := False;
       end;
-    *)
+
+      for i := 0 to AFormGrid.tv.DataController.RowCount - 1 do
+      begin
+      LValue := '';
+      for j := 0 to AFormGrid.tv.ColumnCount - 1 do
+      if (AFormGrid.tv.Columns[i].Tag = TAG_COL_BEST) or
+      (AFormGrid.tv.Columns[i].Tag = TAG_COL_GROUP_BY) then
+      LValue := LValue + VarToStr(AFormGrid.tv.DataController.Values[i, j]) + '|';
+      AFormGrid.tv.DataController.Values[i, LCol] := LValue;
+      end;
+      AFormGrid.tv.Columns[LCol].GroupIndex := 0;
+      end; }
+
+    procedure createGridFinal;
+
+      function StrToMd5(const ATxt: string): string;
+      var
+        idmd5: TIdHashMessageDigest5;
+      begin
+        idmd5 := TIdHashMessageDigest5.Create;
+        try
+          Result := idmd5.HashStringAsHex(ATxt);
+        finally
+          idmd5.DisposeOf;
+        end;
+      end;
+
+    const
+      TAG_COL_MD5 = 999;
+    var
+      i, j, k: integer;
+      LNewFoGrid: TFoGrid;
+      LMd5, LLastMD5: string;
+      LNewRow: Boolean;
+    begin
+      LMd5 := '';
+      LLastMD5 := 'zzzzzzz';
+      LNewFoGrid := TFoGrid.Create(Self);
+      LNewFoGrid.tv.BeginUpdate;
+      try
+        for i := 0 to AFormGrid.tv.ColumnCount - 1 do
+          if (AFormGrid.tv.Columns[i].Tag = TAG_COL_BEST) or
+            (AFormGrid.tv.Columns[i].Tag = TAG_COL_GROUP_BY) then
+            with LNewFoGrid.tv.CreateColumn do
+            begin
+              Caption := AFormGrid.tv.Columns[i].Caption;
+              Tag := i;
+            end;
+
+        with LNewFoGrid.tv.CreateColumn do
+        begin
+          Caption := 'hash';
+          Tag := TAG_COL_MD5;
+        end;
+
+        k := 0;
+        for i := 0 to AFormGrid.tv.DataController.RowCount - 1 do
+        begin
+          LNewFoGrid.tv.DataController.RecordCount := k + 1;
+          LNewRow := True;
+          for j := 0 to LNewFoGrid.tv.ColumnCount - 1 do
+            if LNewFoGrid.tv.Columns[j].Tag = TAG_COL_MD5 then
+            begin
+              LMd5 := StrToMd5(LMd5);
+              if LMd5 = LLastMD5 then
+              begin
+                LNewRow := False;
+                break;
+              end;
+              LLastMD5 := LMd5;
+              LNewFoGrid.tv.DataController.Values[k, j] := LMd5;
+              LMd5 := '';
+            end
+            else
+            begin
+              LMd5 := LMd5 + AFormGrid.tv.DataController.Values
+                [i, LNewFoGrid.tv.Columns[j].Tag] + ',';
+              LNewFoGrid.tv.DataController.Values[k, j] := AFormGrid.tv.DataController.Values
+                [i, LNewFoGrid.tv.Columns[j].Tag];
+            end;
+          if LNewRow then
+            k := k + 1;
+        end;
+
+      finally
+        AFormGrid.DisposeOf;
+        LNewFoGrid.tv.EndUpdate;
+        AFormGrid := LNewFoGrid;
+      end;
+    end;
+
+  begin
+    for i := AFormGrid.tv.ColumnCount - 1 downto 0 do
+      if AFormGrid.tv.Columns[i].Tag = TAG_COL_BEST then
+        AFormGrid.tv.Columns[i].DisposeOf;
+    for i := 0 to LBestList.Count - 1 do
+    begin
+      with AFormGrid.tv.CreateColumn do
+      begin
+        LCol := Index;
+        Tag := TAG_COL_BEST;
+        Caption := 'best_' + AFormGrid.tv.Columns[LBestList[i].FCol].Caption;
+        // Position.BandIndex := 1;
+      end;
+      for j := 0 to AFormGrid.tv.DataController.RowCount - 1 do
+      begin
+        AFormGrid.tv.DataController.Values[j, LCol] := LBestList[i].BestValue(KeyRow(j))
+      end;
+    end;
+    // createColunmGroupBy;
+    createGridFinal;
   end;
 
 var
-  i: Integer;
+  i: integer;
   LKindSummary: TKindCondensation;
 begin
   inherited;
-  FIdx :=0;
   AFormGrid.tv.DataController.Summary.DefaultGroupSummaryItems.Clear;
-  AFormGrid.tv.OptionsView.Footer := True;
+  LGroupByCols := TList<integer>.Create;
+  LBestList := nil;
   try
     for i := 0 to TFoEditCondensation(FFormEdit).Gr.Rows.Count - 1 do
     begin
@@ -351,60 +362,119 @@ begin
       case LKindSummary of
         TKindCondensation.GroupBy:
           begin
-            (* if not Assigned(FGroupByIndexList) then
-              FGroupByIndexList := TList<Integer>.Create;
-              FGroupByIndexList.Add(i); *)
+            LGroupByCols.Add(i);
+            AFormGrid.tv.Columns[i].Tag := TAG_COL_GROUP_BY;
             AFormGrid.tv.Columns[i].Summary.FooterKind := TCXSummarykind.skNone;
-            AFormGrid.tv.Columns[i].GroupIndex := 0; // g
-            AFormGrid.tv.Columns[i].Visible := False;
+            // AFormGrid.tv.Columns[i].GroupIndex := 0; // g
+            // AFormGrid.tv.Columns[i].Visible := False;
             // g := g + 1;
           end;
         TKindCondensation.Null:
           AFormGrid.tv.Columns[i].Summary.FooterKind := TCXSummarykind.skNone;
         TKindCondensation.Sum:
-          AddDefaultGroupSummaryItems(i, TCXSummarykind.skSum);
+          begin
+            AFormGrid.tv.Columns[i].Summary.FooterKind := TCXSummarykind.skSum;
+            with AFormGrid.tv.DataController.Summary.DefaultGroupSummaryItems.Add do
+            begin
+              // Format := '';
+              Kind := TCXSummarykind.skSum;
+
+            end;
+          end;
         TKindCondensation.Average:
-          AddDefaultGroupSummaryItems(i, TCXSummarykind.skAverage);
+          begin
+            AFormGrid.tv.Columns[i].Summary.FooterKind := TCXSummarykind.skAverage;
+            with AFormGrid.tv.DataController.Summary.DefaultGroupSummaryItems.Add do
+            begin
+              // Format := '';
+              Kind := TCXSummarykind.skAverage;
+            end;
+          end;
         TKindCondensation.Max:
-          AddDefaultGroupSummaryItems(i, TCXSummarykind.skMax);
+          begin
+            AFormGrid.tv.Columns[i].Summary.FooterKind := TCXSummarykind.skMax;
+            with AFormGrid.tv.DataController.Summary.DefaultGroupSummaryItems.Add do
+            begin
+              // Format := '';
+              Kind := TCXSummarykind.skMax;
+            end;
+          end;
         TKindCondensation.Min:
-          AddDefaultGroupSummaryItems(i, TCXSummarykind.skMin);
+          begin
+            AFormGrid.tv.Columns[i].Summary.FooterKind := TCXSummarykind.skMin;
+            with AFormGrid.tv.DataController.Summary.DefaultGroupSummaryItems.Add do
+            begin
+              // Format := '';
+              Kind := TCXSummarykind.skMin;
+            end;
+          end;
         TKindCondensation.Count:
-          AddDefaultGroupSummaryItems(i, TCXSummarykind.skCount);
+          begin
+            AFormGrid.tv.Columns[i].Summary.FooterKind := TCXSummarykind.skCount;
+            with AFormGrid.tv.DataController.Summary.DefaultGroupSummaryItems.Add do
+            begin
+              // Format := '';
+              Kind := TCXSummarykind.skCount;
+            end;
+          end;
         TKindCondensation.First:
-          AddDefaultGroupSummaryItems(i, TCXSummarykind.skSum);
+          begin
+            AFormGrid.tv.Columns[i].Summary.FooterKind := TCXSummarykind.skCount;
+            with AFormGrid.tv.DataController.Summary.DefaultGroupSummaryItems.Add do
+            begin
+              // Format := '';
+              Kind := TCXSummarykind.skCount;
+            end;
+          end;
         TKindCondensation.Last:
-          AddDefaultGroupSummaryItems(i, TCXSummarykind.skSum);
+          begin
+            AFormGrid.tv.Columns[i].Summary.FooterKind := TCXSummarykind.skCount;
+            with AFormGrid.tv.DataController.Summary.DefaultGroupSummaryItems.Add do
+            begin
+              // Format := '';
+              Kind := TCXSummarykind.skCount;
+            end;
+          end;
         TKindCondensation.Best:
           begin
-            AddDefaultGroupSummaryItems(i, TCXSummarykind.skSum);
+            if LBestList = nil then
+              LBestList := TObjectList<TBest>.Create;
 
-            // if not Assigned(LBestDictionaryList) then
-            // LBestDictionaryList := TObjectList<TBestDictionary>.Create;
-
-            // LBestDictionaryList.Add(TBestDictionary.Create(i));
-          end
+            LBestList.Add(TBest.Create(i));
+          end;
       else
-        AddDefaultGroupSummaryItems(i, TCXSummarykind.skNone);
+        begin
+          AFormGrid.tv.Columns[i].Summary.FooterKind := TCXSummarykind.skNone;
+          // with AFormGrid.tv.DataController.Summary.DefaultGroupSummaryItems.Add do
+          // begin
+          // Format := '';
+          // Kind := TCXSummarykind.skNone;
+          // end;
+
+          // LBestDictionaryList.Add(TBestDictionary.Create(i));
+        end;
       end;
     end;
-    // if Assigned(FGroupByIndexList) then
-    // if Assigned(LBestDictionaryList) then
-    // begin
-    // populateBestDictionary;
-    // selectBests;
-    // end;
-
+    AFormGrid.tv.DataController.Groups.FullExpand;
+    AFormGrid.tv.ViewData.Expand(True);
+    if LBestList <> nil then
+    begin
+      populateBests;
+      selectBests;
+    end;
   finally
-    // if Assigned(LBestDictionaryList) then
-    // LBestDictionaryList.DisposeOf;
+    try
+      LGroupByCols.DisposeOf;
+    except
+    end;
+    if LBestList <> nil then
+      try
+        LBestList.DisposeOf;
+      except
+      end;
   end;
   // AFormGrid.tv.Columns[i].Summary.GroupFooterKind := AFormGrid.tv.Columns[i].Summary.FooterKind;
   // AFormGrid.tv.Columns[i].Summary.GroupFooterFormat := AFormGrid.tv.Columns[i].Summary.FooterFormat;
-
-  AFormGrid.tv.DataController.Summary.FooterSummaryItems.OnSummary := SummaryBEST;
-  // AFormGrid.tv.DataController.Summary.DefaultGroupSummaryItems.OnSummary := SummaryBEST;
-  // AFormGrid.tv.DataController.Summary.Recalculate;
 end;
 
 end.
