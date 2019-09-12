@@ -16,7 +16,6 @@ type
   TConnectionDatabase = class(TInterfacedObject, IConnectionDatabase)
   strict private
     FConnection: TFDConnection;
-    class function CreateConnection(const AName: string): TFDConnection;
   strict protected
     function GetName: string;
     function GetConnection: TFDConnection;
@@ -63,17 +62,12 @@ uses
 
 { TConnectionDatabase }
 
-class function TConnectionDatabase.CreateConnection(const AName: string): TFDConnection;
-begin
-  Result := TFDConnection.Create(nil);
-  Result.ConnectionDefName := AName;
-  Result.Connected := True;
-end;
-
 constructor TConnectionDatabase.Create(const AName: string);
 begin
   inherited Create;
-  FConnection := CreateConnection(AName);
+  FConnection := TFDConnection.Create(nil);
+  FConnection.ConnectionName := AName;
+  FConnection.Connected := True;
 end;
 
 class function TConnectionDatabase.CreateMetaInfoFields: TFDMetaInfoQuery;
@@ -110,22 +104,24 @@ end;
 
 function TConnectionDatabase.GetName: string;
 begin
-  Result := FConnection.ConnectionDefName;
+  Result := FConnection.ConnectionName;
 end;
 
 { TListConnections }
 
 class function TListConnections.GetConnection(const AName: string): TFDConnection;
 var
-  LConn: IConnectionDatabase;
+  i: Integer;
   LList: IListConnections;
 begin
+  Result := nil;
   LList := GetInstance;
-  for LConn in LList.GetList do
-    if LConn.Name = AName then
-      exit(LConn.Connection);
+  for i := 0 to LList.Count -1 do
+    if LList[i].Name = AName then
+      Exit(LList[i].Connection);
 
-  Result := LList.Add(TConnectionDatabase.Create(AName)).Connection;
+  if Result = nil then
+    Result := LList.Add(TConnectionDatabase.Create(AName)).Connection;
 end;
 
 class function TListConnections.GetInstance: IListConnections;

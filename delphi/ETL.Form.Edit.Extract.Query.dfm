@@ -116,10 +116,6 @@ inherited FoEditQuery: TFoEditQuery
       Caption = 'Query Out'
       ImageIndex = 1
       OnEnter = TsOutEnter
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object MmOut: TMemo
         AlignWithMargins = True
         Left = 3

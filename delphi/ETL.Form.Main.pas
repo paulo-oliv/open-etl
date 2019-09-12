@@ -52,6 +52,7 @@ type
     Panel1: TPanel;
     Button2: TButton;
     Button1: TButton;
+    ProgressBar: TProgressBar;
     procedure FormCreate(Sender: TObject);
     procedure AcExecuteExecute(Sender: TObject);
     procedure AcOpenAccept(Sender: TObject);

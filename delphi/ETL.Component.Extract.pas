@@ -107,10 +107,8 @@ var
   begin
     LQr.Close;
     LQr.Connection := AConn;
-    // Qr.ConnectionName := 'testar';
     FFormEdit.UpdateSqlOut;
     LQr.SQL.Text := FFormEdit.MmOut.Lines.Text;
-    // Qr.Filter := Trim(AFilter);
     LQr.Filtered := LQr.Filter <> '';
     LQr.Open;
     i := AFormGrid.tv.ColumnCount;

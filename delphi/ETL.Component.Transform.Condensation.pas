@@ -25,16 +25,28 @@ uses ETL.FileProject.Interfaces, System.SysUtils, System.Generics.Collections, c
   Variants, IdHashMessageDigest;
 
 type
-  TBestItem = record
-    Key: string;
-    Value: Variant;
-    Score: integer;
-    procedure IncScore(const AInc: integer = 1);
+  IBestItem = interface
+    ['{AF680F10-8D6D-4988-81C7-F8DD8986BCC4}']
+    function getKey: string;
+    function BestValue: Variant;
+    function Add(const AValue: Variant): IBestItem;
+  end;
+
+  TBestItem = class(TInterfacedObject, IBestItem)
+  strict private
+    FKey: string;
+    FDictionary: TDictionary<Variant, integer>;
+  public
+    function BestValue: Variant;
+    function getKey: string;
+    constructor Create(const AKey: string);
+    function Add(const AValue: Variant): IBestItem;
+    destructor Destroy; override;
   end;
 
   TBest = class
   public
-    FItens: TList<TBestItem>;
+    FItens: TList<IBestItem>;
     FCol: integer;
     constructor Create(const ACol: integer);
     destructor Destroy; override;
@@ -44,10 +56,57 @@ type
 
   { TBestItem }
 
-procedure TBestItem.IncScore(const AInc: integer);
+function TBestItem.Add(const AValue: Variant): IBestItem;
+var
+  LScore: integer;
 begin
-  Score := Score + AInc;
+  Result := Self;
+  if FDictionary.TryGetValue(AValue, LScore) then
+  begin
+    FDictionary[AValue] := LScore + 1;
+  end
+  else
+    FDictionary.Add(AValue, 1);
 end;
+
+function TBestItem.BestValue: Variant;
+var
+  i, LScore: integer;
+begin
+  LScore := 0;
+  Result := Null;
+  for i := 0 to FDictionary.Count - 1 do
+    if FDictionary.Values.ToArray[i] > LScore then
+    begin
+      Result := FDictionary.Keys.ToArray[i];
+      LScore := FDictionary.Values.ToArray[i];
+    end;
+end;
+
+constructor TBestItem.Create;
+begin
+  inherited Create;
+  FDictionary := TDictionary<Variant, integer>.Create;
+end;
+
+destructor TBestItem.Destroy;
+begin
+  try
+    FDictionary.DisposeOf
+  except
+  end;
+  inherited;
+end;
+
+function TBestItem.getKey: string;
+begin
+  Result := FKey;
+end;
+
+{ procedure TBestItem.IncScore(const AInc: integer);
+  begin
+  Score := Score + AInc;
+  end; }
 
 { TBest }
 
@@ -59,12 +118,11 @@ procedure TBest.Add(const AKey: string; const AValue: Variant);
   begin
     Result := False;
     for i := 0 to FItens.Count - 1 do
-      if FItens[i].Key = AKey then
-        if FItens[i].Value = AValue then
-        begin
-          FItens[i].IncScore;
-          exit(True);
-        end;
+      if FItens[i].getKey = AKey then
+      begin
+        FItens[i].Add(AValue);
+        exit(True);
+      end;
   end;
 
 var
@@ -72,17 +130,15 @@ var
 begin
   if not LocateValue then
   begin
-    LItem.Key := AKey;
-    LItem.Value := AValue;
-    LItem.Score := 1;
-    FItens.Add(LItem);
+    FItens[FItens.Add(TBestItem.Create(AKey))].Add(AValue);
   end;
 end;
 
 constructor TBest.Create(const ACol: integer);
 begin
+  inherited Create;
   FCol := ACol;
-  FItens := TList<TBestItem>.Create;
+  FItens := TList<IBestItem>.Create;
 end;
 
 destructor TBest.Destroy;
@@ -99,19 +155,14 @@ end;
 
 function TBest.BestValue(const AKey: string): Variant;
 var
-  LItem: TBestItem;
-  LScore: integer;
+  LItem: IBestItem;
 begin
-  LScore := 0;
   Result := Null;
   for LItem in FItens do
-    if LItem.Key = AKey then
+    if LItem.getKey = AKey then
     begin
-      if LItem.Score > LScore then
-      begin
-        Result := LItem.Value;
-        LScore := LItem.Score;
-      end;
+      Result := LItem.BestValue;
+      break;
     end;
 end;
 
@@ -308,8 +359,8 @@ var
             end
             else
             begin
-              LMd5 := LMd5 + AFormGrid.tv.DataController.Values
-                [i, LNewFoGrid.tv.Columns[j].Tag] + ',';
+              LMd5 := LMd5 + VarToStr(AFormGrid.tv.DataController.Values[i,
+                LNewFoGrid.tv.Columns[j].Tag]) + ',';
               LNewFoGrid.tv.DataController.Values[k, j] := AFormGrid.tv.DataController.Values
                 [i, LNewFoGrid.tv.Columns[j].Tag];
             end;

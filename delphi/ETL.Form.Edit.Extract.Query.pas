@@ -85,12 +85,11 @@ begin
 
   LConn := GetConnection(ClConexoes.ItemIndex);
   LTables := TConnectionDatabase.CreateMetaInfoTables; // LConn.GetTableNames();
+  LTables.Connection := LConn;
   try
     LFields := TConnectionDatabase.CreateMetaInfoFields; // LConn.GetFieldNames();
     try
-      LTables.Connection := LConn;
       LFields.Connection := LConn;
-
       LTables.Open;
       while not LTables.Eof do
       begin
@@ -133,23 +132,35 @@ begin
 end;
 
 procedure TFoEditQuery.UpdateSqlOut;
+var
+  LSqlOut, LPattern: string;
+  LStartPos: Integer;
+
+  function AddSelect(const ASchema: string): string;
+  begin
+    Result := Copy(MmOut.Text, 1, LStartPos - 1);
+    Result := Result + ASchema + '.' + Copy(MmOut.Text, LStartPos);
+  end;
 
   procedure addSchemas(const AIdxConn: Integer);
   var
-    LSchemas: TFDMetaInfoQuery;
+    LSchemas: TFDQuery; // TFDMetaInfoQuery
     LConn: TFDConnection;
   begin
     LConn := GetConnection(AIdxConn);
-    LSchemas := TConnectionDatabase.CreateMetaInfoSchemas;
     // LConn.GetSchemaNames('', '', LStrList.Items)
+    LSchemas := TFDQuery.Create(nil); // TConnectionDatabase.CreateMetaInfoSchemas;
     try
       LSchemas.Connection := LConn;
+      LSchemas.SQL.Text := 'SHOW DATABASES';
       LSchemas.Open;
       while not LSchemas.Eof do
       begin
-        MmOut.Lines.Add(LSchemas.Fields[2].AsString);
+        if TRegEx.IsMatch(LSchemas.Fields[0].AsString, LPattern) then
+          LSqlOut := LSqlOut + AddSelect(LSchemas.Fields[0].AsString);
         LSchemas.Next;
       end;
+      LSqlOut := StringReplace(LSqlOut, '-- UNION', 'UNION', [rfReplaceAll, rfIgnoreCase]);
     finally
       LSchemas.DisposeOf;
     end;
@@ -159,24 +170,36 @@ const
   PREFIX_REGEX = '/* ^';
   SUFFIX_REGEX = '*/';
 var
-  LStartPos, LEndPos, i: Integer;
+  LEndPos, i: Integer;
 
 begin
   MmOut.Text := MmIn.Text;
   LStartPos := Pos(PREFIX_REGEX, MmIn.Text);
   if LStartPos > 0 then
   begin
+    LSqlOut := '';
     MmOut.SelStart := LStartPos - 1;
     MmOut.SelLength := Pos(SUFFIX_REGEX, MmOut.Text) - LStartPos + 2;
+    LPattern := Copy(MmOut.Text, MmOut.SelStart + 4, MmOut.SelLength - 5);
+    MmOut.SelText := '';
 
     for i := 0 to ClConexoes.Count - 1 do
       if ClConexoes.Checked[i] then
         addSchemas(i);
 
-    MmOut.SelText := 'pub.';
-  end;
-  // if TRegEx.IsMatch(paramstr(1), ) then
+    MmOut.Text := LSqlOut;
+    for i := MmOut.Lines.Count - 1 downto 0 do
+    begin
+      MmOut.Lines[i] := Trim(MmOut.Lines[i]);
+      if MmOut.Lines[i] = '' then
+        MmOut.Lines.Delete(i)
+      else if UpperCase(Copy(MmOut.Lines[i], 1, 5)) = 'UNION' then
+        MmOut.Lines.Delete(i)
+      else
+        break;
+    end;
 
+  end;
 end;
 
 procedure TFoEditQuery.AcReverseChecksExecute(Sender: TObject);
