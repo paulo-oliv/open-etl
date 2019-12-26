@@ -490,33 +490,37 @@ object FoMain: TFoMain
     ParentBackground = False
     ParentCtl3D = False
     TabOrder = 2
-    object Button2: TButton
+    object BtOpen: TButton
       AlignWithMargins = True
       Left = 3
       Top = 3
-      Width = 100
+      Width = 110
       Height = 35
       Action = AcOpen
       Align = alLeft
       Images = DmMain.IL32
+      PopupMenu = PopupMenuOpen
+      Style = bsSplitButton
       TabOrder = 0
     end
-    object Button1: TButton
+    object BtSave: TButton
       AlignWithMargins = True
-      Left = 109
+      Left = 119
       Top = 3
-      Width = 100
+      Width = 106
       Height = 35
       Action = AcSave
       Align = alLeft
       Images = DmMain.IL32
+      PopupMenu = PopupMenuSave
+      Style = bsSplitButton
       TabOrder = 1
     end
     object ProgressBar: TProgressBar
       AlignWithMargins = True
-      Left = 215
+      Left = 231
       Top = 9
-      Width = 577
+      Width = 561
       Height = 23
       Margins.Top = 9
       Margins.Right = 5
@@ -525,10 +529,8 @@ object FoMain: TFoMain
       MarqueeInterval = 1
       TabOrder = 2
       Visible = False
-      ExplicitLeft = 400
-      ExplicitTop = 16
-      ExplicitWidth = 150
-      ExplicitHeight = 17
+      ExplicitLeft = 215
+      ExplicitWidth = 577
     end
   end
   object SQL: TFDScript
@@ -660,5 +662,14 @@ object FoMain: TFoMain
       FieldName = 'script'
       BlobType = ftMemo
     end
+  end
+  object PopupMenuOpen: TPopupMenu
+    OnPopup = PopupMenuOpenPopup
+    Left = 192
+    Top = 72
+  end
+  object PopupMenuSave: TPopupMenu
+    Left = 264
+    Top = 64
   end
 end

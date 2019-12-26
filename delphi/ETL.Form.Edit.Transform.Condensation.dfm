@@ -13,6 +13,7 @@ inherited FoEditCondensation: TFoEditCondensation
     Width = 379
     Height = 434
     Hint = ''
+    BorderStyle = cxcbsNone
     Align = alClient
     TabOrder = 0
     OnEditValueChanged = GrEditValueChanged

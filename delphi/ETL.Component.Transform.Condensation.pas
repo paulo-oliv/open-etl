@@ -13,7 +13,7 @@ type
     function GetInstanceFormEdit: TFoEditCondensation;
   strict protected
     function GetScript: string; override;
-    procedure setScript(const AScript: string); override;
+    procedure SetScript(const AScript: string); override;
     procedure RefreshGrid(var AFormGrid: TFoGrid); override;
   public
     procedure Edit; override;
@@ -22,7 +22,7 @@ type
 implementation
 
 uses ETL.FileProject.Interfaces, System.SysUtils, System.Generics.Collections, cxCustomData,
-  Variants, IdHashMessageDigest;
+  Variants, IdHashMessageDigest, ETL.Form.Main;
 
 type
   IBestItem = interface
@@ -61,12 +61,13 @@ var
   LScore: integer;
 begin
   Result := Self;
-  if FDictionary.TryGetValue(AValue, LScore) then
-  begin
-    FDictionary[AValue] := LScore + 1;
-  end
-  else
-    FDictionary.Add(AValue, 1);
+  if AValue <> Null then
+    if FDictionary.TryGetValue(AValue, LScore) then
+    begin
+      FDictionary.Items[AValue] := LScore + 1;
+    end
+    else
+      FDictionary.Add(AValue, 1);
 end;
 
 function TBestItem.BestValue: Variant;
@@ -83,9 +84,10 @@ begin
     end;
 end;
 
-constructor TBestItem.Create;
+constructor TBestItem.Create(const AKey: string);
 begin
   inherited Create;
+  FKey := AKey;
   FDictionary := TDictionary<Variant, integer>.Create;
 end;
 
@@ -121,7 +123,8 @@ procedure TBest.Add(const AKey: string; const AValue: Variant);
       if FItens[i].getKey = AKey then
       begin
         FItens[i].Add(AValue);
-        exit(True);
+        Result := True;
+        Break;
       end;
   end;
 
@@ -162,7 +165,7 @@ begin
     if LItem.getKey = AKey then
     begin
       Result := LItem.BestValue;
-      break;
+      Break;
     end;
 end;
 
@@ -208,7 +211,7 @@ begin
     Result := TFoEditCondensation(FFormEdit).ToString;
 end;
 
-procedure TCompCondensation.setScript(const AScript: string);
+procedure TCompCondensation.SetScript(const AScript: string);
 var
   LValue: string;
   i, j: integer;
@@ -254,13 +257,18 @@ var
     i, j: integer;
     LKey: string;
   begin
-    for i := 0 to AFormGrid.tv.DataController.RowCount - 1 do
-    begin
-      LKey := KeyRow(i);
-      for j := 0 to LBestList.Count - 1 do
+    FoMain.ProgressBar.Show;
+    try
+      FoMain.ProgressBar.Max := AFormGrid.tv.DataController.RowCount;
+      for i := 0 to AFormGrid.tv.DataController.RowCount - 1 do
       begin
-        LBestList[j].Add(LKey, AFormGrid.tv.DataController.Values[i, LBestList[j].FCol]);
+        LKey := KeyRow(i);
+        for j := 0 to LBestList.Count - 1 do
+          LBestList[j].Add(LKey, AFormGrid.tv.DataController.Values[i, LBestList[j].FCol]);
+        FoMain.ProgressBar.Position := i;
       end;
+    finally
+      FoMain.ProgressBar.Hide;
     end;
   end;
 
@@ -323,6 +331,7 @@ var
       LLastMD5 := 'zzzzzzz';
       LNewFoGrid := TFoGrid.Create(Self);
       LNewFoGrid.tv.BeginUpdate;
+      FoMain.ProgressBar.Show;
       try
         for i := 0 to AFormGrid.tv.ColumnCount - 1 do
           if (AFormGrid.tv.Columns[i].Tag = TAG_COL_BEST) or
@@ -340,8 +349,10 @@ var
         end;
 
         k := 0;
+        FoMain.ProgressBar.Max := AFormGrid.tv.DataController.RowCount;
         for i := 0 to AFormGrid.tv.DataController.RowCount - 1 do
         begin
+          FoMain.ProgressBar.Position := i;
           LNewFoGrid.tv.DataController.RecordCount := k + 1;
           LNewRow := True;
           for j := 0 to LNewFoGrid.tv.ColumnCount - 1 do
@@ -351,7 +362,7 @@ var
               if LMd5 = LLastMD5 then
               begin
                 LNewRow := False;
-                break;
+                Break;
               end;
               LLastMD5 := LMd5;
               LNewFoGrid.tv.DataController.Values[k, j] := LMd5;
@@ -372,27 +383,39 @@ var
         AFormGrid.DisposeOf;
         LNewFoGrid.tv.EndUpdate;
         AFormGrid := LNewFoGrid;
+        FoMain.ProgressBar.Hide;
       end;
     end;
 
+  var
+    LVariant: Variant;
   begin
     for i := AFormGrid.tv.ColumnCount - 1 downto 0 do
       if AFormGrid.tv.Columns[i].Tag = TAG_COL_BEST then
         AFormGrid.tv.Columns[i].DisposeOf;
-    for i := 0 to LBestList.Count - 1 do
-    begin
-      with AFormGrid.tv.CreateColumn do
+    FoMain.ProgressBar.Show;
+    try
+      FoMain.ProgressBar.Max := LBestList.Count * AFormGrid.tv.DataController.RowCount;
+      for i := 0 to LBestList.Count - 1 do
       begin
-        LCol := Index;
-        Tag := TAG_COL_BEST;
-        Caption := 'best_' + AFormGrid.tv.Columns[LBestList[i].FCol].Caption;
-        // Position.BandIndex := 1;
+        with AFormGrid.tv.CreateColumn do
+        begin
+          LCol := Index;
+          Tag := TAG_COL_BEST;
+          Caption := 'best_' + AFormGrid.tv.Columns[LBestList[i].FCol].Caption;
+          Position.BandIndex := 1;
+        end;
+        for j := 0 to AFormGrid.tv.DataController.RowCount - 1 do
+        begin
+          FoMain.ProgressBar.Position := i * j;
+          LVariant := LBestList[i].BestValue(KeyRow(j));
+          AFormGrid.tv.DataController.Values[j, LCol] := LVariant;
+        end;
       end;
-      for j := 0 to AFormGrid.tv.DataController.RowCount - 1 do
-      begin
-        AFormGrid.tv.DataController.Values[j, LCol] := LBestList[i].BestValue(KeyRow(j))
-      end;
+    finally
+      FoMain.ProgressBar.Hide;
     end;
+
     // createColunmGroupBy;
     createGridFinal;
   end;

@@ -50,9 +50,11 @@ type
     FileMaintype: TShortintField;
     FileMainscript: TMemoField;
     Panel1: TPanel;
-    Button2: TButton;
-    Button1: TButton;
+    BtOpen: TButton;
+    BtSave: TButton;
     ProgressBar: TProgressBar;
+    PopupMenuOpen: TPopupMenu;
+    PopupMenuSave: TPopupMenu;
     procedure FormCreate(Sender: TObject);
     procedure AcExecuteExecute(Sender: TObject);
     procedure AcOpenAccept(Sender: TObject);
@@ -67,6 +69,7 @@ type
     procedure FormDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState;
       var Accept: Boolean);
     procedure FormDragDrop(Sender, Source: TObject; X, Y: Integer);
+    procedure PopupMenuOpenPopup(Sender: TObject);
   strict private
     procedure updateEnableButtons;
     procedure Execute;
@@ -306,6 +309,12 @@ procedure TFoMain.FormDragOver(Sender, Source: TObject; X, Y: Integer; State: TD
   var Accept: Boolean);
 begin
   Accept := Source is TImage;
+end;
+
+procedure TFoMain.PopupMenuOpenPopup(Sender: TObject);
+begin
+  if PopupMenuOpen.Items.Count = 0 then
+
 end;
 
 procedure TFoMain.SQLSpoolPut(AEngine: TFDScript; const AMessage: string;

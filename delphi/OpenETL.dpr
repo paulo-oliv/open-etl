@@ -7,7 +7,7 @@ uses
   ETL.Form.Edit.Extract.Query in 'ETL.Form.Edit.Extract.Query.pas' {FoEditQuery},
   ETL.Form.Edit.Transform in 'ETL.Form.Edit.Transform.pas' {FoEditTransform},
   ETL.Form.Grid in 'ETL.Form.Grid.pas' {FoGrid},
-  ETL.Form.Edit.Load in 'ETL.Form.Edit.Load.pas' {FoEditLoad},
+  ETL.Form.Edit.Load.Script in 'ETL.Form.Edit.Load.Script.pas' {FoEditLoadScript},
   ETL.Component in 'ETL.Component.pas',
   ETL.FileProject in 'ETL.FileProject.pas',
   ETL.FileProject.Interfaces in 'ETL.FileProject.Interfaces.pas',
@@ -27,7 +27,8 @@ uses
   ETL.Form.Edit.Extract in 'ETL.Form.Edit.Extract.pas' {FoEditExtract},
   ETL.Form.Edit.Extract.Files in 'ETL.Form.Edit.Extract.Files.pas' {FoEditFiles},
   ETL.Component.Load.Script in 'ETL.Component.Load.Script.pas',
-  ETL.ListConnections.Singleton in 'ETL.ListConnections.Singleton.pas';
+  ETL.ListConnections.Singleton in 'ETL.ListConnections.Singleton.pas',
+  ETL.Form.Edit.Load.Execute in 'ETL.Form.Edit.Load.Execute.pas' {FoEditLoadExecute};
 
 {$R *.res}
 

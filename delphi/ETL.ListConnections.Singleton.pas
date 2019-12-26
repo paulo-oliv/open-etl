@@ -121,7 +121,7 @@ begin
       Exit(LList[i].Connection);
 
   if Result = nil then
-    Result := LList.Add(TConnectionDatabase.Create(AName)).Connection;
+    Result := LList.Add(TConnectionDatabase.Create(AName)).GetList.Last.Connection;
 end;
 
 class function TListConnections.GetInstance: IListConnections;

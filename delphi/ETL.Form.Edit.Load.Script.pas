@@ -1,42 +1,71 @@
-unit ETL.Form.Edit.Load;
+unit ETL.Form.Edit.Load.Script;
 
 interface
 
 uses ETL.Form.Edit, Vcl.StdCtrls, Vcl.Samples.Spin, Vcl.Controls, Vcl.ExtCtrls, System.Classes,
-  System.Actions, Vcl.ActnList;
+  System.Actions, Vcl.ActnList, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
+  cxLookAndFeelPainters, cxStyles, cxEdit, cxDropDownEdit, cxVGrid, cxInplaceContainer, cxTextEdit;
+
+const
+  SEPARATE_SCRIPT_CHAR = '|';
+  SEPARATE_SCRIPT_FIELDS_CHAR = ',';
 
 type
-  TFoEditLoad = class(TFoEdit)
-    EdSchema: TEdit;
+  TFoEditLoadScript = class(TFoEdit)
+    PageControl1: TPageControl;
+    TsSettings: TTabSheet;
+    Label2: TLabel;
     CbCommit: TCheckBox;
     CbDisableFK: TCheckBox;
     CbUse: TCheckBox;
-    Label1: TLabel;
-    Label2: TLabel;
-    EdFileName: TEdit;
-    Label3: TLabel;
-    RgDestination: TRadioGroup;
     RgCommand: TRadioGroup;
-    LbConnection: TLabel;
-    EdConnection: TEdit;
     EdBlock: TSpinEdit;
-    Button1: TButton;
-    Button2: TButton;
-  private
+    TsNames: TTabSheet;
+    EdSchema: TEdit;
+    Label1: TLabel;
+    Gr: TcxVerticalGrid;
+    GrEditorRow1: TcxEditorRow;
+  strict private
   public
-    class function New(const AOwner: TComponent): TFoEditLoad;
+    procedure AddField(const AField: string);
+    function ToString: string; override;
+    procedure SetValue(const ARow: Integer; const AValue: string);
+    class function New(const AOwner: TComponent): TFoEditLoadScript;
   end;
-
 
 implementation
 
 {$R *.dfm}
+{ TFoEditLoadScript }
 
-{ TFoEditLoad }
-
-class function TFoEditLoad.New(const AOwner: TComponent): TFoEditLoad;
+class function TFoEditLoadScript.New(const AOwner: TComponent): TFoEditLoadScript;
 begin
-  Result := TFoEditLoad.Create(AOwner);
+  Result := TFoEditLoadScript.Create(AOwner);
+end;
+
+procedure TFoEditLoadScript.SetValue(const ARow: Integer; const AValue: string);
+begin
+  TcxEditorRow(Gr.Rows.Items[ARow]).Properties.Value := AValue;
+end;
+
+procedure TFoEditLoadScript.AddField(const AField: string);
+begin
+  with Gr.Add(TcxEditorRow) as TcxEditorRow do
+  begin
+    Properties.EditPropertiesClass := TcxTextEditProperties;
+    Properties.Caption := AField;
+    Properties.Value := AField;
+  end;
+end;
+
+function TFoEditLoadScript.ToString: string;
+var
+  i: Integer;
+begin
+  Result := '';
+  for i := 0 to Gr.Rows.Count - 1 do
+    Result := Result + TcxEditorRow(Gr.Rows.Items[i]).Properties.Value +
+      SEPARATE_SCRIPT_FIELDS_CHAR;
 end;
 
 (*
@@ -150,6 +179,5 @@ end;
   S.Add('COMMIT;');
 
   end; *)
-
 
 end.
