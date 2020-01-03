@@ -29,7 +29,7 @@ implementation
 
 { TFoEditLoadExecute }
 
-class function TFoEditLoad.New(const AOwner: TComponent): TFoEditLoadExecute;
+class function TFoEditLoadExecute.New(const AOwner: TComponent): TFoEditLoadExecute;
 begin
   Result := TFoEditLoadExecute.Create(AOwner);
 end;

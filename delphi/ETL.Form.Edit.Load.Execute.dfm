@@ -17,6 +17,8 @@ inherited FoEditLoadExecute: TFoEditLoadExecute
       Caption = 'TabSheet1'
       ExplicitLeft = -20
       ExplicitTop = 35
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Label3: TLabel
         Left = 279
         Top = 68
@@ -79,6 +81,10 @@ inherited FoEditLoadExecute: TFoEditLoadExecute
     object TabSheet2: TTabSheet
       Caption = 'TabSheet2'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
   end
   inherited ActionList: TActionList

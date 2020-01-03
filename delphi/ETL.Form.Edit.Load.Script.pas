@@ -36,6 +36,9 @@ type
 implementation
 
 {$R *.dfm}
+
+uses SysUtils, Variants;
+
 { TFoEditLoadScript }
 
 class function TFoEditLoadScript.New(const AOwner: TComponent): TFoEditLoadScript;
@@ -62,9 +65,26 @@ function TFoEditLoadScript.ToString: string;
 var
   i: Integer;
 begin
-  Result := '';
+  Result := IntToStr(RgCommand.ItemIndex) + SEPARATE_SCRIPT_CHAR;
+
+  if CbDisableFK.Checked then
+    Result := Result + '1';
+  Result := Result + SEPARATE_SCRIPT_CHAR;
+
+  if CbUse.Checked then
+    Result := Result + '1';
+  Result := Result + SEPARATE_SCRIPT_CHAR;
+
+  Result := Result + EdSchema.Text + SEPARATE_SCRIPT_CHAR;
+
+  if CbCommit.Checked then
+    Result := Result + '1';
+  Result := Result + SEPARATE_SCRIPT_CHAR;
+
+  Result := Result + EdBlock.Text + SEPARATE_SCRIPT_CHAR;
+
   for i := 0 to Gr.Rows.Count - 1 do
-    Result := Result + TcxEditorRow(Gr.Rows.Items[i]).Properties.Value +
+    Result := Result + VarToStr(TcxEditorRow(Gr.Rows.Items[i]).Properties.Value) +
       SEPARATE_SCRIPT_FIELDS_CHAR;
 end;
 

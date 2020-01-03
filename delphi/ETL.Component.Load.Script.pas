@@ -10,7 +10,7 @@ type
     function GetInstanceFormEdit: TFoEditLoadScript;
   strict protected
     FFormEdit: TFoEditLoadScript;
-     function GetScript: string; override;
+    function GetScript: string; override;
     procedure setScript(const AScript: string); override;
     // procedure RefreshGrid(var AFormGrid: TFoGrid); override;
   public
@@ -56,14 +56,46 @@ end;
 
 procedure TCompScript.setScript(const AScript: string);
 var
+  p: integer;
+
+  function nextValue: string;
+  var
+    i: integer;
+  begin
+    Result := '';
+    for i := p to AScript.Length do
+      if AScript[i] = SEPARATE_SCRIPT_CHAR then
+      begin
+        p := i + 1;
+        break;
+      end
+      else
+        Result := Result + AScript[i];
+  end;
+
+var
   LValue: string;
-  i, j: integer;
   LFormEdit: TFoEditLoadScript;
+  i, j: integer;
 begin
   j := 0;
-  LValue := '';
+  p := 1;
   LFormEdit := GetInstanceFormEdit;
-  for i := 1 to AScript.Length do
+
+  LFormEdit.RgCommand.ItemIndex := StrToIntDef(nextValue, -1);
+
+  LFormEdit.CbDisableFK.Checked := nextValue = '1';
+
+  LFormEdit.CbUse.Checked := nextValue = '1';
+
+  LFormEdit.EdSchema.Text := nextValue;
+
+  LFormEdit.CbCommit.Checked := nextValue = '1';
+
+  LFormEdit.EdBlock.Text := nextValue;
+
+  LValue := '';
+  for i := p to AScript.Length do
     if AScript[i] = SEPARATE_SCRIPT_FIELDS_CHAR then
     begin
       if LValue <> '' then
