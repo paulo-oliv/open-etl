@@ -28,7 +28,9 @@ uses
   ETL.Form.Edit.Extract.Files in 'ETL.Form.Edit.Extract.Files.pas' {FoEditFiles},
   ETL.Component.Load.Script in 'ETL.Component.Load.Script.pas',
   ETL.ListConnections.Singleton in 'ETL.ListConnections.Singleton.pas',
-  ETL.Form.Edit.Load.Execute in 'ETL.Form.Edit.Load.Execute.pas' {FoEditLoadExecute};
+  ETL.Form.Edit.Load.Execute in 'ETL.Form.Edit.Load.Execute.pas' {FoEditLoadExecute},
+  ETL.Component.Load.Execute in 'ETL.Component.Load.Execute.pas',
+  ETL.Form.Script in 'ETL.Form.Script.pas' {FoScript};
 
 {$R *.res}
 

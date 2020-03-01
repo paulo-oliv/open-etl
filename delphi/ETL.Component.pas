@@ -20,8 +20,8 @@ type
     FGUID: string;
     class var FMoveX, FMoveY: Integer;
     class var FMover: Boolean;
-    function GetGrid: TFoGrid;
   strict protected
+    function GetGrid: TFoGrid;
     procedure RefreshPositionLabel;
     procedure Resize; override;
     function getTitle: string;
@@ -46,7 +46,7 @@ type
     procedure AddSource(const ASource: IComponentETL);
     function GetKind: Integer;
     procedure Edit; virtual; abstract;
-    procedure Preview;
+    procedure Preview; virtual;
     procedure Delete;
     procedure RefreshPreviewForm;
 

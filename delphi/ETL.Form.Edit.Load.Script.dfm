@@ -15,6 +15,10 @@ inherited FoEditLoadScript: TFoEditLoadScript
     TabOrder = 0
     object TsSettings: TTabSheet
       Caption = 'Settings'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Label2: TLabel
         Left = 154
         Top = 34
@@ -87,6 +91,10 @@ inherited FoEditLoadScript: TFoEditLoadScript
     object TsNames: TTabSheet
       Caption = 'Names'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Gr: TcxVerticalGrid
         AlignWithMargins = True
         Left = 3
