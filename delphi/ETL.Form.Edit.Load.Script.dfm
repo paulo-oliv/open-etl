@@ -1,24 +1,20 @@
 inherited FoEditLoadScript: TFoEditLoadScript
-  ClientHeight = 257
+  ClientHeight = 278
   ClientWidth = 484
   ExplicitWidth = 500
-  ExplicitHeight = 296
+  ExplicitHeight = 317
   PixelsPerInch = 96
   TextHeight = 20
   object PageControl1: TPageControl [0]
     Left = 0
     Top = 0
     Width = 484
-    Height = 257
-    ActivePage = TsSettings
+    Height = 278
+    ActivePage = TsNames
     Align = alClient
     TabOrder = 0
     object TsSettings: TTabSheet
       Caption = 'Settings'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label2: TLabel
         Left = 154
         Top = 34
@@ -28,7 +24,7 @@ inherited FoEditLoadScript: TFoEditLoadScript
       end
       object Label1: TLabel
         Left = 2
-        Top = 155
+        Top = 183
         Width = 93
         Height = 20
         Caption = 'Schema name'
@@ -43,7 +39,7 @@ inherited FoEditLoadScript: TFoEditLoadScript
       end
       object CbDisableFK: TCheckBox
         Left = 3
-        Top = 109
+        Top = 137
         Width = 217
         Height = 25
         Caption = 'Disable Foreign Key Checks'
@@ -51,7 +47,7 @@ inherited FoEditLoadScript: TFoEditLoadScript
       end
       object CbUse: TCheckBox
         Left = 3
-        Top = 135
+        Top = 163
         Width = 209
         Height = 17
         Caption = 'Generate "USE" stantement'
@@ -61,13 +57,14 @@ inherited FoEditLoadScript: TFoEditLoadScript
         Left = 3
         Top = 3
         Width = 145
-        Height = 100
+        Height = 128
         Caption = 'Command'
         ItemIndex = 2
         Items.Strings = (
           'Insert Ingore'
           'Replace'
-          'Insert Update')
+          'Insert Update'
+          'Create Table')
         TabOrder = 3
       end
       object EdBlock: TSpinEdit
@@ -82,7 +79,7 @@ inherited FoEditLoadScript: TFoEditLoadScript
       end
       object EdSchema: TEdit
         Left = 3
-        Top = 181
+        Top = 209
         Width = 241
         Height = 28
         TabOrder = 5
@@ -91,17 +88,12 @@ inherited FoEditLoadScript: TFoEditLoadScript
     object TsNames: TTabSheet
       Caption = 'Names'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Gr: TcxVerticalGrid
         AlignWithMargins = True
         Left = 3
         Top = 3
         Width = 470
-        Height = 216
-        Hint = ''
+        Height = 237
         BorderStyle = cxcbsNone
         Align = alClient
         TabOrder = 0

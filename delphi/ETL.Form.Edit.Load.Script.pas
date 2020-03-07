@@ -30,6 +30,7 @@ type
     procedure AddField(const AField: string);
     function ToString: string; override;
     procedure SetValue(const ARow: Integer; const AValue: string);
+    function getValue(const ARow: Integer): Variant;
     class function New(const AOwner: TComponent): TFoEditLoadScript;
   end;
 
@@ -40,6 +41,11 @@ implementation
 uses SysUtils, Variants;
 
 { TFoEditLoadScript }
+
+function TFoEditLoadScript.getValue(const ARow: Integer): Variant;
+begin
+  Result := TcxEditorRow(Gr.Rows.Items[ARow]).Properties.Value;
+end;
 
 class function TFoEditLoadScript.New(const AOwner: TComponent): TFoEditLoadScript;
 begin
