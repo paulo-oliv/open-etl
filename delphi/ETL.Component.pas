@@ -137,6 +137,7 @@ procedure TComponentETL.Delete;
     i: Integer;
   begin
     for i := Parent.ControlCount - 1 downto 0 do
+      // if Assigned(Parent.Controls[i]) then
       if Parent.Controls[i] is TLinkComponents then
         if (TLinkComponents(Parent.Controls[i]).Target = IComponentETL(Self)) or
           (TLinkComponents(Parent.Controls[i]).Source = IComponentETL(Self)) then

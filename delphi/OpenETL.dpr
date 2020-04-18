@@ -25,12 +25,14 @@ uses
   ETL.Form.Edit.Transform.Conversion in 'ETL.Form.Edit.Transform.Conversion.pas' {FoEditConversion},
   ETL.Form.Edit.Transform.Derivation in 'ETL.Form.Edit.Transform.Derivation.pas' {FoEditDerivation},
   ETL.Form.Edit.Extract in 'ETL.Form.Edit.Extract.pas' {FoEditExtract},
-  ETL.Form.Edit.Extract.Files in 'ETL.Form.Edit.Extract.Files.pas' {FoEditFiles},
   ETL.Component.Load.Script in 'ETL.Component.Load.Script.pas',
   ETL.ListConnections.Singleton in 'ETL.ListConnections.Singleton.pas',
   ETL.Form.Edit.Load.Execute in 'ETL.Form.Edit.Load.Execute.pas' {FoEditLoadExecute},
   ETL.Component.Load.Execute in 'ETL.Component.Load.Execute.pas',
-  ETL.Form.Script in 'ETL.Form.Script.pas' {FoScript};
+  ETL.Form.Script in 'ETL.Form.Script.pas' {FoScript},
+  ETL.Component.Extract.Query in 'ETL.Component.Extract.Query.pas',
+  ETL.Component.Extract.Files in 'ETL.Component.Extract.Files.pas',
+  ETL.Form.Edit.Extract.Files in 'ETL.Form.Edit.Extract.Files.pas' {FoEditFiles};
 
 {$R *.res}
 

@@ -26,8 +26,13 @@ type
 
 implementation
 
-uses ETL.Component.Extract, ETL.Component.Transform, ETL.Component.Transform.Condensation,
-  ETL.Component.Load, ETL.Component.Load.Script;
+uses
+  ETL.Component.Extract.Query,
+  ETL.Component.Extract.Files,
+  ETL.Component.Transform,
+  ETL.Component.Transform.Condensation,
+  ETL.Component.Load,
+  ETL.Component.Load.Script;
 
 { TComponentETLFactory }
 
@@ -38,7 +43,7 @@ begin
     KIND_COMPONENT_QUERY:
       Result := TCompQuery.Create(AParent, AGUID);
     KIND_COMPONENT_FILE:
-      Result := TCompFile.Create(AParent, AGUID);
+      Result := TCompFiles.Create(AParent, AGUID);
     KIND_COMPONENT_FILTER:
       Result := TCompFilter.Create(AParent, AGUID);
     KIND_COMPONENT_CONVERSION:

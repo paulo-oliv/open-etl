@@ -28,7 +28,8 @@ uses
   ETL.FileProject.Interfaces,
   System.SysUtils,
   ETL.Form.Grid,
-  ETL.Form.Main;
+  ETL.Form.Main,
+  FuncoesSQL;
 
 { TCompScript }
 
@@ -136,10 +137,33 @@ procedure TCompScript.Preview;
 
 var
   i, j, p: integer;
-  s, LTabelName, LFieldName: String; // t, u, tab: ;
+  s, LTableName, LFieldName: String; // t, u, tab: ;
   // fs: TFormatSettings;
   LFormGrid: TFoGrid;
+  LLine1Ini, LLine1Fin: string;
 begin
+  case FFormEdit.RgCommand.ItemIndex of
+    0:
+      begin
+        LLine1Ini := 'INSERT IGNORE INTO %s(';
+        LLine1Fin := ')VALUES';
+      end;
+    1:
+      begin
+        LLine1Ini := 'REPLACE INTO %s(';
+        LLine1Fin := ')VALUES';
+      end;
+    2:
+      begin
+        LLine1Ini := 'INSERT INTO %s(';
+        LLine1Fin := ')VALUES';
+      end;
+    3:
+      begin
+        LLine1Ini := 'INSERT INTO %s(';
+        LLine1Fin := ')VALUES';
+      end;
+  end;
   LFormGrid := GetGrid;
   if not Assigned(FForm) then
     FForm := TFoScript.New(Owner);
@@ -162,15 +186,19 @@ begin
   FoMain.ProgressBar.Show;
   try
     // FForm.MemoScript.Lines.Add('CREATE TABLE '+ tab +' (';
+    s := '';
     for i := 0 to LFormGrid.tv.ColumnCount - 1 do // FFormEdit.Gr.Rows.Count
     begin
       LFieldName := FFormEdit.getValue(i);
+      if LFieldName = '' then
+        Continue;
       p := pos('.', LFieldName);
       if p > 0 then
       begin
-        LTabelName := Copy(LFieldName, 1, p - 1);
+        LTableName := Copy(LFieldName, 1, p - 1);
         LFieldName := Copy(LFieldName, p + 1);
       end;
+      s := s + LFieldName + ',';
 
       // LFormGrid.tv.Columns[i].Caption;
       // u := trim(Fields[i].FieldName);
@@ -185,7 +213,7 @@ begin
       // else if (Fields[i] is TDateField) then
       // u := u + ' Date'
       // else if (Fields[i] is TDateTimeField) then
-      /// u := u + ' Datetime'
+      // u := u + ' Datetime'
       // else if (Fields[i] is TTimeField) then
       // u := u + ' Time'
       // else
@@ -194,14 +222,19 @@ begin
       // end;
       // t := copy(t, 1, length(t) - 3) + ');';
     end;
-    FoMain.ProgressBar.Max := LFormGrid.tv.DataController.RowCount;
+    FForm.MemoScript.Lines.Add(Format(LLine1Ini, [LTableName]) + Copy(s, 1, s.Length - 1) +
+      LLine1Fin);
+
+    FoMain.ProgressBar.Properties.Max := LFormGrid.tv.DataController.RowCount;
     for i := 0 to LFormGrid.tv.DataController.RowCount - 1 do
+    begin
+      s := '';
       for j := 0 to LFormGrid.tv.ColumnCount - 1 do
       begin
         FoMain.ProgressBar.Position := i;
-        // LFormGrid.tv.DataController.Values[k, j] :=;
 
-        // FFormEdit.RgCommand.ItemIndex;
+        s := s + VarToSQLAspas(LFormGrid.tv.DataController.Values[i, j]) + ',';
+
         // FFormEdit.CbCommit.Checked;
         // FFormEdit.EdBlock.Text;
         // FForm.MemoScript.Lines.Add()
@@ -225,8 +258,12 @@ begin
         // Conexao.DataSetQuery.Next;
         // end;
         // S[S.Count - 1] := copy(S[S.Count - 1], 1, length(S[S.Count - 1]) - 1) + ';';
-
       end;
+      if i = LFormGrid.tv.DataController.RowCount - 1 then
+        FForm.MemoScript.Lines.Add('(' + Copy(s, 1, s.Length - 1) + ');')
+      else
+        FForm.MemoScript.Lines.Add('(' + Copy(s, 1, s.Length - 1) + '),');
+    end;
   finally
     LFormGrid.tv.EndUpdate;
     FoMain.ProgressBar.Hide;

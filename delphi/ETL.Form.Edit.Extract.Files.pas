@@ -4,16 +4,96 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, ETL.Form.Edit.Extract, System.Actions, Vcl.ActnList;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, ETL.Form.Edit.Extract, System.Actions, Vcl.ActnList,
+  Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.StdActns;
 
 type
   TFoEditFiles = class(TFoEditExtract)
+    EdPath: TButtonedEdit;
+    AcBrowseForFolder: TBrowseForFolder;
+    ListBoxFiles: TListBox;
+    Panel1: TPanel;
+    EdFilter: TEdit;
+    CbSubDir: TCheckBox;
+    procedure EdPathRightButtonClick(Sender: TObject);
+    procedure EdFilterChange(Sender: TObject);
+    procedure ListBoxFilesDblClick(Sender: TObject);
   strict private
+    procedure updateListFiles;
+    procedure FixFiles;
+  public
+    class function New(const AOwner: TComponent): TFoEditFiles;
   end;
 
 implementation
 
 {$R *.dfm}
+{ TFoEditFiles }
+
+procedure TFoEditFiles.updateListFiles;
+begin
+  ListBoxFiles.Clear;
+end;
+
+procedure TFoEditFiles.EdFilterChange(Sender: TObject);
+var
+  S: TSearchRec;
+  Pasta: string;
+begin
+  ListBoxFiles.Clear;
+  if FindFirst(EdPath.Text + EdFilter.Text, faAnyFile, S) = 0 then
+    repeat
+      ListBoxFiles.Items.Add(S.Name);
+    until FindNext(S) <> 0;
+  FindClose(S);
+end;
+
+procedure TFoEditFiles.EdPathRightButtonClick(Sender: TObject);
+begin
+  if AcBrowseForFolder.Execute then
+  begin
+    EdPath.Text := AcBrowseForFolder.Folder;
+
+  end;
+end;
+
+procedure TFoEditFiles.FixFiles;
+var
+  i: Integer;
+  // LFile: TextFile;
+  LStrs: TStringList;
+  LNmDatabase: string;
+begin
+  LStrs := TStringList.Create;
+  try
+    for i := 0 to ListBoxFiles.Count - 1 do
+    begin
+      LStrs.LoadFromFile(EdPath.Text + ListBoxFiles.Items[i]);
+      // AssignFile(LFile, EdPath.Text + ListBoxFiles.Items[i]);
+      // try
+      // Append(LFile);
+      LNmDatabase := copy(ListBoxFiles.Items[i], 1, LastDelimiter('.', ListBoxFiles.Items[i]) - 1);
+      LStrs.Insert(6, 'CREATE DATABASE ' + LNmDatabase + '; use ' + LNmDatabase + ';');
+      // finally
+      // CloseFile(LFile);
+      // end;
+      LStrs.SaveToFile(EdPath.Text + '_' + ListBoxFiles.Items[i]);
+    end;
+  finally
+    LStrs.DisposeOf;
+  end;
+end;
+
+procedure TFoEditFiles.ListBoxFilesDblClick(Sender: TObject);
+begin
+  FixFiles
+end;
+
+class function TFoEditFiles.New(const AOwner: TComponent): TFoEditFiles;
+begin
+  Result := TFoEditFiles.Create(AOwner);
+end;
+
 { Adaptar a funcao abaixo para importar do Excel
 
   function XlsToStringGrid(AXLSFile: string): Boolean;

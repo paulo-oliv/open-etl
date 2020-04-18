@@ -259,7 +259,7 @@ var
   begin
     FoMain.ProgressBar.Show;
     try
-      FoMain.ProgressBar.Max := AFormGrid.tv.DataController.RowCount;
+      FoMain.ProgressBar.Properties.Max := AFormGrid.tv.DataController.RowCount;
       for i := 0 to AFormGrid.tv.DataController.RowCount - 1 do
       begin
         LKey := KeyRow(i);
@@ -320,6 +320,7 @@ var
       end;
 
     const
+      // TAG_COL_STATISTIC = 998;
       TAG_COL_MD5 = 999;
     var
       i, j, k: integer;
@@ -342,6 +343,11 @@ var
               Tag := i;
             end;
 
+        // with LNewFoGrid.tv.CreateColumn do
+        // begin
+        // Caption := 'statistic';
+        // Tag := TAG_COL_STATISTIC;
+        // end;
         with LNewFoGrid.tv.CreateColumn do
         begin
           Caption := 'hash';
@@ -349,13 +355,18 @@ var
         end;
 
         k := 0;
-        FoMain.ProgressBar.Max := AFormGrid.tv.DataController.RowCount;
+        FoMain.ProgressBar.Properties.Max := AFormGrid.tv.DataController.RowCount;
         for i := 0 to AFormGrid.tv.DataController.RowCount - 1 do
         begin
           FoMain.ProgressBar.Position := i;
           LNewFoGrid.tv.DataController.RecordCount := k + 1;
           LNewRow := True;
           for j := 0 to LNewFoGrid.tv.ColumnCount - 1 do
+            // if LNewFoGrid.tv.Columns[j].Tag = TAG_COL_STATISTIC then
+            // begin
+            // LNewFoGrid.tv.DataController.Values[k, j] := LMd5;
+            // end
+            // else
             if LNewFoGrid.tv.Columns[j].Tag = TAG_COL_MD5 then
             begin
               LMd5 := StrToMd5(LMd5);
@@ -395,7 +406,7 @@ var
         AFormGrid.tv.Columns[i].DisposeOf;
     FoMain.ProgressBar.Show;
     try
-      FoMain.ProgressBar.Max := LBestList.Count * AFormGrid.tv.DataController.RowCount;
+      FoMain.ProgressBar.Properties.Max := LBestList.Count * AFormGrid.tv.DataController.RowCount;
       for i := 0 to LBestList.Count - 1 do
       begin
         with AFormGrid.tv.CreateColumn do

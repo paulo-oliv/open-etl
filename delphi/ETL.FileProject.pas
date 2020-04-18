@@ -30,7 +30,10 @@ type
     class function Save(const AFileName: string): IProjectETL; overload;
     class function Save: IProjectETL; overload;
 
+    class procedure Clear;
+
     constructor Create;
+    property FileName: string read FFileName { write setFileName };
     // procedure BeginSave;
     // procedure AddLink(ALink: IDataComponentETL);
     // procedure EndSave;
@@ -74,6 +77,14 @@ begin
     // Creating GUID failed!'
   end;
   Result := AddComponent(AParent, AKind, Ax, Ay, GUIDToString(LGUID))
+end;
+
+class procedure TProjectETL.Clear;
+var
+  i: Integer;
+begin
+  for i := GetInstance.getListComponents.Count - 1 downto 0 do
+    GetInstance.getListComponents[i].Delete;
 end;
 
 constructor TProjectETL.Create;

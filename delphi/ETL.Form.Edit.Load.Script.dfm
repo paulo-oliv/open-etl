@@ -10,7 +10,7 @@ inherited FoEditLoadScript: TFoEditLoadScript
     Top = 0
     Width = 484
     Height = 278
-    ActivePage = TsNames
+    ActivePage = TsSettings
     Align = alClient
     TabOrder = 0
     object TsSettings: TTabSheet
@@ -94,6 +94,7 @@ inherited FoEditLoadScript: TFoEditLoadScript
         Top = 3
         Width = 470
         Height = 237
+        Hint = ''
         BorderStyle = cxcbsNone
         Align = alClient
         TabOrder = 0

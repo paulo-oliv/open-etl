@@ -29,6 +29,7 @@ type
     function getScript: string;
     function GetSources: IListSources;
     procedure AddSource(const ASource: IComponentETL);
+    procedure Delete;
     property Title: string read getTitle write setTitle;
     property Script: string read getScript write setScript;
   end;
@@ -62,6 +63,5 @@ type
   end;
 
 implementation
-
 
 end.

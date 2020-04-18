@@ -516,21 +516,37 @@ object FoMain: TFoMain
       Style = bsSplitButton
       TabOrder = 1
     end
-    object ProgressBar: TProgressBar
+    object ProgressBar: TcxProgressBar
       AlignWithMargins = True
       Left = 231
-      Top = 9
-      Width = 561
-      Height = 23
-      Margins.Top = 9
-      Margins.Right = 5
-      Margins.Bottom = 9
+      Top = 3
+      Hint = ''
       Align = alClient
-      MarqueeInterval = 1
+      ParentColor = False
+      ParentFont = False
+      Position = 50.000000000000000000
+      Properties.BeginColor = 33306
+      Properties.PeakValue = 100.000000000000000000
+      Properties.ShowTextStyle = cxtsText
+      Properties.SolidTextColor = True
+      Properties.Text = 'Wait...'
+      Style.BorderColor = cl3DLight
+      Style.Color = clDefault
+      Style.Font.Charset = ANSI_CHARSET
+      Style.Font.Color = clWhite
+      Style.Font.Height = -15
+      Style.Font.Name = 'Segoe UI Semibold'
+      Style.Font.Style = [fsBold]
+      Style.TextColor = clWhite
+      Style.IsFontAssigned = True
       TabOrder = 2
+      Transparent = True
       Visible = False
-      ExplicitLeft = 215
-      ExplicitWidth = 577
+      ExplicitLeft = 408
+      ExplicitTop = 8
+      ExplicitWidth = 121
+      ExplicitHeight = 28
+      Width = 563
     end
   end
   object SQL: TFDScript

@@ -10,7 +10,7 @@ uses dxRibbonSkins, dxRibbonCustomizationForm, cxGraphics, cxControls, cxLookAnd
   Vcl.Controls, Vcl.ExtCtrls, Vcl.Forms, ETL.Component, FireDAC.Stan.Option, FireDAC.Stan.Param,
   FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf, Data.DB,
   FireDAC.Comp.DataSet, FireDAC.Comp.Client, Vcl.ToolWin, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus,
-  Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, Vcl.ComCtrls;
+  Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, Vcl.ComCtrls, cxContainer, cxEdit, cxProgressBar;
 
 type
   TFoMain = class(TForm)
@@ -52,9 +52,9 @@ type
     Panel1: TPanel;
     BtOpen: TButton;
     BtSave: TButton;
-    ProgressBar: TProgressBar;
     PopupMenuOpen: TPopupMenu;
     PopupMenuSave: TPopupMenu;
+    ProgressBar: TcxProgressBar;
     procedure FormCreate(Sender: TObject);
     procedure AcExecuteExecute(Sender: TObject);
     procedure AcOpenAccept(Sender: TObject);
@@ -72,7 +72,6 @@ type
     procedure PopupMenuOpenPopup(Sender: TObject);
   strict private
     procedure updateEnableButtons;
-    procedure Execute;
   public
   end;
 
@@ -131,6 +130,14 @@ procedure TFoMain.AcOpenAccept(Sender: TObject);
 begin
   if FileExists(AcOpen.Dialog.FileName) then
   begin
+
+    if TProjectETL.GetInstance.getListComponents.Count > 0 then
+    begin
+      // if TMensagem.Confirmacao('Do you want to keep the existing components?') then
+      // else
+      TProjectETL.Clear;
+    end;
+
     TProjectETL.Open(AcOpen.Dialog.FileName, Self)
   end
   // else
@@ -175,76 +182,6 @@ procedure TFoMain.updateEnableButtons;
 begin
   // AcCommit.Enabled := not DmDBRoot.DB.TxOptions.AutoCommit;
   // AcRollBack.Enabled := not DmDBRoot.DB.TxOptions.AutoCommit;
-end;
-
-procedure TFoMain.Execute;
-
-{ procedure executaDiretoArquivo;
-
-  procedure msg(const s: String);
-  begin
-  if s = '' then
-  begin
-  TMensagem.Informacao('Script executado com sucesso!', '', 5);
-  if AcAutoFecha.Checked then
-  Application.Terminate;
-  end
-  else
-  TMensagem.Aviso(s);
-  end;
-
-  begin
-  try
-  msg(DmDBRoot.rodaScriptNoCMD(ActiveMDIChild.Caption));
-  except
-  on e: exception do
-  TMensagem.Erro(e, Name, 'Script SQL');
-  end;
-  end;
-
-  procedure executaMM;
-
-  procedure copiaLinhas;
-  begin
-  SQL.SQLScripts.Clear;
-  if AcTriggers.Checked then
-  SQL.SQLScripts.Add.SQL.Text := 'SET @DISABLE_TRIGGERS=1;';
-  if AcForeignKey.Checked then
-  SQL.SQLScripts.Add.SQL.Text := 'SET FOREIGN_KEY_CHECKS=0;';
-
-  SQL.SQLScripts.Add.SQL := TFoMdiChild(ActiveMDIChild).MM.Lines;
-
-  if AcTriggers.Checked then
-  SQL.SQLScripts.Add.SQL.Text := 'SET @DISABLE_TRIGGERS=NULL;';
-  if AcForeignKey.Checked then
-  SQL.SQLScripts.Add.SQL.Text := 'SET FOREIGN_KEY_CHECKS=1;';
-  end;
-
-  begin
-  try
-  copiaLinhas;
-  try
-  SQL.ValidateAll;
-  SQL.ExecuteAll;
-  finally
-  if SQL.TotalErrors = 0 then
-  begin
-  if AcAutoFecha.Checked then
-  Application.Terminate;
-  end;
-  end;
-  except
-  on e: exception do
-  TMensagem.Erro(e, Name, 'Script');
-  end;
-  end; }
-
-begin
-  { if Assigned(ActiveMDIChild) then
-    if TFoMdiChild(ActiveMDIChild).EhArquivo then
-    executaDiretoArquivo
-    else
-    executaMM; }
 end;
 
 procedure TFoMain.FormCreate(Sender: TObject);
@@ -313,7 +250,7 @@ end;
 
 procedure TFoMain.PopupMenuOpenPopup(Sender: TObject);
 begin
-  if PopupMenuOpen.Items.Count = 0 then
+  // if PopupMenuOpen.Items.Count = 0 then
 
 end;
 
@@ -324,6 +261,77 @@ begin
 end;
 
 procedure TFoMain.AcExecuteExecute(Sender: TObject);
+
+  procedure Execute;
+
+  { procedure executaDiretoArquivo;
+
+    procedure msg(const s: String);
+    begin
+    if s = '' then
+    begin
+    TMensagem.Informacao('Script executado com sucesso!', '', 5);
+    if AcAutoFecha.Checked then
+    Application.Terminate;
+    end
+    else
+    TMensagem.Aviso(s);
+    end;
+
+    begin
+    try
+    msg(DmDBRoot.rodaScriptNoCMD(ActiveMDIChild.Caption));
+    except
+    on e: exception do
+    TMensagem.Erro(e, Name, 'Script SQL');
+    end;
+    end;
+
+    procedure executaMM;
+
+    procedure copiaLinhas;
+    begin
+    SQL.SQLScripts.Clear;
+    if AcTriggers.Checked then
+    SQL.SQLScripts.Add.SQL.Text := 'SET @DISABLE_TRIGGERS=1;';
+    if AcForeignKey.Checked then
+    SQL.SQLScripts.Add.SQL.Text := 'SET FOREIGN_KEY_CHECKS=0;';
+
+    SQL.SQLScripts.Add.SQL := TFoMdiChild(ActiveMDIChild).MM.Lines;
+
+    if AcTriggers.Checked then
+    SQL.SQLScripts.Add.SQL.Text := 'SET @DISABLE_TRIGGERS=NULL;';
+    if AcForeignKey.Checked then
+    SQL.SQLScripts.Add.SQL.Text := 'SET FOREIGN_KEY_CHECKS=1;';
+    end;
+
+    begin
+    try
+    copiaLinhas;
+    try
+    SQL.ValidateAll;
+    SQL.ExecuteAll;
+    finally
+    if SQL.TotalErrors = 0 then
+    begin
+    if AcAutoFecha.Checked then
+    Application.Terminate;
+    end;
+    end;
+    except
+    on e: exception do
+    TMensagem.Erro(e, Name, 'Script');
+    end;
+    end; }
+
+  begin
+    { if Assigned(ActiveMDIChild) then
+      if TFoMdiChild(ActiveMDIChild).EhArquivo then
+      executaDiretoArquivo
+      else
+      executaMM; }
+  end;
+
 begin
   AcExecute.Enabled := false;
   try

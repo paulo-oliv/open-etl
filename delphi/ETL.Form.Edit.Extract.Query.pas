@@ -55,7 +55,12 @@ implementation
 
 {$R *.dfm}
 
-uses SectionConexao, System.SysUtils, Vcl.Dialogs, RegularExpressions, FireDAC.VCLUI.ConnEdit,
+uses
+  SectionConexao,
+  System.SysUtils,
+  Vcl.Dialogs,
+  RegularExpressions,
+  FireDAC.VCLUI.ConnEdit,
   ETL.ListConnections.Singleton;
 
 { TFoEditQuery }
